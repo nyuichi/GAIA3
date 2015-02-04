@@ -1,0 +1,251 @@
+#-----------------------------------------------------------
+#--  Design Name	 :	CPU Evaluation Boad_2
+#--
+#--  File Name		 :	CPUEV2.ucf
+#--  Function		 :	CPUEV2_Top module
+#--
+#--  HDL			 :	Verilog
+#--  Purpose		 :	Synthesis
+#--  Target Device	 :	Virtex5 XC5VLX50T-1FF1136C
+#--  Creation Date	 :	2008/03/25 Ver.0.10
+#--  Design 		 :	Sansei System Co.,Ltd.
+#--  Auther 		 :	Y.Fujishiro
+#--
+#--  Update 		 :
+#--
+#-----------------------------------------------------------
+
+#-----------------------------------------------------------
+# Target Information
+CONFIG PART=5VLX50TFF1136-1 ;
+
+
+##########################################################
+# Pin Assign
+##########################################################
+
+#////////////////////////////////////////
+#// ZBT-RAM connection.
+#////////////////////////////////////////
+#// = Bus. =
+NET  ZD<0>		   LOC=AJ30;
+NET  ZD<1>		   LOC=AH29;
+NET  ZD<2>		   LOC=AH30;
+NET  ZD<3>		   LOC=AG30;
+NET  ZD<4>		   LOC=AF29;
+NET  ZD<5>		   LOC=AF30;
+NET  ZD<6>		   LOC=AE29;
+NET  ZD<7>		   LOC=AD29;
+NET  ZD<8>		   LOC=V28;
+NET  ZD<9>		   LOC=W27;
+NET  ZD<10> 	   LOC=Y29;
+NET  ZD<11> 	   LOC=Y28;
+NET  ZD<12> 	   LOC=AA30;
+NET  ZD<13> 	   LOC=AA29;
+NET  ZD<14> 	   LOC=AB30;
+NET  ZD<15> 	   LOC=AC30;
+NET  ZD<16> 	   LOC=AP32;
+NET  ZD<17> 	   LOC=AN32;
+NET  ZD<18> 	   LOC=AM32;
+NET  ZD<19> 	   LOC=AK31;
+NET  ZD<20> 	   LOC=AK32;
+NET  ZD<21> 	   LOC=AJ31;
+NET  ZD<22> 	   LOC=AJ32;
+NET  ZD<23> 	   LOC=AH32;
+NET  ZD<24> 	   LOC=V30;
+NET  ZD<25> 	   LOC=V29;
+NET  ZD<26> 	   LOC=W30;
+NET  ZD<27> 	   LOC=W29;
+NET  ZD<28> 	   LOC=AD31;
+NET  ZD<29> 	   LOC=AE32;
+NET  ZD<30> 	   LOC=AE31;
+NET  ZD<31> 	   LOC=AF31;
+
+NET  ZDP<0> 	   LOC=AD30;
+NET  ZDP<1> 	   LOC=AC29;
+NET  ZDP<2> 	   LOC=AG31;
+NET  ZDP<3> 	   LOC=AG32;
+
+#// = Outputs. =
+NET  ZA<0>		   LOC=AJ34;
+NET  ZA<1>		   LOC=AD32;
+NET  ZA<2>		   LOC=AC32;
+NET  ZA<3>		   LOC=AB31;
+NET  ZA<4>		   LOC=AB32;
+NET  ZA<5>		   LOC=AH33;
+NET  ZA<6>		   LOC=V34;
+NET  ZA<7>		   LOC=V33;
+NET  ZA<8>		   LOC=AF33;
+NET  ZA<9>		   LOC=AG33;
+NET  ZA<10> 	   LOC=V32;
+NET  ZA<11> 	   LOC=AK34;
+NET  ZA<12> 	   LOC=AK33;
+NET  ZA<13> 	   LOC=AL34;
+NET  ZA<14> 	   LOC=AL33;
+NET  ZA<15> 	   LOC=AM33;
+NET  ZA<16> 	   LOC=AN34;
+NET  ZA<17> 	   LOC=AN33;
+NET  ZA<18> 	   LOC=AF34;
+NET  ZA<19> 	   LOC=AE33;
+
+NET XE1 		   LOC=W34;
+NET  E2A		   LOC=Y34;
+NET XE3 		   LOC=AA33;
+NET XZBE<0> 	   LOC=W31;
+NET XZBE<1> 	   LOC=W32;
+NET XZBE<2> 	   LOC=AA34;
+NET XZBE<3> 	   LOC=Y33;
+NET XGA 		   LOC=AD34;
+NET XWA 		   LOC=AC34;
+NET XZCKE		   LOC=AC33;
+NET  ZCLKMA<0>	   LOC=Y32;
+NET  ZCLKMA<1>	   LOC=AB33;
+
+NET  ADVA		   LOC=AE34;
+NET XFT 		   LOC=Y31;
+NET XLBO		   LOC=AH34;
+NET  ZZA		   LOC=AA31;
+
+#// = Inputs. =
+
+
+NET RS_TX			LOC=K11;
+NET RS_RX			LOC=J11;
+
+
+#///////////////////////////////////////
+#// Clock connection.
+#///////////////////////////////////////
+#// = Outputs. =
+#NET  DUMY		   LOC=K17;
+
+#// = Inputs. =
+#NET  CLK48M 	   LOC=H17;
+NET  MCLK1		   LOC=J16;
+
+#////////////////////////////////////////
+#// UNIVERSAL-I/O connection.
+#////////////////////////////////////////
+#// = Bus. =
+
+
+##########################################################
+# Pin Type Define
+##########################################################
+#////////////////////////////////////////
+#// ZBT-RAM Type Define.
+#////////////////////////////////////////
+#// = Bus. =
+NET  ZD<0>		   IOSTANDARD = LVTTL;
+NET  ZD<1>		   IOSTANDARD = LVTTL;
+NET  ZD<2>		   IOSTANDARD = LVTTL;
+NET  ZD<3>		   IOSTANDARD = LVTTL;
+NET  ZD<4>		   IOSTANDARD = LVTTL;
+NET  ZD<5>		   IOSTANDARD = LVTTL;
+NET  ZD<6>		   IOSTANDARD = LVTTL;
+NET  ZD<7>		   IOSTANDARD = LVTTL;
+NET  ZD<8>		   IOSTANDARD = LVTTL;
+NET  ZD<9>		   IOSTANDARD = LVTTL;
+NET  ZD<10> 	   IOSTANDARD = LVTTL;
+NET  ZD<11> 	   IOSTANDARD = LVTTL;
+NET  ZD<12> 	   IOSTANDARD = LVTTL;
+NET  ZD<13> 	   IOSTANDARD = LVTTL;
+NET  ZD<14> 	   IOSTANDARD = LVTTL;
+NET  ZD<15> 	   IOSTANDARD = LVTTL;
+NET  ZD<16> 	   IOSTANDARD = LVTTL;
+NET  ZD<17> 	   IOSTANDARD = LVTTL;
+NET  ZD<18> 	   IOSTANDARD = LVTTL;
+NET  ZD<19> 	   IOSTANDARD = LVTTL;
+NET  ZD<20> 	   IOSTANDARD = LVTTL;
+NET  ZD<21> 	   IOSTANDARD = LVTTL;
+NET  ZD<22> 	   IOSTANDARD = LVTTL;
+NET  ZD<23> 	   IOSTANDARD = LVTTL;
+NET  ZD<24> 	   IOSTANDARD = LVTTL;
+NET  ZD<25> 	   IOSTANDARD = LVTTL;
+NET  ZD<26> 	   IOSTANDARD = LVTTL;
+NET  ZD<27> 	   IOSTANDARD = LVTTL;
+NET  ZD<28> 	   IOSTANDARD = LVTTL;
+NET  ZD<29> 	   IOSTANDARD = LVTTL;
+NET  ZD<30> 	   IOSTANDARD = LVTTL;
+NET  ZD<31> 	   IOSTANDARD = LVTTL;
+
+NET  ZDP<0> 	   IOSTANDARD = LVTTL;
+NET  ZDP<1> 	   IOSTANDARD = LVTTL;
+NET  ZDP<2> 	   IOSTANDARD = LVTTL;
+NET  ZDP<3> 	   IOSTANDARD = LVTTL;
+
+#// = Outputs. =
+NET  ZA<0>		   IOSTANDARD = LVTTL;
+NET  ZA<1>		   IOSTANDARD = LVTTL;
+NET  ZA<2>		   IOSTANDARD = LVTTL;
+NET  ZA<3>		   IOSTANDARD = LVTTL;
+NET  ZA<4>		   IOSTANDARD = LVTTL;
+NET  ZA<5>		   IOSTANDARD = LVTTL;
+NET  ZA<6>		   IOSTANDARD = LVTTL;
+NET  ZA<7>		   IOSTANDARD = LVTTL;
+NET  ZA<8>		   IOSTANDARD = LVTTL;
+NET  ZA<9>		   IOSTANDARD = LVTTL;
+NET  ZA<10> 	   IOSTANDARD = LVTTL;
+NET  ZA<11> 	   IOSTANDARD = LVTTL;
+NET  ZA<12> 	   IOSTANDARD = LVTTL;
+NET  ZA<13> 	   IOSTANDARD = LVTTL;
+NET  ZA<14> 	   IOSTANDARD = LVTTL;
+NET  ZA<15> 	   IOSTANDARD = LVTTL;
+NET  ZA<16> 	   IOSTANDARD = LVTTL;
+NET  ZA<17> 	   IOSTANDARD = LVTTL;
+NET  ZA<18> 	   IOSTANDARD = LVTTL;
+NET  ZA<19> 	   IOSTANDARD = LVTTL;
+
+NET XE1 		   IOSTANDARD = LVTTL;
+NET  E2A		   IOSTANDARD = LVTTL;
+NET XE3 		   IOSTANDARD = LVTTL;
+NET XZBE<0> 	   IOSTANDARD = LVTTL;
+NET XZBE<1> 	   IOSTANDARD = LVTTL;
+NET XZBE<2> 	   IOSTANDARD = LVTTL;
+NET XZBE<3> 	   IOSTANDARD = LVTTL;
+NET XGA 		   IOSTANDARD = LVTTL;
+NET XWA 		   IOSTANDARD = LVTTL;
+NET XZCKE		   IOSTANDARD = LVTTL;
+NET  ZCLKMA<0>	   IOSTANDARD = LVTTL;
+NET  ZCLKMA<1>	   IOSTANDARD = LVTTL;
+
+NET  ADVA		   IOSTANDARD = LVTTL;
+NET XFT 		   IOSTANDARD = LVTTL;
+NET XLBO		   IOSTANDARD = LVTTL;
+NET  ZZA		   IOSTANDARD = LVTTL;
+
+#// = Inputs. =
+#////////////////////////////////////////
+#// UNIVERSAL-I/O Type Define.
+#////////////////////////////////////////
+#// = Bus. =
+#////////////////////////////////////////
+#// UNIVERSAL-I/O Type Define.
+#////////////////////////////////////////
+#// = Bus. =
+
+#////////////////////////////////////////
+#// Clock Type Define.
+#////////////////////////////////////////
+#// = Outputs. =
+
+#// = Inputs. =
+#NET  CLK48M 	   IOSTANDARD = LVTTL;
+NET  MCLK1		   IOSTANDARD = LVTTL;
+NET RS_TX		   IOSTANDARD = LVTTL;
+NET RS_RX		   IOSTANDARD = LVTTL;
+NET XRST		   LOC=H18;
+
+
+############################################################################
+# Clock constraints                                                        #
+############################################################################
+
+#NET "u_mig/u_infrastructure/sys_clk_ibufg" TNM_NET =  "SYS_CLK";
+#NET "bufg_66" TNM_NET = "SYS_CLK";
+#TIMESPEC "TS_SYS_CLK" = PERIOD "SYS_CLK" 14.52 ns HIGH 50 %;
+
+###############################################################################
+# Define multicycle paths - these paths may take longer because additional
+# time allowed for logic to settle in calibration/initialization FSM
+###############################################################################
