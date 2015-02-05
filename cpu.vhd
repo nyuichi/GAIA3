@@ -16,7 +16,7 @@ entity cpu is
     cache_out  : in  cache_out_type;
     cpu_out    : out cpu_out_type);
 
-end entity cpu;
+end entity;
 
 architecture Behavioral of cpu is
 
@@ -81,7 +81,7 @@ architecture Behavioral of cpu is
     if a = x"80000000" then
       a := x"00000000";
     end if;
-  end normalize_fzero;
+  end procedure;
 
   procedure d_data_forward (
     reg_src : in std_logic_vector(4 downto 0);
@@ -90,7 +90,7 @@ architecture Behavioral of cpu is
     if r.e.reg_write = '1' and r.e.reg_dest /= "00000" and r.e.reg_dest = reg_src then
       res := r.e.res;
     end if;
-  end d_data_forward;
+  end procedure;
 
   procedure e_data_forward (
     reg_src : in std_logic_vector(4 downto 0);
@@ -108,7 +108,7 @@ architecture Behavioral of cpu is
     else
       res := reg_data;
     end if;
-  end e_data_forward;
+  end procedure;
 
   procedure detect_hazard (
     inst : in std_logic_vector(31 downto 0);
@@ -156,7 +156,7 @@ architecture Behavioral of cpu is
     end if;
 
     stall := br_stall or lw_stall;
-  end detect_hazard;
+  end procedure;
 
 begin  -- architecture Behavioral
 
@@ -418,13 +418,13 @@ begin  -- architecture Behavioral
     cpu_out.val <= d_val;
     cpu_out.we <= d_we;
     cpu_out.re <= d_re;
-  end process comb;
+  end process;
 
   regs : process(clk)
   begin
     if rising_edge(clk) then
       r <= rin;
     end if;
-  end process regs;
+  end process;
 
-end architecture Behavioral;
+end architecture;
