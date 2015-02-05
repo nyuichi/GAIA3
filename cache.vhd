@@ -11,8 +11,8 @@ entity cache is
     rst       : in  std_logic;
     cpu_out   : in  cpu_out_type;
     cache_out : out cache_out_type;
-    mem_out   : in  mem_out_type;
-    mem_in    : out mem_in_type);
+    sram_out  : in  sram_out_type;
+    sram_in   : out sram_in_type);
 
 end entity cache;
 
@@ -58,7 +58,7 @@ architecture Behavioral of cache is
     else
       return not (r.header(index).valid = '1' and r.header(index).tag = tag);
     end if;
-  end function need_fetch;
+  end function;
 
 begin
 
@@ -114,16 +114,16 @@ begin
         v.addr := r.addr + 4;
         v.fetch_n := 0;
       when 14 =>
-        v.data(r.index)(r.fetch_n) := mem_out.rx;
+        v.data(r.index)(r.fetch_n) := sram_out.rx;
         v.fetch_n := 15;
       when 15 =>
         v.header(index).valid := '1';
         v.header(index).tag := tag;
-        v.data(r.index)(r.fetch_n) := mem_out.rx;
+        v.data(r.index)(r.fetch_n) := sram_out.rx;
         v.fetch_n := -2;
       when others =>
         v.addr := r.addr + 4;
-        v.data(r.index)(r.fetch_n) := mem_out.rx;
+        v.data(r.index)(r.fetch_n) := sram_out.rx;
         v.fetch_n := r.fetch_n + 1;
     end case;
 
@@ -177,16 +177,16 @@ begin
 
     cache_out.stall <= stall;
     cache_out.rx <= dout;
-    mem_in.addr <= v.addr;
-    mem_in.tx <= din;
-    mem_in.we <= we;
-  end process comb;
+    sram_in.addr <= v.addr;
+    sram_in.tx <= din;
+    sram_in.we <= we;
+  end process;
 
   regs : process(clk)
   begin
     if rising_edge(clk) then
       r <= rin;
     end if;
-  end process regs;
+  end process;
 
-end Behavioral;
+end architecture;

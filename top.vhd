@@ -29,7 +29,7 @@ entity top is
     XLBO   : out   std_logic;
     ZZA    : out   std_logic);
 
-end entity top;
+end entity;
 
 architecture Behavioral of top is
 
@@ -41,8 +41,8 @@ architecture Behavioral of top is
   signal icache_out : icache_out_type;
   signal cpu_out    : cpu_out_type;
   signal cache_out  : cache_out_type;
-  signal mem_out    : mem_out_type;
-  signal mem_in     : mem_in_type;
+  signal sram_out   : sram_out_type;
+  signal sram_in    : sram_in_type;
 
 begin   -- architecture Behavioral
 
@@ -65,14 +65,14 @@ begin   -- architecture Behavioral
       cache_out  => cache_out,
       cpu_out    => cpu_out);
 
-  cache_1: entity work.cache
+  cache_1 : entity work.cache
     port map (
       clk       => clk,
       rst       => rst,
       cpu_out   => cpu_out,
       cache_out => cache_out,
-      mem_out   => mem_out,
-      mem_in    => mem_in);
+      sram_out  => sram_out,
+      sram_in   => sram_in);
 
   icache_1: entity work.icache
     port map (
@@ -80,15 +80,15 @@ begin   -- architecture Behavioral
       icache_in  => icache_in,
       icache_out => icache_out);
 
-  mem_1: entity work.mem
+  sram_1 : entity work.sram
     port map (
-      clk     => clk,
-      mem_in  => mem_in,
-      mem_out => mem_out,
-      ZD      => ZD,
-      ZDP     => ZDP,
-      ZA      => ZA,
-      XWA     => XWA);
+      clk      => clk,
+      sram_in  => sram_in,
+      sram_out => sram_out,
+      ZD       => ZD,
+      ZDP      => ZDP,
+      ZA       => ZA,
+      XWA      => XWA);
 
   RS_TX <= '1';
 
@@ -105,4 +105,4 @@ begin   -- architecture Behavioral
   XLBO      <= '1';
   ZZA       <= '0';
 
-end architecture Behavioral;
+end architecture;

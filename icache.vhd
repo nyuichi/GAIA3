@@ -215,7 +215,7 @@ others => (others => '0')
 35 => x"ffffffff",
 others => (others => '0'));
 
-  signal ram : ram_t := myram_fibrecur;
+  signal ram : ram_t := myram9;
 
   signal addr_reg : std_logic_vector(31 downto 0) := (others => '0');
 

@@ -3,6 +3,8 @@ use IEEE.std_logic_1164.all;
 
 package types is
 
+  -- cache
+
   type cpu_out_type is record
     we   : std_logic;
     re   : std_logic;
@@ -15,6 +17,8 @@ package types is
     rx : std_logic_vector(31 downto 0);
   end record;
 
+  -- icache (to be removed)
+
   type icache_out_type is record
     rx : std_logic_vector(31 downto 0);
   end record;
@@ -23,11 +27,13 @@ package types is
     addr : std_logic_vector(31 downto 0);
   end record;
 
-  type mem_out_type is record
+  -- sram
+
+  type sram_out_type is record
     rx : std_logic_vector(31 downto 0);
   end record;
 
-  type mem_in_type is record
+  type sram_in_type is record
     addr : std_logic_vector(31 downto 0);
     we : std_logic;
     re : std_logic;
@@ -42,7 +48,7 @@ package types is
       icache_in  : out icache_in_type;
       cache_out  : in  cache_out_type;
       cpu_out    : out cpu_out_type);
-  end component cpu;
+  end component;
 
   component cache is
     port (
@@ -50,26 +56,26 @@ package types is
       rst       : in  std_logic;
       cpu_out   : in  cpu_out_type;
       cache_out : out cache_out_type;
-      mem_out   : in  mem_out_type;
-      mem_in    : out mem_in_type);
-  end component cache;
+      sram_out   : in  sram_out_type;
+      sram_in    : out sram_in_type);
+  end component;
 
   component icache is
     port (
       clk        : in  std_logic;
       icache_in  : in  icache_in_type;
       icache_out : out icache_out_type);
-  end component icache;
+  end component;
 
-  component mem is
+  component sram is
     port (
       clk     : in    std_logic;
-      mem_in  : in    mem_in_type;
-      mem_out : out   mem_out_type;
+      sram_in  : in    sram_in_type;
+      sram_out : out   sram_out_type;
       ZD      : inout std_logic_vector(31 downto 0);
       ZDP     : inout std_logic_vector(3 downto 0);
       ZA      : out   std_logic_vector(19 downto 0);
       XWA     : out   std_logic);
-  end component mem;
+  end component;
 
 end package;
