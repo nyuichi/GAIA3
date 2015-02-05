@@ -177,7 +177,7 @@ others => (others => '0')
     );
 
   constant myram_fibrecur : ram_t := (
-0 => x"2e804070",
+0 => x"2e800070",
 1 => x"3ef40000",
 2 => x"ce830000",
 3 => x"0f780181",
