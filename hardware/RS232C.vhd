@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 
-entity RS232C is
+entity rs232c is
   port (
     clk      : in  std_logic;
     tx_pin   : out std_logic;
@@ -12,9 +12,9 @@ entity RS232C is
     rx_done  : in  std_logic;
     rx_ready : out std_logic;
     rx_data  : out std_logic_vector(7 downto 0));
-end RS232C;
+end entity;
 
-architecture Behavioral of RS232C is
+architecture Behavioral of rs232c is
 
   -- 9600 bps: 1ADB
   -- 115200 bps: 023D
@@ -30,7 +30,7 @@ architecture Behavioral of RS232C is
       done   : in  std_logic;
       data   : out std_logic_vector(7 downto 0);
       ready  : out std_logic);
-  end component Rx;
+  end component;
 
   component Tx is
     generic (
@@ -41,7 +41,7 @@ architecture Behavioral of RS232C is
       go     : in  std_logic;
       busy   : out std_logic;
       data   : in  std_logic_vector(7 downto 0));
-  end component Tx;
+  end component;
 
 begin
 
@@ -65,4 +65,4 @@ begin
       busy   => tx_busy,
       data   => tx_data);
 
-end Behavioral;
+end architecture;
