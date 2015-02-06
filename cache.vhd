@@ -14,7 +14,7 @@ entity cache is
     sram_out  : in  sram_out_type;
     sram_in   : out sram_in_type);
 
-end entity cache;
+end entity;
 
 architecture Behavioral of cache is
 
