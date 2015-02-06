@@ -74,6 +74,57 @@ architecture Behavioral of cpu is
     m : memory_reg_type;
   end record;
 
+  constant fzero : fetch_reg_type := (
+    nextpc => (others => '0')
+    );
+
+  constant dzero : decode_reg_type := (
+    opcode    => "0000",
+    reg_dest  => "00000",
+    reg_a     => "00000",
+    reg_b     => "00000",
+    data_x    => (others => '0'),
+    data_a    => (others => '0'),
+    data_b    => (others => '0'),
+    data_l    => (others => '0'),
+    data_d    => (others => '0'),
+    tag       => "00000",
+    nextpc    => (others => '0'),
+    reg_write => '0',
+    reg_mem   => '0',
+    mem_write => '0',
+    mem_read  => '0',
+    pc_addr   => (others => '0'),
+    pc_src    => '0'
+    );
+
+  constant ezero : execute_reg_type := (
+    res       => (others => '0'),
+    mem_addr  => (others => '0'),
+    data_x    => (others => '0'),
+    reg_dest  => "00000",
+    reg_write => '0',
+    reg_mem   => '0',
+    mem_write => '0',
+    mem_read  => '0'
+    );
+
+  constant mzero : memory_reg_type := (
+    res       => (others => '0'),
+    reg_dest  => "00000",
+    reg_write => '0',
+    reg_mem   => '0'
+    );
+
+  constant rzero : reg_type := (
+    pc      => (others => '0'),
+    regfile => (others => (others => '0')),
+    f       => fzero,
+    d       => dzero,
+    e       => ezero,
+    m       => mzero
+    );
+
   signal r, rin : reg_type;
 
   procedure normalize_fzero(a : inout std_logic_vector) is
@@ -404,13 +455,6 @@ begin  -- architecture Behavioral
 
     -- END
 
-    if rst = '1' then
-      for i in 0 to 31 loop
-        v.regfile(i) := (others => '0');
-      end loop;
-      v.f.nextpc := (others => '0');
-    end if;
-
     rin <= v;
 
     icache_in.addr <= i_addr;
@@ -422,7 +466,9 @@ begin  -- architecture Behavioral
 
   regs : process(clk)
   begin
-    if rising_edge(clk) then
+    if rst = '1' then
+      r <= rzero;
+    elsif rising_edge(clk) then
       r <= rin;
     end if;
   end process;
