@@ -13,8 +13,8 @@ entity cpu is
     rst        : in  std_logic;
     icache_out : in  icache_out_type;
     icache_in  : out icache_in_type;
-    cache_out  : in  cache_out_type;
-    cpu_out    : out cpu_out_type);
+    cpu_in     : in  bus_up_type;
+    cpu_out    : out bus_down_type);
 
 end entity;
 
@@ -153,7 +153,7 @@ architecture Behavioral of cpu is
       res := r.e.res;
     elsif r.m.reg_write = '1' and r.m.reg_dest /= "00000" and r.e.reg_dest /= reg_src and r.m.reg_dest = reg_src then
       if r.m.reg_mem = '1' then
-        res := cache_out.rx;
+        res := cpu_in.rx;
       else
         res := r.m.res;
       end if;
@@ -212,7 +212,7 @@ architecture Behavioral of cpu is
 
 begin
 
-  comb : process(r, icache_out, cache_out, rst)
+  comb : process(r, icache_out, cpu_in, rst)
     variable v : reg_type;
 
     -- decode/write
@@ -261,7 +261,7 @@ begin
     v.pc := pc;
     v.f.nextpc := pc + 4;
 
-    if stall = '1' or cache_out.stall = '1' then
+    if stall = '1' or cpu_in.stall = '1' then
       pc := r.pc;
       v.pc := r.pc;
       v.f := r.f;
@@ -272,7 +272,7 @@ begin
     -- WRITE (put here to avoid structual hazard between WRITE and DECODE)
 
     if r.m.reg_mem = '1' then
-      res := cache_out.rx;
+      res := cpu_in.rx;
     else
       res := r.m.res;
     end if;
@@ -343,7 +343,7 @@ begin
         v.d.pc_src := '0';
     end case;
 
-    if cache_out.stall = '1' then
+    if cpu_in.stall = '1' then
       v.d := r.d;
     elsif stall = '1' then
       v.d.reg_write := '0';
@@ -435,7 +435,7 @@ begin
     v.e.mem_write := r.d.mem_write;
     v.e.mem_read := r.d.mem_read;
 
-    if cache_out.stall = '1' then
+    if cpu_in.stall = '1' then
       v.e := r.e;
     end if;
 
@@ -450,7 +450,7 @@ begin
     v.m.reg_write := r.e.reg_write;
     v.m.reg_mem := r.e.reg_mem;
 
-    if cache_out.stall = '1' then
+    if cpu_in.stall = '1' then
       v.m.reg_write := '0';
     end if;
 

@@ -3,18 +3,18 @@ use IEEE.std_logic_1164.all;
 
 package types is
 
-  -- cache
+  -- bus units
 
-  type cpu_out_type is record
+  type bus_up_type is record
+    stall : std_logic;
+    rx : std_logic_vector(31 downto 0);
+  end record;
+
+  type bus_down_type is record
     we   : std_logic;
     re   : std_logic;
     val  : std_logic_vector(31 downto 0);
     addr : std_logic_vector(31 downto 0);
-  end record;
-
-  type cache_out_type is record
-    stall : std_logic;
-    rx : std_logic_vector(31 downto 0);
   end record;
 
   -- icache (to be removed)
@@ -46,18 +46,28 @@ package types is
       rst        : in  std_logic;
       icache_out : in  icache_out_type;
       icache_in  : out icache_in_type;
-      cache_out  : in  cache_out_type;
-      cpu_out    : out cpu_out_type);
+      cpu_in     : in  bus_up_type;
+      cpu_out    : out bus_down_type);
+  end component;
+
+  component bridge is
+    port (
+      clk       : in  std_logic;
+      rst       : in  std_logic;
+      cpu_out   : in  bus_down_type;
+      cpu_in    : out bus_up_type;
+      cache_out : in  bus_up_type;
+      cache_in  : out bus_down_type);
   end component;
 
   component cache is
     port (
       clk       : in  std_logic;
       rst       : in  std_logic;
-      cpu_out   : in  cpu_out_type;
-      cache_out : out cache_out_type;
-      sram_out   : in  sram_out_type;
-      sram_in    : out sram_in_type);
+      cache_in  : in  bus_down_type;
+      cache_out : out bus_up_type;
+      sram_out  : in  sram_out_type;
+      sram_in   : out sram_in_type);
   end component;
 
   component icache is
@@ -69,13 +79,13 @@ package types is
 
   component sram is
     port (
-      clk     : in    std_logic;
+      clk      : in    std_logic;
       sram_in  : in    sram_in_type;
       sram_out : out   sram_out_type;
-      ZD      : inout std_logic_vector(31 downto 0);
-      ZDP     : inout std_logic_vector(3 downto 0);
-      ZA      : out   std_logic_vector(19 downto 0);
-      XWA     : out   std_logic);
+      ZD       : inout std_logic_vector(31 downto 0);
+      ZDP      : inout std_logic_vector(3 downto 0);
+      ZA       : out   std_logic_vector(19 downto 0);
+      XWA      : out   std_logic);
   end component;
 
 end package;

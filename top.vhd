@@ -39,8 +39,10 @@ architecture Behavioral of top is
 
   signal icache_in  : icache_in_type;
   signal icache_out : icache_out_type;
-  signal cpu_out    : cpu_out_type;
-  signal cache_out  : cache_out_type;
+  signal cpu_in     : bus_up_type;
+  signal cpu_out    : bus_down_type;
+  signal cache_in   : bus_down_type;
+  signal cache_out  : bus_up_type;
   signal sram_out   : sram_out_type;
   signal sram_in    : sram_in_type;
 
@@ -56,20 +58,29 @@ begin   -- architecture Behavioral
 
   rst <= not XRST;
 
-  cpu_1: entity work.cpu
+  cpu_1 : entity work.cpu
     port map (
       clk        => clk,
       rst        => rst,
       icache_out => icache_out,
       icache_in  => icache_in,
-      cache_out  => cache_out,
+      cpu_in     => cpu_in,
       cpu_out    => cpu_out);
+
+  bridge_1: entity work.bridge
+    port map (
+      clk       => clk,
+      rst       => rst,
+      cpu_out   => cpu_out,
+      cpu_in    => cpu_in,
+      cache_out => cache_out,
+      cache_in  => cache_in);
 
   cache_1 : entity work.cache
     port map (
       clk       => clk,
       rst       => rst,
-      cpu_out   => cpu_out,
+      cache_in  => cache_in,
       cache_out => cache_out,
       sram_out  => sram_out,
       sram_in   => sram_in);

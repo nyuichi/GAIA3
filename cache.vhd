@@ -9,8 +9,8 @@ entity cache is
   port (
     clk       : in  std_logic;
     rst       : in  std_logic;
-    cpu_out   : in  cpu_out_type;
-    cache_out : out cache_out_type;
+    cache_in  : in  bus_down_type;
+    cache_out : out bus_up_type;
     sram_out  : in  sram_out_type;
     sram_in   : out sram_in_type);
 
@@ -53,7 +53,7 @@ architecture Behavioral of cache is
     tag : integer range 0 to 262143)
     return boolean is
   begin
-    if cpu_out.we = '0' and cpu_out.re = '0' then
+    if cache_in.we = '0' and cache_in.re = '0' then
       return false;
     else
       return not (r.header(index).valid = '1' and r.header(index).tag = tag);
@@ -81,9 +81,9 @@ begin
 
     -- current req
 
-    tag := conv_integer(cpu_out.addr(31 downto 14));
-    index := conv_integer(cpu_out.addr(13 downto 6));
-    offset := conv_integer(cpu_out.addr(5 downto 2));
+    tag := conv_integer(cache_in.addr(31 downto 14));
+    index := conv_integer(cache_in.addr(13 downto 6));
+    offset := conv_integer(cache_in.addr(5 downto 2));
 
     v.tag := tag;
     v.index := index;
@@ -129,7 +129,7 @@ begin
 
     -- flusher
 
-    if cpu_out.we = '1' and fetch = '0' and r.flush_n /= 0 then
+    if cache_in.we = '1' and fetch = '0' and r.flush_n /= 0 then
       flush := '1';
     else
       flush := '0';
@@ -142,13 +142,13 @@ begin
       when -2 =>
         if flush = '1' then
           we := '1';
-          v.addr := cpu_out.addr;
+          v.addr := cache_in.addr;
           v.flush_n := -1;
         end if;
       when -1 =>
         v.flush_n := 0;
       when 0 =>
-        din := cpu_out.val;
+        din := cache_in.val;
         v.data(r.index)(r.offset) := din;
         v.flush_n := -2;
       when others =>
