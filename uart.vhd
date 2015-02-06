@@ -2,7 +2,7 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_unsigned.all;
 
-entity io is
+entity uart is
 
   port (
     clk   : in  std_logic;
@@ -16,7 +16,7 @@ entity io is
 
 end entity;
 
-architecture Behavioral of io is
+architecture Behavioral of uart is
 
   component rs232c is
     port (

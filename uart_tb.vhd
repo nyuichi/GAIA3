@@ -1,12 +1,12 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 
-entity io_tb is
-end io_tb;
+entity uart_tb is
+end uart_tb;
 
-architecture Behavioral of io_tb is
+architecture Behavioral of uart_tb is
 
-  component io is
+  component uart is
     port (
       clk   : in  std_logic;
       rst   : in  std_logic;
@@ -16,7 +16,7 @@ architecture Behavioral of io_tb is
       din   : out std_logic_vector(31 downto 0);
       RS_TX : out std_logic;
       RS_RX : in  std_logic);
-  end component io;
+  end component uart;
 
   signal rst   : std_logic;
   signal re    : std_logic;
@@ -35,7 +35,7 @@ architecture Behavioral of io_tb is
 
 begin
 
-  io_2: entity work.io
+  uart_2: entity work.uart
     port map (
       clk   => clk,
       rst   => rst,
