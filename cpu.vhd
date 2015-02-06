@@ -28,50 +28,50 @@ architecture Behavioral of cpu is
   end record;
 
   type decode_reg_type is record
-    opcode : std_logic_vector(3 downto 0);
-    reg_dest : std_logic_vector(4 downto 0);
-    reg_a : std_logic_vector(4 downto 0);
-    reg_b : std_logic_vector(4 downto 0);
-    data_x : std_logic_vector(31 downto 0);
-    data_a : std_logic_vector(31 downto 0);
-    data_b : std_logic_vector(31 downto 0);
-    data_l : std_logic_vector(31 downto 0);
-    data_d : std_logic_vector(31 downto 0);
-    tag : std_logic_vector(4 downto 0);
-    nextpc : std_logic_vector(31 downto 0);
+    opcode    : std_logic_vector(3 downto 0);
+    reg_dest  : std_logic_vector(4 downto 0);
+    reg_a     : std_logic_vector(4 downto 0);
+    reg_b     : std_logic_vector(4 downto 0);
+    data_x    : std_logic_vector(31 downto 0);
+    data_a    : std_logic_vector(31 downto 0);
+    data_b    : std_logic_vector(31 downto 0);
+    data_l    : std_logic_vector(31 downto 0);
+    data_d    : std_logic_vector(31 downto 0);
+    tag       : std_logic_vector(4 downto 0);
+    nextpc    : std_logic_vector(31 downto 0);
     reg_write : std_logic;
-    reg_mem : std_logic;
+    reg_mem   : std_logic;
     mem_write : std_logic;
-    mem_read : std_logic;
-    pc_addr : std_logic_vector(31 downto 0);
-    pc_src : std_logic;
+    mem_read  : std_logic;
+    pc_addr   : std_logic_vector(31 downto 0);
+    pc_src    : std_logic;
   end record;
 
   type execute_reg_type is record
-    res : std_logic_vector(31 downto 0);
-    mem_addr : std_logic_vector(31 downto 0);
-    data_x : std_logic_vector(31 downto 0);
-    reg_dest : std_logic_vector(4 downto 0);
+    res       : std_logic_vector(31 downto 0);
+    mem_addr  : std_logic_vector(31 downto 0);
+    data_x    : std_logic_vector(31 downto 0);
+    reg_dest  : std_logic_vector(4 downto 0);
     reg_write : std_logic;
-    reg_mem : std_logic;
+    reg_mem   : std_logic;
     mem_write : std_logic;
-    mem_read : std_logic;
+    mem_read  : std_logic;
   end record;
 
   type memory_reg_type is record
-    res : std_logic_vector(31 downto 0);
-    reg_dest : std_logic_vector(4 downto 0);
+    res       : std_logic_vector(31 downto 0);
+    reg_dest  : std_logic_vector(4 downto 0);
     reg_write : std_logic;
-    reg_mem : std_logic;
+    reg_mem   : std_logic;
   end record;
 
   type reg_type is record
-    pc : std_logic_vector(31 downto 0);
+    pc      : std_logic_vector(31 downto 0);
     regfile : regfile_type;
-    f : fetch_reg_type;
-    d : decode_reg_type;
-    e : execute_reg_type;
-    m : memory_reg_type;
+    f       : fetch_reg_type;
+    d       : decode_reg_type;
+    e       : execute_reg_type;
+    m       : memory_reg_type;
   end record;
 
   constant fzero : fetch_reg_type := (
@@ -127,7 +127,8 @@ architecture Behavioral of cpu is
 
   signal r, rin : reg_type;
 
-  procedure normalize_fzero(a : inout std_logic_vector) is
+  procedure normalize_fzero(
+    a : inout std_logic_vector) is
   begin
     if a = x"80000000" then
       a := x"00000000";
@@ -135,8 +136,8 @@ architecture Behavioral of cpu is
   end procedure;
 
   procedure d_data_forward (
-    reg_src : in std_logic_vector(4 downto 0);
-    res : out std_logic_vector(31 downto 0)) is
+    reg_src : in  std_logic_vector(4 downto 0);
+    res     : out std_logic_vector(31 downto 0)) is
   begin
     if r.e.reg_write = '1' and r.e.reg_dest /= "00000" and r.e.reg_dest = reg_src then
       res := r.e.res;
@@ -144,9 +145,9 @@ architecture Behavioral of cpu is
   end procedure;
 
   procedure e_data_forward (
-    reg_src : in std_logic_vector(4 downto 0);
-    reg_data : in std_logic_vector(31 downto 0);
-    res : out std_logic_vector(31 downto 0)) is
+    reg_src  : in  std_logic_vector(4 downto 0);
+    reg_data : in  std_logic_vector(31 downto 0);
+    res      : out std_logic_vector(31 downto 0)) is
   begin
     if r.e.reg_write = '1' and r.e.reg_dest /= "00000" and r.e.reg_dest = reg_src then
       res := r.e.res;
@@ -162,12 +163,12 @@ architecture Behavioral of cpu is
   end procedure;
 
   procedure detect_hazard (
-    inst : in std_logic_vector(31 downto 0);
+    inst  : in  std_logic_vector(31 downto 0);
     stall : out std_logic) is
 
     variable lw_stall : std_logic;
     variable br_stall : std_logic;
-    variable br_inst : std_logic;
+    variable br_inst  : std_logic;
 
     variable reg_x : std_logic_vector(4 downto 0);
     variable reg_a : std_logic_vector(4 downto 0);
@@ -209,7 +210,7 @@ architecture Behavioral of cpu is
     stall := br_stall or lw_stall;
   end procedure;
 
-begin  -- architecture Behavioral
+begin
 
   comb : process(r, icache_out, cache_out, rst)
     variable v : reg_type;
