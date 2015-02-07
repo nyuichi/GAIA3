@@ -215,7 +215,18 @@ others => (others => '0')
 35 => x"ffffffff",
 others => (others => '0'));
 
-  signal ram : ram_t := myram9;
+  constant myram_loopback : ram_t := (
+0 => x"2e80000c",
+1 => x"3ef40000",
+2 => x"ce830000",
+3 => x"80800800",
+4 => x"2100ffff",
+5 => x"f088fffd",
+6 => x"60800800",
+7 => x"be83fffb",
+others => (others => '0'));
+
+  signal ram : ram_t := myram_loopback;
 
   signal addr_reg : std_logic_vector(31 downto 0) := (others => '0');
 

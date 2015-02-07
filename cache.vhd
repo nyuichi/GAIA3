@@ -152,7 +152,7 @@ begin
         v.data(r.index)(r.offset) := din;
         v.flush_n := -2;
       when others =>
-        assert false;
+        assert false report "cache: invalid value stored in flush_n";
     end case;
 
     -- control

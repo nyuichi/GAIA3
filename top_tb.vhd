@@ -163,7 +163,7 @@ begin
 
     XRST <= '1';
 
-    wait for (16 * BR);
+    wait for (2 * BR);
 
     wait for BR; RS_RX <= '0'; -- start-bit
     wait for BR; RS_RX <= '1'; -- data-bit 8'hc5

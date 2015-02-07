@@ -57,7 +57,9 @@ package types is
       cpu_out   : in  bus_down_type;
       cpu_in    : out bus_up_type;
       cache_out : in  bus_up_type;
-      cache_in  : out bus_down_type);
+      cache_in  : out bus_down_type;
+      uart_out  : in  bus_up_type;
+      uart_in   : out bus_down_type);
   end component;
 
   component cache is
@@ -68,6 +70,16 @@ package types is
       cache_out : out bus_up_type;
       sram_out  : in  sram_out_type;
       sram_in   : out sram_in_type);
+  end component;
+
+  component uart is
+    port (
+      clk      : in  std_logic;
+      rst      : in  std_logic;
+      uart_in  : in  bus_down_type;
+      uart_out : out bus_up_type;
+      RS_TX    : out std_logic;
+      RS_RX    : in  std_logic);
   end component;
 
   component icache is

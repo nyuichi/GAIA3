@@ -413,7 +413,7 @@ begin
             end if;
           when others =>
             v.e.res := (others => '0');
-            assert false;
+            assert false report "Unknown ALU opcode";
         end case;
       when "0010" =>
         v.e.res := r.d.data_d;
@@ -422,7 +422,6 @@ begin
       when "1011" =>
         v.e.res := r.d.nextpc;
       when others =>
-        assert false;
         v.e.res := (others => '0');
     end case;
 

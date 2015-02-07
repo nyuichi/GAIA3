@@ -12,7 +12,9 @@ entity bridge is
     cpu_out   : in  bus_down_type;
     cpu_in    : out bus_up_type;
     cache_out : in  bus_up_type;
-    cache_in  : out bus_down_type);
+    cache_in  : out bus_down_type;
+    uart_out  : in  bus_up_type;
+    uart_in   : out bus_down_type);
 
 end entity;
 
@@ -41,29 +43,34 @@ begin
 
     variable v_cpu_in : bus_up_type;
     variable v_cache_in : bus_down_type;
+    variable v_uart_in : bus_down_type;
   begin
     v := r;
 
     v_cpu_in := bus_up_zero;
     v_cache_in := bus_down_zero;
+    v_uart_in := bus_down_zero;
 
     v.addr := cpu_out.addr;
 
     -- previous req
     case conv_integer(r.addr) is
+      when 16#00002000# to 16#00002008# =>
+        v_cpu_in := uart_out;
       when 16#00003000# to 16#003FFFFF# =>
         v_cpu_in := cache_out;
       when others =>
-        assert false;
     end case;
 
     -- current req
     if cpu_out.we = '1' or cpu_out.re = '1' then
       case conv_integer(cpu_out.addr) is
+        when 16#00002000# to 16#00002008# =>
+          v_uart_in := cpu_out;
         when 16#00003000# to 16#003FFFFF# =>
           v_cache_in := cpu_out;
         when others =>
-          assert false;
+          assert false report "fuga";
       end case;
     end if;
 
@@ -71,6 +78,7 @@ begin
 
     cpu_in <= v_cpu_in;
     cache_in <= v_cache_in;
+    uart_in <= v_uart_in;
   end process;
 
   regs : process(clk)

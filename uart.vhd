@@ -2,17 +2,17 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_unsigned.all;
 
+use work.types.all;
+
 entity uart is
 
   port (
-    clk   : in  std_logic;
-    rst   : in  std_logic;
-    re    : in  std_logic;
-    we    : in  std_logic;
-    dout  : in  std_logic_vector(31 downto 0);
-    din   : out std_logic_vector(31 downto 0);
-    RS_TX : out std_logic;
-    RS_RX : in  std_logic);
+    clk      : in  std_logic;
+    rst      : in  std_logic;
+    uart_in  : in  bus_down_type;
+    uart_out : out bus_up_type;
+    RS_TX    : out std_logic;
+    RS_RX    : in  std_logic);
 
 end entity;
 
@@ -53,6 +53,9 @@ architecture Behavioral of uart is
     -- pins
     re : std_logic;
     we : std_logic;
+
+    -- reg
+    prev : std_logic_vector(31 downto 0);
   end record;
 
   constant rzero : reg_type := (
@@ -63,13 +66,14 @@ architecture Behavioral of uart is
     rx_ptr => (others => '0'),
     rx_len => 0,
     re     => '0',
-    we     => '1');
+    we     => '1',
+    prev   => (others => '0'));
 
   signal r, rin : reg_type;
 
 begin
 
-  myRS232C : RS232C port map (
+  rs232c_1 : rs232c port map (
     clk      => clk,
     tx_pin   => RS_TX,
     rx_pin   => RS_RX,
@@ -82,7 +86,7 @@ begin
 
   -- WRITE
 
-  comb : process(r, rst, re, we, dout, tx_busy, rx_ready, rx_dat)
+  comb : process(r, uart_in, tx_busy, rx_ready, rx_dat)
     variable v : reg_type;
 
     variable v_din  : std_logic_vector(31 downto 0);
@@ -103,15 +107,15 @@ begin
     end if;
 
     -- write
-    if we = '1' then
+    if uart_in.we = '1' then
       if v.tx_len < 256 then
-        v.tx_buf(conv_integer(v.tx_ptr + v.tx_len)) := dout(7 downto 0);
+        v.tx_buf(conv_integer(v.tx_ptr + v.tx_len)) := uart_in.val(7 downto 0);
         v.tx_len := v.tx_len + 1;
       end if;
     end if;
 
     -- read
-    if re = '1' then
+    if uart_in.re = '1' then
       if v.rx_len > 0 then
         v_din := x"000000" & v.rx_buf(conv_integer(v.rx_ptr));
         v.rx_ptr := v.rx_ptr + 1;
@@ -129,12 +133,15 @@ begin
       v.we := '0';
     end if;
 
+    v.prev := v_din;
+
     rin <= v;
 
     tx_go <= v.we;
     rx_done <= v.re;
     tx_dat <= v_dout;
-    din <= v_din;
+    uart_out.rx <= r.prev;
+    uart_out.stall <= '0';
   end process;
 
   regs : process(clk)
