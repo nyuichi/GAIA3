@@ -77,8 +77,10 @@ architecture Behavioral of Top_tb is
 
   -- global clock period
   constant CP: time := 15.15 ns;
-  -- bit rate (1 / 9600bps)
-  constant BR: time := 104166 ns;
+  -- bit rate:
+  --  1 / 9600bps   == 104166 ns
+  --  1 / 115200bps == 8680 ns
+  constant BR: time := 8680 ns;
 
 begin
 
@@ -163,7 +165,7 @@ begin
 
     XRST <= '1';
 
-    wait for (2 * BR);
+    wait for (5 * BR);
 
     wait for BR; RS_RX <= '0'; -- start-bit
     wait for BR; RS_RX <= '1'; -- data-bit 8'hc5
