@@ -212,7 +212,7 @@ architecture Behavioral of cpu is
 
 begin
 
-  comb : process(r, icache_out, cpu_in, rst)
+  comb : process(r, icache_out, cpu_in)
     variable v : reg_type;
 
     -- decode/write
