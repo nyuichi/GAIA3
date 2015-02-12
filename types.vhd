@@ -100,4 +100,16 @@ package types is
       XWA      : out   std_logic);
   end component;
 
+  component blockram is
+    generic (
+      dwidth : integer;
+      awidth : integer);
+    port (
+      clk  : in  std_logic;
+      we   : in  std_logic;
+      di   : in  std_logic_vector(dwidth - 1 downto 0);
+      do   : out std_logic_vector(dwidth - 1 downto 0);
+      addr : in  std_logic_vector(awidth - 1 downto 0));
+  end component;
+
 end package;

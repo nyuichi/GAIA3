@@ -20,13 +20,26 @@ end entity;
 
 architecture Behavioral of sram is
 
+  signal we1, we2 : std_logic;
+  signal tx1, tx2 : std_logic_vector(31 downto 0);
+
 begin
+
+  process(clk)
+  begin
+    if rising_edge(clk) then
+      we1 <= sram_in.we;
+      tx1 <= sram_in.tx;
+      we2 <= we1;
+      tx2 <= tx1;
+    end if;
+  end process;
 
   sram_out.rx <= ZD;
 
-  ZA <= sram_in.addr when sram_in.re = '1' or sram_in.we = '1' else (others => 'Z');
-  ZD <= sram_in.tx when sram_in.we = '1' else (others => 'Z');
-  ZDP <= "0000" when sram_in.we = '1' else (others => 'Z');
+  ZA  <= sram_in.addr(21 downto 2);
+  ZD  <= tx2    when we2 = '1' else (others => 'Z');
+  ZDP <= "0000" when we2 = '1' else (others => 'Z');
   XWA <= not sram_in.we;
 
 end architecture;
