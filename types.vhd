@@ -59,7 +59,16 @@ package types is
       cache_out : in  bus_up_type;
       cache_in  : out bus_down_type;
       uart_out  : in  bus_up_type;
-      uart_in   : out bus_down_type);
+      uart_in   : out bus_down_type;
+      bram_out  : in  bus_up_type;
+      bram_in   : out bus_down_type);
+  end component;
+
+  component bram is
+    port (
+      clk      : in  std_logic;
+      bram_in  : in  bus_down_type;
+      bram_out : out bus_up_type);
   end component;
 
   component cache is

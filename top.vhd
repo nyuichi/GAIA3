@@ -47,6 +47,8 @@ architecture Behavioral of top is
   signal uart_out   : bus_up_type;
   signal sram_out   : sram_out_type;
   signal sram_in    : sram_in_type;
+  signal bram_out   : bus_up_type;
+  signal bram_in    : bus_down_type;
 
 begin   -- architecture Behavioral
 
@@ -78,7 +80,9 @@ begin   -- architecture Behavioral
       cache_out => cache_out,
       cache_in  => cache_in,
       uart_out  => uart_out,
-      uart_in   => uart_in);
+      uart_in   => uart_in,
+      bram_out  => bram_out,
+      bram_in   => bram_in);
 
   cache_1 : entity work.cache
     port map (
@@ -97,6 +101,12 @@ begin   -- architecture Behavioral
       uart_out => uart_out,
       RS_TX    => RS_TX,
       RS_RX    => RS_RX);
+
+  bram_1: entity work.bram
+    port map (
+      clk      => clk,
+      bram_in  => bram_in,
+      bram_out => bram_out);
 
   icache_1 : entity work.icache
     port map (

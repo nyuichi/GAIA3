@@ -14,7 +14,9 @@ entity bridge is
     cache_out : in  bus_up_type;
     cache_in  : out bus_down_type;
     uart_out  : in  bus_up_type;
-    uart_in   : out bus_down_type);
+    uart_in   : out bus_down_type;
+    bram_out  : in  bus_up_type;
+    bram_in   : out bus_down_type);
 
 end entity;
 
@@ -22,6 +24,8 @@ architecture Behavioral of bridge is
 
   type reg_type is record
     addr : std_logic_vector(31 downto 0);
+    we   : std_logic;
+    re   : std_logic;
   end record;
 
   constant bus_up_zero : bus_up_type := (
@@ -34,6 +38,11 @@ architecture Behavioral of bridge is
     val  => (others => '0'),
     addr => (others => '0'));
 
+  constant rzero : reg_type := (
+    addr => (others => '0'),
+    we   => '0',
+    re   => '0');
+
   signal r, rin : reg_type;
 
 begin
@@ -44,27 +53,34 @@ begin
     variable v_cpu_in : bus_up_type;
     variable v_cache_in : bus_down_type;
     variable v_uart_in : bus_down_type;
+    variable v_bram_in : bus_down_type;
   begin
     v := r;
 
-    v_cpu_in := bus_up_zero;
+    v_cpu_in   := bus_up_zero;
     v_cache_in := bus_down_zero;
-    v_uart_in := bus_down_zero;
-
-    v.addr := cpu_out.addr;
+    v_uart_in  := bus_down_zero;
+    v_bram_in  := bus_down_zero;
 
     -- previous req
-    case conv_integer(r.addr) is
-      when 16#00002000# to 16#00002008# =>
-        v_cpu_in := uart_out;
-      when 16#00003000# to 16#003FFFFF# =>
-        v_cpu_in := cache_out;
-      when others =>
-    end case;
+    if r.re = '1' or r.we = '1' then
+      case conv_integer(r.addr) is
+        when 16#00000000# to 16#00001FFF# =>
+          v_cpu_in := bram_out;
+        when 16#00002000# to 16#00002008# =>
+          v_cpu_in := uart_out;
+        when 16#00003000# to 16#003FFFFF# =>
+          v_cpu_in := cache_out;
+        when others =>
+          assert false report "hoge";
+      end case;
+    end if;
 
     -- current req
     if cpu_out.we = '1' or cpu_out.re = '1' then
       case conv_integer(cpu_out.addr) is
+        when 16#00000000# to 16#00001FFF# =>
+          v_bram_in := cpu_out;
         when 16#00002000# to 16#00002008# =>
           v_uart_in := cpu_out;
         when 16#00003000# to 16#003FFFFF# =>
@@ -74,16 +90,23 @@ begin
       end case;
     end if;
 
+    v.addr := cpu_out.addr;
+    v.re   := cpu_out.re;
+    v.we   := cpu_out.we;
+
     rin <= v;
 
-    cpu_in <= v_cpu_in;
+    cpu_in   <= v_cpu_in;
     cache_in <= v_cache_in;
-    uart_in <= v_uart_in;
+    uart_in  <= v_uart_in;
+    bram_in  <= v_bram_in;
   end process;
 
   regs : process(clk)
   begin
-    if rising_edge(clk) then
+    if rst = '1' then
+      r <= rzero;
+    elsif rising_edge(clk) then
       r <= rin;
     end if;
   end process;
