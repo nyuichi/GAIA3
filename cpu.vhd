@@ -68,6 +68,7 @@ architecture Behavioral of cpu is
 
   type reg_type is record
     pc      : std_logic_vector(31 downto 0);
+    stall   : std_logic;
     regfile : regfile_type;
     f       : fetch_reg_type;
     d       : decode_reg_type;
@@ -119,6 +120,7 @@ architecture Behavioral of cpu is
 
   constant rzero : reg_type := (
     pc      => (others => '0'),
+    stall   => '0',
     regfile => (others => (others => '0')),
     f       => fzero,
     d       => dzero,
@@ -237,9 +239,6 @@ begin
     variable data_b : std_logic_vector(31 downto 0);
     variable data_x : std_logic_vector(31 downto 0);
 
-    -- control
-    variable stall : std_logic;
-
     -- external
     variable i_addr : std_logic_vector(31 downto 0);
     variable d_addr : std_logic_vector(31 downto 0);
@@ -249,7 +248,7 @@ begin
   begin
     v := r;
 
-    detect_hazard(icache_out.rx, stall);
+    detect_hazard(icache_out.rx, v.stall);
 
     -- FETCH
 
@@ -262,7 +261,7 @@ begin
     v.pc := pc;
     v.f.nextpc := pc + 4;
 
-    if stall = '1' or memory_hazard = '1' then
+    if v.stall = '1' or memory_hazard = '1' then
       pc := r.pc;
       v.pc := r.pc;
       v.f := r.f;
@@ -346,7 +345,7 @@ begin
 
     if memory_hazard = '1' then
       v.d := r.d;
-    elsif stall = '1' then
+    elsif v.stall = '1' then
       v.d.reg_write := '0';
       v.d.mem_write := '0';
       v.d.mem_read := '0';
