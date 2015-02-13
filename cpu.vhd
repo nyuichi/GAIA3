@@ -154,7 +154,7 @@ architecture Behavioral of cpu is
   begin
     if r.e.reg_write = '1' and r.e.reg_dest /= "00000" and r.e.reg_dest = reg_src then
       res := r.e.res;
-    elsif r.m.reg_write = '1' and r.m.reg_dest /= "00000" and r.e.reg_dest /= reg_src and r.m.reg_dest = reg_src then
+    elsif r.m.reg_write = '1' and r.m.reg_dest /= "00000" and r.m.reg_dest = reg_src then
       if r.m.reg_mem = '1' then
         res := cpu_in.rx;
       else
