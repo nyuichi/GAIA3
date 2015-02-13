@@ -426,7 +426,7 @@ begin
         v.e.res := (others => '0');
     end case;
 
-    v.e.mem_addr := r.d.data_a + (r.d.data_d(29 downto 0) & "00");
+    v.e.mem_addr := data_a + (r.d.data_d(29 downto 0) & "00");
 
     v.e.reg_dest := r.d.reg_dest;
     v.e.data_x := data_x;
