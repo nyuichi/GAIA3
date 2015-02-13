@@ -205,14 +205,16 @@ others => (others => '0')
 25 => x"00844000",
 26 => x"8e780000",
 27 => x"ce030000",
-28 => x"2080000a",
-29 => x"6ff8ffff",
-30 => x"0f780081",
-31 => x"0ff80000",
-32 => x"be03ffe2",
-33 => x"0f7c0080",
-34 => x"8ff8ffff",
-35 => x"ffffffff",
+28 => x"3f000040",
+29 => x"3f800040",
+30 => x"2080000a",
+31 => x"6ff8ffff",
+32 => x"0f780081",
+33 => x"0ff80000",
+34 => x"be03ffe0",
+35 => x"0f7c0080",
+36 => x"8ff8ffff",
+37 => x"ffffffff",
 others => (others => '0'));
 
   constant myram_loopback : ram_t := (
@@ -226,7 +228,46 @@ others => (others => '0'));
 7 => x"be83fffb",
 others => (others => '0'));
 
-  signal ram : ram_t := myram_loopback;
+  constant myram_ramtest : ram_t := (
+0 => x"2e8000aa",
+1 => x"6e801000",
+2 => x"80801000",
+3 => x"2e8000bb",
+4 => x"6e801001",
+5 => x"81001000",
+6 => x"81801001",
+7 => x"ffffffff",
+others => (others => '0')
+);
+
+  constant myram_fib1 : ram_t := (
+0 => x"2e800010",
+1 => x"3ef40000",
+2 => x"ce830000",
+3 => x"ce030000",
+4 => x"3f000040",
+5 => x"3f800040",
+6 => x"2080000a",
+7 => x"6ff8ffff",
+8 => x"0f780081",
+9 => x"0ff80000",
+10 => x"be03fff8",
+11 => x"0f7c0080",
+12 => x"8ff8ffff",
+13 => x"ffffffff",
+others => (others => '0')
+    );
+
+  constant myram_ramtest2 : ram_t := (
+0 => x"2e8000aa",
+1 => x"6e801000",
+2 => x"80801000",
+3 => x"00840020",
+4 => x"ffffffff",
+others => (others => '0')
+);
+
+  signal ram : ram_t := myram_fibrecur;
 
   signal addr_reg : std_logic_vector(31 downto 0) := (others => '0');
 
