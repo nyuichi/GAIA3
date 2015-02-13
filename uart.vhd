@@ -141,10 +141,9 @@ begin
     rx_done <= v.re;
     tx_dat <= v_dout;
     uart_out.rx <= r.prev;
-    uart_out.stall <= '0';
   end process;
 
-  regs : process(clk)
+  regs : process(clk, rst)
   begin
     if rst = '1' then
       r <= rzero;

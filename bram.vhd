@@ -27,6 +27,4 @@ begin
       do   => bram_out.rx,
       addr => bram_in.addr(14 downto 2));
 
-  bram_out.stall <= '0';
-
 end architecture;

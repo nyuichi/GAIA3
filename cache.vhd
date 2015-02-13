@@ -15,6 +15,7 @@ entity cache is
     rst       : in  std_logic;
     cache_in  : in  bus_down_type;
     cache_out : out bus_up_type;
+    hazard    : out std_logic;
     sram_out  : in  sram_out_type;
     sram_in   : out sram_in_type);
 
@@ -100,10 +101,9 @@ begin
       do   => cache_out.rx,
       addr => bram_addr);
 
-  comb : process(clk)
+  comb : process(r, cache_in, sram_out)
     variable v : reg_type;
-
-    variable stall : std_logic;
+    variable v_hazard : std_logic;
   begin
     v := r;
 
@@ -167,25 +167,25 @@ begin
     -- control
 
     if v.fetch_n = -2 and v.flush_n = -2 then
-      stall := '0';
+      v_hazard := '0';
     else
-      stall := '1';
+      v_hazard := '1';
     end if;
 
     -- end
 
     rin <= v;
 
-    cache_out.stall <= stall;
-    sram_in.addr    <= v.sram_addr;
-    sram_in.tx      <= v.sram_tx;
-    sram_in.we      <= v.sram_we;
-    sram_in.re      <= '1';
-    bram_we         <= v.bram_we;
-    bram_addr       <= v.bram_addr;
+    hazard       <= v_hazard;
+    sram_in.addr <= v.sram_addr;
+    sram_in.tx   <= v.sram_tx;
+    sram_in.we   <= v.sram_we;
+    sram_in.re   <= '1';
+    bram_we      <= v.bram_we;
+    bram_addr    <= v.bram_addr;
   end process;
 
-  regs : process(clk)
+  regs : process(clk, rst)
   begin
     if rst = '1' then
       r <= rzero;

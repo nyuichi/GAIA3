@@ -7,16 +7,18 @@ use work.types.all;
 entity bridge is
 
   port (
-    clk       : in  std_logic;
-    rst       : in  std_logic;
-    cpu_out   : in  bus_down_type;
-    cpu_in    : out bus_up_type;
-    cache_out : in  bus_up_type;
-    cache_in  : out bus_down_type;
-    uart_out  : in  bus_up_type;
-    uart_in   : out bus_down_type;
-    bram_out  : in  bus_up_type;
-    bram_in   : out bus_down_type);
+    clk          : in  std_logic;
+    rst          : in  std_logic;
+    cpu_out      : in  bus_down_type;
+    cpu_in       : out bus_up_type;
+    hazard       : out std_logic;
+    cache_out    : in  bus_up_type;
+    cache_hazard : in  std_logic;
+    cache_in     : out bus_down_type;
+    uart_out     : in  bus_up_type;
+    uart_in      : out bus_down_type;
+    bram_out     : in  bus_up_type;
+    bram_in      : out bus_down_type);
 
 end entity;
 
@@ -29,7 +31,6 @@ architecture Behavioral of bridge is
   end record;
 
   constant bus_up_zero : bus_up_type := (
-    stall => '0',
     rx    => (others => '0'));
 
   constant bus_down_zero : bus_down_type := (
@@ -47,13 +48,14 @@ architecture Behavioral of bridge is
 
 begin
 
-  comb : process(rst, cpu_out, cache_out)
+  comb : process(r, cpu_out, cache_out, cache_hazard, uart_out, bram_out)
     variable v : reg_type;
 
-    variable v_cpu_in : bus_up_type;
+    variable v_hazard   : std_logic;
+    variable v_cpu_in   : bus_up_type;
     variable v_cache_in : bus_down_type;
-    variable v_uart_in : bus_down_type;
-    variable v_bram_in : bus_down_type;
+    variable v_uart_in  : bus_down_type;
+    variable v_bram_in  : bus_down_type;
   begin
     v := r;
 
@@ -76,6 +78,8 @@ begin
       end case;
     end if;
 
+    v_hazard := '0';
+
     -- current req
     if cpu_out.we = '1' or cpu_out.re = '1' then
       case conv_integer(cpu_out.addr) is
@@ -85,6 +89,7 @@ begin
           v_uart_in := cpu_out;
         when 16#00003000# to 16#003FFFFF# =>
           v_cache_in := cpu_out;
+          v_hazard := cache_hazard;
         when others =>
           assert false report "fuga";
       end case;
@@ -96,13 +101,14 @@ begin
 
     rin <= v;
 
+    hazard   <= v_hazard;
     cpu_in   <= v_cpu_in;
     cache_in <= v_cache_in;
     uart_in  <= v_uart_in;
     bram_in  <= v_bram_in;
   end process;
 
-  regs : process(clk)
+  regs : process(clk, rst)
   begin
     if rst = '1' then
       r <= rzero;

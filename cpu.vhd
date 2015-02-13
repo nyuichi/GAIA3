@@ -9,12 +9,13 @@ use work.util.all;
 entity cpu is
 
   port (
-    clk        : in  std_logic;
-    rst        : in  std_logic;
-    icache_out : in  icache_out_type;
-    icache_in  : out icache_in_type;
-    cpu_in     : in  bus_up_type;
-    cpu_out    : out bus_down_type);
+    clk           : in  std_logic;
+    rst           : in  std_logic;
+    icache_out    : in  icache_out_type;
+    icache_in     : out icache_in_type;
+    cpu_in        : in  bus_up_type;
+    cpu_out       : out bus_down_type;
+    memory_hazard : in  std_logic);
 
 end entity;
 
@@ -212,7 +213,7 @@ architecture Behavioral of cpu is
 
 begin
 
-  comb : process(r, icache_out, cpu_in)
+  comb : process(r, icache_out, cpu_in, memory_hazard)
     variable v : reg_type;
 
     -- decode/write
@@ -261,7 +262,7 @@ begin
     v.pc := pc;
     v.f.nextpc := pc + 4;
 
-    if stall = '1' or cpu_in.stall = '1' then
+    if stall = '1' or memory_hazard = '1' then
       pc := r.pc;
       v.pc := r.pc;
       v.f := r.f;
@@ -343,7 +344,7 @@ begin
         v.d.pc_src := '0';
     end case;
 
-    if cpu_in.stall = '1' then
+    if memory_hazard = '1' then
       v.d := r.d;
     elsif stall = '1' then
       v.d.reg_write := '0';
@@ -434,7 +435,7 @@ begin
     v.e.mem_write := r.d.mem_write;
     v.e.mem_read := r.d.mem_read;
 
-    if cpu_in.stall = '1' then
+    if memory_hazard = '1' then
       v.e := r.e;
     end if;
 
@@ -449,7 +450,7 @@ begin
     v.m.reg_write := r.e.reg_write;
     v.m.reg_mem := r.e.reg_mem;
 
-    if cpu_in.stall = '1' then
+    if memory_hazard = '1' then
       v.m.reg_write := '0';
     end if;
 
@@ -464,7 +465,7 @@ begin
     cpu_out.re <= d_re;
   end process;
 
-  regs : process(clk)
+  regs : process(clk, rst)
   begin
     if rst = '1' then
       r <= rzero;
