@@ -114,7 +114,7 @@ begin
     -- fetcher
 
     v.sram_addr := (others => '0');
-    v.bram_addr := (others => '0');
+    v.bram_addr := v.index & v.offset;
 
     case r.fetch_n is
       when -2 =>
@@ -144,7 +144,7 @@ begin
 
     v.sram_we := '0';
     v.sram_tx := (others => '0');
-    v.bram_we := '1';
+    v.bram_we := '0';
 
     case r.flush_n is
       when -2 =>
