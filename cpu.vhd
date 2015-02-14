@@ -169,48 +169,51 @@ architecture Behavioral of cpu is
     inst  : in  std_logic_vector(31 downto 0);
     stall : out std_logic) is
 
-    variable lw_stall : std_logic;
-    variable br_stall : std_logic;
-    variable br_inst  : std_logic;
-
-    variable reg_x : std_logic_vector(4 downto 0);
-    variable reg_a : std_logic_vector(4 downto 0);
-    variable reg_b : std_logic_vector(4 downto 0);
+    variable opcode : std_logic_vector(3 downto 0);
+    variable reg_x  : std_logic_vector(4 downto 0);
+    variable reg_a  : std_logic_vector(4 downto 0);
+    variable reg_b  : std_logic_vector(4 downto 0);
 
   begin
+
+    -- micro decoder
+    opcode := inst(31 downto 28);
     reg_x := inst(27 downto 23);
     reg_a := inst(22 downto 18);
-    if inst(31 downto 29) = "000" then
-      reg_b := inst(17 downto 13);
-    else
-      reg_b := "00000";
-    end if;
+    case opcode is
+      when "0000" | "0001" =>
+        reg_b := inst(17 downto 13);
+      when others =>
+        reg_b := "00000";
+    end case;
+
+    stall := '1';
 
     -- load stall
-    lw_stall := to_std_logic(
-      r.d.mem_read = '1' and (r.d.reg_dest = reg_a or r.d.reg_dest = reg_b)
-      );
-
-    -- branch hazard
-    if inst(31 downto 30) = "11" then
-      if inst(28) = '1' then
-        br_stall := to_std_logic(
-          (r.d.reg_write = '1' and (r.d.reg_dest = reg_x or r.d.reg_dest = reg_a))
-          or
-          (r.e.reg_write = '1' and (r.e.reg_dest = reg_x or r.e.reg_dest = reg_a))
-          );
-      else
-        br_stall := to_std_logic(
-          (r.d.reg_write = '1' and r.d.reg_dest = reg_x)
-          or
-          (r.e.reg_write = '1' and r.e.reg_dest = reg_x)
-          );
-      end if;
-    else
-      br_stall := '0';
+    if r.d.mem_read = '1' and r.d.reg_dest /= "00000" and (r.d.reg_dest = reg_a or r.d.reg_dest = reg_b) then
+      return;
     end if;
 
-    stall := br_stall or lw_stall;
+    -- branch hazard
+    case opcode is
+      when "1101" | "1111" =>
+        if r.d.reg_write = '1' and r.d.reg_dest /= "00000" and (r.d.reg_dest = reg_x or r.d.reg_dest = reg_a) then
+          return;
+        end if;
+        if r.e.reg_write = '1' and r.e.reg_dest /= "00000" and (r.e.reg_dest = reg_x or r.e.reg_dest = reg_a) then
+          return;
+        end if;
+      when "1100" =>
+        if r.d.reg_write = '1' and r.d.reg_dest /= "00000" and r.d.reg_dest = reg_x then
+          return;
+        end if;
+        if r.e.reg_write = '1' and r.e.reg_dest /= "00000" and r.e.reg_dest = reg_x then
+          return;
+        end if;
+      when others =>
+    end case;
+
+    stall := '0';
   end procedure;
 
 begin
