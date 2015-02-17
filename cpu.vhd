@@ -9,13 +9,10 @@ use work.util.all;
 entity cpu is
 
   port (
-    clk           : in  std_logic;
-    rst           : in  std_logic;
-    icache_out    : in  icache_out_type;
-    icache_in     : out icache_in_type;
-    cpu_in        : in  bus_up_type;
-    cpu_out       : out bus_down_type;
-    memory_hazard : in  std_logic);
+    clk     : in  std_logic;
+    rst     : in  std_logic;
+    cpu_in  : in  cpu_in_type;
+    cpu_out : out cpu_out_type);
 
 end entity;
 
@@ -156,7 +153,7 @@ architecture Behavioral of cpu is
       res := r.e.res;
     elsif r.m.reg_write = '1' and r.m.reg_dest /= "00000" and r.m.reg_dest = reg_src then
       if r.m.reg_mem = '1' then
-        res := cpu_in.rx;
+        res := cpu_in.d_data;
       else
         res := r.m.res;
       end if;
@@ -218,7 +215,7 @@ architecture Behavioral of cpu is
 
 begin
 
-  comb : process(r, icache_out, cpu_in, memory_hazard)
+  comb : process(r, cpu_in)
     variable v : reg_type;
 
     -- decode/write
@@ -251,7 +248,7 @@ begin
   begin
     v := r;
 
-    detect_hazard(icache_out.rx, v.stall);
+    detect_hazard(cpu_in.i_data, v.stall);
 
     -- FETCH
 
@@ -264,7 +261,7 @@ begin
     v.pc := pc;
     v.f.nextpc := pc + 4;
 
-    if v.stall = '1' or memory_hazard = '1' then
+    if v.stall = '1' or cpu_in.d_stall = '1' then
       pc := r.pc;
       v.pc := r.pc;
       v.f := r.f;
@@ -275,7 +272,7 @@ begin
     -- WRITE (put here to avoid structual hazard between WRITE and DECODE)
 
     if r.m.reg_mem = '1' then
-      res := cpu_in.rx;
+      res := cpu_in.d_data;
     else
       res := r.m.res;
     end if;
@@ -294,7 +291,7 @@ begin
 
     -- DECODE
 
-    inst := icache_out.rx;
+    inst := cpu_in.i_data;
 
     if r.d.pc_src = '1' then
       inst := x"00000000";
@@ -346,7 +343,7 @@ begin
         v.d.pc_src := '0';
     end case;
 
-    if memory_hazard = '1' then
+    if cpu_in.d_stall = '1' then
       v.d := r.d;
     elsif v.stall = '1' then
       v.d.reg_write := '0';
@@ -437,7 +434,7 @@ begin
     v.e.mem_write := r.d.mem_write;
     v.e.mem_read := r.d.mem_read;
 
-    if memory_hazard = '1' then
+    if cpu_in.d_stall = '1' then
       v.e := r.e;
     end if;
 
@@ -452,7 +449,7 @@ begin
     v.m.reg_write := r.e.reg_write;
     v.m.reg_mem := r.e.reg_mem;
 
-    if memory_hazard = '1' then
+    if cpu_in.d_stall = '1' then
       v.m.reg_write := '0';
     end if;
 
@@ -460,11 +457,11 @@ begin
 
     rin <= v;
 
-    icache_in.addr <= i_addr;
-    cpu_out.addr <= d_addr;
-    cpu_out.val <= d_val;
-    cpu_out.we <= d_we;
-    cpu_out.re <= d_re;
+    cpu_out.i_addr <= i_addr;
+    cpu_out.d_addr <= d_addr;
+    cpu_out.d_data <= d_val;
+    cpu_out.d_we   <= d_we;
+    cpu_out.d_re   <= d_re;
   end process;
 
   regs : process(clk, rst)

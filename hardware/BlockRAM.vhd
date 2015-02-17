@@ -22,7 +22,8 @@ architecture behavioral of blockram is
   type ram_type is
     array(0 to (2 ** awidth) - 1) of std_logic_vector(dwidth - 1 downto 0);
 
-  signal ram      : ram_type;
+  signal ram : ram_type := (others => (others => '0'));
+
   signal reg_addr : std_logic_vector(awidth - 1 downto 0);
 
 begin

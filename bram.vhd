@@ -7,8 +7,8 @@ entity bram is
 
   port (
     clk      : in  std_logic;
-    bram_in  : in  bus_down_type;
-    bram_out : out bus_up_type);
+    bram_in  : in  bram_in_type;
+    bram_out : out bram_out_type);
 
 end entity;
 

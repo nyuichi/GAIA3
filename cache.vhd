@@ -13,9 +13,8 @@ entity cache is
   port (
     clk       : in  std_logic;
     rst       : in  std_logic;
-    cache_in  : in  bus_down_type;
-    cache_out : out bus_up_type;
-    hazard    : out std_logic;
+    cache_in  : in  cache_in_type;
+    cache_out : out cache_out_type;
     sram_out  : in  sram_out_type;
     sram_in   : out sram_in_type);
 
@@ -179,13 +178,13 @@ begin
 
     rin <= v;
 
-    hazard       <= v_hazard;
-    sram_in.addr <= v.sram_addr;
-    sram_in.tx   <= v.sram_tx;
-    sram_in.we   <= v.sram_we;
-    sram_in.re   <= '1';
-    bram_we      <= v.bram_we;
-    bram_addr    <= v.bram_addr;
+    cache_out.stall <= v_hazard;
+    sram_in.addr    <= v.sram_addr;
+    sram_in.tx      <= v.sram_tx;
+    sram_in.we      <= v.sram_we;
+    sram_in.re      <= '1';
+    bram_we         <= v.bram_we;
+    bram_addr       <= v.bram_addr;
   end process;
 
   regs : process(clk, rst)

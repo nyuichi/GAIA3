@@ -7,35 +7,46 @@ use work.types.all;
 entity mux is
 
   port (
-    clk          : in  std_logic;
-    rst          : in  std_logic;
-    cpu_out      : in  bus_down_type;
-    cpu_in       : out bus_up_type;
-    hazard       : out std_logic;
-    cache_out    : in  bus_up_type;
-    cache_hazard : in  std_logic;
-    cache_in     : out bus_down_type;
-    uart_out     : in  uart_out_type;
-    uart_in      : out uart_in_type;
-    bram_out     : in  bus_up_type;
-    bram_in      : out bus_down_type);
+    clk        : in  std_logic;
+    rst        : in  std_logic;
+    cpu_out    : in  cpu_out_type;
+    cpu_in     : out cpu_in_type;
+    icache_out : in  icache_out_type;
+    icache_in  : out icache_in_type;
+    cache_out  : in  cache_out_type;
+    cache_in   : out cache_in_type;
+    uart_out   : in  uart_out_type;
+    uart_in    : out uart_in_type;
+    bram_out   : in  bram_out_type;
+    bram_in    : out bram_in_type);
 
 end entity;
 
 architecture Behavioral of mux is
 
   type reg_type is record
-    addr : std_logic_vector(31 downto 0);
-    we   : std_logic;
-    re   : std_logic;
+    i_addr : std_logic_vector(31 downto 0);
+    d_addr : std_logic_vector(31 downto 0);
+    d_we   : std_logic;
+    d_re   : std_logic;
   end record;
 
-  constant bus_up_zero : bus_up_type := (
-    rx    => (others => '0'));
+  constant cpu_in_zero : cpu_in_type := (
+    i_data  => (others => '0'),
+    d_stall => '0',
+    d_data  => (others => '0'));
 
-  constant bus_down_zero : bus_down_type := (
+  constant cache_in_zero : cache_in_type := (
     we   => '0',
     re   => '0',
+    val  => (others => '0'),
+    addr => (others => '0'));
+
+  constant icache_in_zero : icache_in_type := (
+    addr => (others => '0'));
+
+  constant bram_in_zero : bram_in_type := (
+    we   => '0',
     val  => (others => '0'),
     addr => (others => '0'));
 
@@ -46,75 +57,102 @@ architecture Behavioral of mux is
     addr => (others => '0'));
 
   constant rzero : reg_type := (
-    addr => (others => '0'),
-    we   => '0',
-    re   => '0');
+    i_addr => (others => '0'),
+    d_addr => (others => '0'),
+    d_we   => '0',
+    d_re   => '0');
 
   signal r, rin : reg_type;
 
 begin
 
-  comb : process(r, cpu_out, cache_out, cache_hazard, uart_out, bram_out)
+  comb : process(r, cpu_out, icache_out, cache_out, uart_out, bram_out)
     variable v : reg_type;
-
-    variable v_hazard   : std_logic;
-    variable v_cpu_in   : bus_up_type;
-    variable v_cache_in : bus_down_type;
-    variable v_uart_in  : uart_in_type;
-    variable v_bram_in  : bus_down_type;
+    variable v_cpu_in    : cpu_in_type;
+    variable v_icache_in : icache_in_type;
+    variable v_cache_in  : cache_in_type;
+    variable v_uart_in   : uart_in_type;
+    variable v_bram_in   : bram_in_type;
   begin
     v := r;
 
-    v_cpu_in   := bus_up_zero;
-    v_cache_in := bus_down_zero;
-    v_uart_in  := uart_in_zero;
-    v_bram_in  := bus_down_zero;
+    v_cpu_in    := cpu_in_zero;
+    v_icache_in := icache_in_zero;
+    v_cache_in  := cache_in_zero;
+    v_uart_in   := uart_in_zero;
+    v_bram_in   := bram_in_zero;
 
     -- previous req
-    if r.re = '1' or r.we = '1' then
-      case conv_integer(r.addr) is
+
+    case conv_integer(r.i_addr) is
+      when 16#00000000# to 16#003FFFFF# =>
+        v_cpu_in.i_data := icache_out.rx;
+
+      when others =>
+        assert false report "fuga";
+    end case;
+
+    if r.d_re = '1' or r.d_we = '1' then
+      case conv_integer(r.d_addr) is
         when 16#00000000# to 16#00001FFF# =>
-          v_cpu_in := bram_out;
-        when 16#00002000# to 16#00002008# =>
-          v_cpu_in.rx := uart_out.rx;
+          v_cpu_in.d_data := bram_out.rx;
+        when 16#00002000# =>
+          v_cpu_in.d_data := uart_out.rx;
         when 16#00003000# to 16#003FFFFF# =>
-          v_cpu_in := cache_out;
+          v_cpu_in.d_data := cache_out.rx;
         when others =>
           assert false report "hoge";
       end case;
     end if;
 
-    v_hazard := '0';
-
     -- current req
-    if cpu_out.we = '1' or cpu_out.re = '1' then
-      case conv_integer(cpu_out.addr) is
+
+    case conv_integer(cpu_out.i_addr) is
+      when 16#00000000# to 16#003FFFFF# =>
+        v_icache_in.addr := cpu_out.i_addr;
+
+      when others =>
+        assert false report "fuga";
+    end case;
+
+    if cpu_out.d_we = '1' or cpu_out.d_re = '1' then
+      case conv_integer(cpu_out.d_addr) is
         when 16#00000000# to 16#00001FFF# =>
-          v_bram_in := cpu_out;
-        when 16#00002000# to 16#00002008# =>
-          v_uart_in.we := cpu_out.we;
-          v_uart_in.re := cpu_out.re;
-          v_uart_in.val := cpu_out.val;
-          v_uart_in.addr := cpu_out.addr;
+          v_bram_in.we := cpu_out.d_we;
+          v_bram_in.val := cpu_out.d_data;
+          v_bram_in.addr := cpu_out.d_addr;
+
+        when 16#00002000# =>
+          v_uart_in.we := cpu_out.d_we;
+          v_uart_in.re := cpu_out.d_re;
+          v_uart_in.val := cpu_out.d_data;
+          v_uart_in.addr := cpu_out.d_addr;
+
         when 16#00003000# to 16#003FFFFF# =>
-          v_cache_in := cpu_out;
-          v_hazard := cache_hazard;
+          v_cache_in.we := cpu_out.d_we;
+          v_cache_in.re := cpu_out.d_re;
+          v_cache_in.val := cpu_out.d_data;
+          v_cache_in.addr := cpu_out.d_addr;
+
+          v_cpu_in.d_stall := cache_out.stall;
+
         when others =>
           assert false report "fuga";
       end case;
     end if;
 
-    v.addr := cpu_out.addr;
-    v.re   := cpu_out.re;
-    v.we   := cpu_out.we;
+    v.i_addr := cpu_out.i_addr;
+    v.d_addr := cpu_out.d_addr;
+    v.d_re   := cpu_out.d_re;
+    v.d_we   := cpu_out.d_we;
 
     rin <= v;
 
-    hazard   <= v_hazard;
-    cpu_in   <= v_cpu_in;
-    cache_in <= v_cache_in;
-    uart_in  <= v_uart_in;
-    bram_in  <= v_bram_in;
+    cpu_in    <= v_cpu_in;
+    icache_in <= v_icache_in;
+    cache_in  <= v_cache_in;
+    uart_in   <= v_uart_in;
+    bram_in   <= v_bram_in;
   end process;
 
   regs : process(clk, rst)
