@@ -4,10 +4,6 @@ use IEEE.std_logic_unsigned.all;
 use IEEE.std_logic_arith.all;
 use work.types.all;
 
--- # sram cache
--- When cache_out.stall = '1', caller must drive the same address and control
--- flags as the first call.
-
 entity cache is
 
   port (
