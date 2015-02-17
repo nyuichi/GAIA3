@@ -9,8 +9,8 @@ entity uart is
   port (
     clk      : in  std_logic;
     rst      : in  std_logic;
-    uart_in  : in  bus_down_type;
-    uart_out : out bus_up_type;
+    uart_in  : in  uart_in_type;
+    uart_out : out uart_out_type;
     RS_TX    : out std_logic;
     RS_RX    : in  std_logic);
 

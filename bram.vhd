@@ -1,30 +1,295 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
+use IEEE.std_logic_unsigned.all;
 
 use work.types.all;
 
 entity bram is
 
   port (
-    clk      : in  std_logic;
-    bram_in  : in  bus_down_type;
-    bram_out : out bus_up_type);
+    clk       : in  std_logic;
+    imem_down : in  imem_down_type;
+    imem_up   : out imem_up_type;
+    dmem_down : in  dmem_down_type;
+    dmem_up   : out dmem_up_type);
 
 end entity;
 
 architecture behavioral of bram is
 
+  type ram_type is
+    array(0 to 8191) of std_logic_vector(31 downto 0);
+
+  constant myram : ram_type := (
+    0 => (others => '0'),
+    1 => "0010" & "00001" & "00000" & "00" & x"FEDB",
+    2 => (others => '0'),
+    3 => (others => '0'),
+    4 => (others => '0'),
+    5 => (others => '0'),
+    6 => (others => '0'),
+    7 => (others => '0'),
+    8 => "0011" & "00001" & "00001" & "00" & x"CA98",
+    others => (others => '0'));
+
+  constant myram2 : ram_type := (
+    (others => '0'),
+    "0010" & "00001" & "00000" & "00" & x"000A", -- 1
+    (others => '0'),
+    (others => '0'),
+    (others => '0'),
+    (others => '0'),
+    (others => '0'),
+    (others => '0'),
+    "1111" & "00001" & "00000" & "00" & x"0014", -- 8
+    (others => '0'),
+    (others => '0'),
+    (others => '0'),
+    (others => '0'),
+    (others => '0'),
+    (others => '0'),
+    "0000" & "00001" & "00001" & "00000" & x"01" & "00001", -- 15
+    (others => '0'),
+    (others => '0'),
+    (others => '0'),
+    (others => '0'),
+    (others => '0'),
+    (others => '0'),
+    "1011" & "11111" & "00000" & "00" & x"FFF1", -- 22
+    (others => '0'),
+    (others => '0'),
+    (others => '0'),
+    (others => '0'),
+    (others => '0'),
+    (others => '0'),
+    "1011" & "11111" & "00000" & "00" & x"FFFF", -- 29
+    others => (others => '0'));
+
+  constant myram3 : ram_type := (
+    (others => '0'),
+    "0000" & "00001" & "00000" & "00000" & x"01" & "00000",
+    "0000" & "00010" & "00000" & "00000" & x"02" & "00000",
+    "0000" & "00011" & "00000" & "00000" & x"03" & "00000",
+    "0000" & "00100" & "00000" & "00000" & x"04" & "00000",
+    "0000" & "00101" & "00000" & "00000" & x"05" & "00000",
+    "0000" & "00110" & "00000" & "00000" & x"06" & "00000",
+    "0000" & "00001" & "00001" & "00010" & x"00" & "00000",
+    "0000" & "00001" & "00001" & "00011" & x"00" & "00000",
+    "0000" & "00001" & "00001" & "00100" & x"00" & "00000",
+    "0000" & "00001" & "00001" & "00101" & x"00" & "00000",
+    "0000" & "00001" & "00001" & "00110" & x"00" & "00000",
+    others => (others => '0'));
+
+  -- mov r1, 1
+  -- mov r2, 2
+  -- st r1, r0, 108
+  -- st r2, r0, 112
+  -- ld r3, r0, 108
+  -- ld r4, r0, 112
+  -- add r5, r3, r4
+
+  constant myram4 : ram_type := (
+    (others => '0'),
+
+    "0000" & "00001" & "00000" & "00000" & x"01" & "00000",
+    "0000" & "00010" & "00000" & "00000" & x"02" & "00000",
+
+    "0110" & "00001" & "00000" & "00" & x"006C",
+    "0110" & "00010" & "00000" & "00" & x"0070",
+
+    "1000" & "00011" & "00000" & "00" & x"006C",
+    "1000" & "00100" & "00000" & "00" & x"0070",
+
+    "0000" & "00101" & "00011" & "00100" & x"00" & "00000",
+
+    (others => '0'),
+    (others => '0'),
+    (others => '0'),
+    (others => '0'),
+    (others => '0'),
+    (others => '0'),
+    others => (others => '0'));
+
+  -- mov r1, 0xA
+  -- beq r1, r0, 8
+  -- sub r1, r1, 1
+  -- jl r31, -C
+  -- jl r31, -4
+
+  constant myram5 : ram_type := (
+    (others => '0'),                    -- 0
+    "0010" & "00001" & "00000" & "00" & x"000A", -- 4
+    "1111" & "00001" & "00000" & "00" & x"0002", -- 8
+    "0000" & "00001" & "00001" & "00000" & x"01" & "00001", -- C
+    "1011" & "11111" & "00000" & "00" & x"FFFD",            -- 10
+    "1011" & "11111" & "00000" & "00" & x"FFFF",            -- 14
+    others => (others => '0'));
+
+  -- mov r1, 10
+  -- mov r2, 3
+  -- bne r1, r2, [40]
+  -- mov r3, 4
+
+  constant myram6 : ram_type := (
+    (others => '0'),
+    "0010" & "00001" & "00000" & "00" & x"000A",
+    "0010" & "00010" & "00000" & "00" & x"0003",
+    "1101" & "00001" & "00010" & "00" & x"0040",
+    "0010" & "00011" & "00000" & "00" & x"0004",
+    others => (others => '0'));
+
+  -- mov r1, 1
+  -- add r2, r1, r0
+  -- beq r1, r2, [40]
+  -- mov r3, 3
+
+  constant myram7 : ram_type := (
+    (others => '0'),
+    "0010" & "00001" & "00000" & "00" & x"0001",
+    "0000" & "00010" & "00001" & "00000" & x"00" & "00000",
+    "1111" & "00001" & "00010" & "00" & x"0040",
+    "0010" & "00011" & "00000" & "00" & x"0003",
+    others => (others => '0'));
+
+  -- mov r1, 1
+  -- cmpeq r2, r1, r0, 1
+
+  constant myram8 : ram_type := (
+    (others => '0'),
+    "0010" & "00001" & "00000" & "00" & x"0001",
+    "0000" & "00010" & "00001" & "00000" & x"01" & "11001",
+    others => (others => '0'));
+
+  constant myram9 : ram_type := (
+x"2e80000c",
+x"3ef40000",
+x"ce830000",
+x"00000000",
+x"00000000",
+x"00000000",
+x"2180000a",
+x"20800000",
+x"21000001",
+x"02040000",
+x"00880000",
+x"01088000",
+x"018c0021",
+x"d180fffb",
+x"ffffffff",
+others => (others => '0')
+    );
+
+  constant myram_fibrecur : ram_type := (
+0 => x"2e800070",
+1 => x"3ef40000",
+2 => x"ce830000",
+3 => x"0f780181",
+4 => x"6e780000",
+5 => x"0e84005a",
+6 => x"de800014",
+7 => x"60fcffff",
+8 => x"00840021",
+9 => x"6ff8ffff",
+10 => x"0f780081",
+11 => x"0ff80000",
+12 => x"be03fff6",
+13 => x"0f7c0080",
+14 => x"8ff8ffff",
+15 => x"60fcfffe",
+16 => x"80fcffff",
+17 => x"00840041",
+18 => x"6ff8ffff",
+19 => x"0f780081",
+20 => x"0ff80000",
+21 => x"be03ffed",
+22 => x"0f7c0080",
+23 => x"8ff8ffff",
+24 => x"817cfffe",
+25 => x"00844000",
+26 => x"8e780000",
+27 => x"ce030000",
+28 => x"3f000040",
+29 => x"3f800040",
+30 => x"2080000a",
+31 => x"6ff8ffff",
+32 => x"0f780081",
+33 => x"0ff80000",
+34 => x"be03ffe0",
+35 => x"0f7c0080",
+36 => x"8ff8ffff",
+37 => x"ffffffff",
+others => (others => '0'));
+
+  constant myram_loopback : ram_type := (
+0 => x"2e80000c",
+1 => x"3ef40000",
+2 => x"ce830000",
+3 => x"80800800",
+4 => x"2100ffff",
+5 => x"f088fffd",
+6 => x"60800800",
+7 => x"be83fffb",
+others => (others => '0'));
+
+  constant myram_ramtest : ram_type := (
+0 => x"2e8000aa",
+1 => x"6e801000",
+2 => x"80801000",
+3 => x"2e8000bb",
+4 => x"6e801001",
+5 => x"81001000",
+6 => x"81801001",
+7 => x"ffffffff",
+others => (others => '0')
+);
+
+  constant myram_fib1 : ram_type := (
+0 => x"2e800010",
+1 => x"3ef40000",
+2 => x"ce830000",
+3 => x"ce030000",
+4 => x"3f000040",
+5 => x"3f800040",
+6 => x"2080000a",
+7 => x"6ff8ffff",
+8 => x"0f780081",
+9 => x"0ff80000",
+10 => x"be03fff8",
+11 => x"0f7c0080",
+12 => x"8ff8ffff",
+13 => x"ffffffff",
+others => (others => '0')
+    );
+
+  constant myram_ramtest2 : ram_type := (
+0 => x"2e8000aa",
+1 => x"6e801000",
+2 => x"80801000",
+3 => x"00840020",
+4 => x"ffffffff",
+others => (others => '0')
+);
+
+  signal ram : ram_type := myram_fibrecur;
+
+  signal data      : std_logic_vector(31 downto 0);
+  signal reg_addr  : std_logic_vector(12 downto 0);
+  signal reg_addr2 : std_logic_vector(12 downto 0);
+
 begin
 
-  blockram_1: entity work.blockram
-    generic map (
-      dwidth => 32,
-      awidth => 13)
-    port map (
-      clk  => clk,
-      we   => bram_in.we,
-      di   => bram_in.val,
-      do   => bram_out.rx,
-      addr => bram_in.addr(14 downto 2));
+  process(clk)
+  begin
+    if rising_edge(clk) then
+      if dmem_down.we = '1' then
+        ram(conv_integer(dmem_down.addr(14 downto 2))) <= dmem_down.data;
+      end if;
+      reg_addr <= dmem_down.addr(14 downto 2);
+      reg_addr2 <= imem_down.addr(14 downto 2);
+    end if;
+  end process;
+
+  dmem_up.data <= ram(conv_integer(reg_addr));
+  imem_up.data <= ram(conv_integer(reg_addr2));
 
 end architecture;

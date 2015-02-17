@@ -3,28 +3,45 @@ use IEEE.std_logic_1164.all;
 
 package types is
 
-  -- bus units
+  type imem_down_type is record
+    re   : std_logic;
+    addr : std_logic_vector(31 downto 0);
+  end record;
 
-  type bus_up_type is record
+  type imem_up_type is record
+    data  : std_logic_vector(31 downto 0);
+  end record;
+
+  type dmem_down_type is record
+    re   : std_logic;
+    we   : std_logic;
+    addr : std_logic_vector(31 downto 0);
+    data : std_logic_vector(31 downto 0);
+  end record;
+
+  type dmem_up_type is record
+    data  : std_logic_vector(31 downto 0);
+  end record;
+
+  constant imem_down_zero : imem_down_type;
+  constant imem_up_zero   : imem_up_type;
+  constant dmem_down_zero : dmem_down_type;
+  constant dmem_up_zero   : dmem_up_type;
+
+  -- uart
+
+  type uart_out_type is record
     rx : std_logic_vector(31 downto 0);
   end record;
 
-  type bus_down_type is record
+  type uart_in_type is record
     we   : std_logic;
     re   : std_logic;
     val  : std_logic_vector(31 downto 0);
     addr : std_logic_vector(31 downto 0);
   end record;
 
-  -- icache (to be removed)
-
-  type icache_out_type is record
-    rx : std_logic_vector(31 downto 0);
-  end record;
-
-  type icache_in_type is record
-    addr : std_logic_vector(31 downto 0);
-  end record;
+  constant uart_in_zero : uart_in_type;
 
   -- sram
 
@@ -34,71 +51,59 @@ package types is
 
   type sram_in_type is record
     addr : std_logic_vector(31 downto 0);
-    we : std_logic;
-    re : std_logic;
-    tx : std_logic_vector(31 downto 0);
+    we   : std_logic;
+    re   : std_logic;
+    tx   : std_logic_vector(31 downto 0);
   end record;
 
   component cpu is
     port (
-      clk           : in  std_logic;
-      rst           : in  std_logic;
-      icache_out    : in  icache_out_type;
-      icache_in     : out icache_in_type;
-      cpu_in        : in  bus_up_type;
-      cpu_out       : out bus_down_type;
-      memory_hazard : in  std_logic);
+      clk        : in  std_logic;
+      rst        : in  std_logic;
+      imem_stall : in  std_logic;
+      imem_up    : in  imem_up_type;
+      imem_down  : out imem_down_type;
+      dmem_stall : in  std_logic;
+      dmem_up    : in  dmem_up_type;
+      dmem_down  : out dmem_down_type);
   end component;
 
-  component bridge is
+  component mux is
     port (
-      clk          : in  std_logic;
-      rst          : in  std_logic;
-      cpu_out      : in  bus_down_type;
-      cpu_in       : out bus_up_type;
-      hazard       : out std_logic;
-      cache_out    : in  bus_up_type;
-      cache_in     : out bus_down_type;
-      cache_hazard : in  std_logic;
-      uart_out     : in  bus_up_type;
-      uart_in      : out bus_down_type;
-      bram_out     : in  bus_up_type;
-      bram_in      : out bus_down_type);
-  end component;
-
-  component bram is
-    port (
-      clk      : in  std_logic;
-      bram_in  : in  bus_down_type;
-      bram_out : out bus_up_type);
+      clk            : in  std_logic;
+      rst            : in  std_logic;
+      cpu_imem_down  : in  imem_down_type;
+      cpu_imem_up    : out imem_up_type;
+      cpu_imem_stall : out std_logic;
+      cpu_dmem_down  : in  dmem_down_type;
+      cpu_dmem_up    : out dmem_up_type;
+      cpu_dmem_stall : out std_logic;
+      uart_in        : out uart_in_type;
+      uart_out       : in  uart_out_type;
+      ic_in          : out imem_down_type;
+      ic_out         : in  imem_up_type;
+      ic_stall       : in  std_logic;
+      dc_in          : out dmem_down_type;
+      dc_out         : in  dmem_up_type;
+      dc_stall       : in  std_logic;
+      ib_in          : out imem_down_type;
+      ib_out         : in  imem_up_type;
+      db_in          : out dmem_down_type;
+      db_out         : in  dmem_up_type);
   end component;
 
   component cache is
     port (
-      clk       : in  std_logic;
-      rst       : in  std_logic;
-      cache_in  : in  bus_down_type;
-      cache_out : out bus_up_type;
-      hazard    : out std_logic;
-      sram_out  : in  sram_out_type;
-      sram_in   : out sram_in_type);
-  end component;
-
-  component uart is
-    port (
       clk      : in  std_logic;
       rst      : in  std_logic;
-      uart_in  : in  bus_down_type;
-      uart_out : out bus_up_type;
-      RS_TX    : out std_logic;
-      RS_RX    : in  std_logic);
-  end component;
-
-  component icache is
-    port (
-      clk        : in  std_logic;
-      icache_in  : in  icache_in_type;
-      icache_out : out icache_out_type);
+      dc_in    : in  dmem_down_type;
+      dc_out   : out dmem_up_type;
+      dc_stall : out std_logic;
+      ic_in    : in  imem_down_type;
+      ic_out   : out imem_up_type;
+      ic_stall : out std_logic;
+      sram_out : in  sram_out_type;
+      sram_in  : out sram_in_type);
   end component;
 
   component sram is
@@ -112,16 +117,63 @@ package types is
       XWA      : out   std_logic);
   end component;
 
+  component uart is
+    port (
+      clk      : in  std_logic;
+      rst      : in  std_logic;
+      uart_in  : in  uart_in_type;
+      uart_out : out uart_out_type;
+      RS_TX    : out std_logic;
+      RS_RX    : in  std_logic);
+  end component;
+
+  component bram is
+    port (
+      clk       : in  std_logic;
+      imem_down : in  imem_down_type;
+      imem_up   : out imem_up_type;
+      dmem_down : in  dmem_down_type;
+      dmem_up   : out dmem_up_type);
+  end component;
+
   component blockram is
     generic (
       dwidth : integer;
       awidth : integer);
     port (
-      clk  : in  std_logic;
-      we   : in  std_logic;
-      di   : in  std_logic_vector(dwidth - 1 downto 0);
-      do   : out std_logic_vector(dwidth - 1 downto 0);
-      addr : in  std_logic_vector(awidth - 1 downto 0));
+      clk   : in  std_logic;
+      we    : in  std_logic;
+      di    : in  std_logic_vector(dwidth - 1 downto 0);
+      do    : out std_logic_vector(dwidth - 1 downto 0);
+      addr  : in  std_logic_vector(awidth - 1 downto 0);
+      do2   : out std_logic_vector(dwidth - 1 downto 0);
+      addr2 : in  std_logic_vector(awidth - 1 downto 0) := (others => '0'));
   end component;
 
 end package;
+
+package body types is
+
+  constant imem_down_zero : imem_down_type := (
+    re   => '0',
+    addr => (others => '0'));
+
+  constant imem_up_zero   : imem_up_type := (
+    data => (others => '0'));
+
+  constant dmem_down_zero : dmem_down_type := (
+    re   => '0',
+    we   => '0',
+    data => (others => '0'),
+    addr => (others => '0'));
+
+  constant dmem_up_zero   : dmem_up_type := (
+    data => (others => '0'));
+
+  constant uart_in_zero : uart_in_type := (
+    re   => '0',
+    we   => '0',
+    val  => (others => '0'),
+    addr => (others => '0'));
+
+end package body;

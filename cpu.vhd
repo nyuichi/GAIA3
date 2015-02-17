@@ -9,13 +9,14 @@ use work.util.all;
 entity cpu is
 
   port (
-    clk           : in  std_logic;
-    rst           : in  std_logic;
-    icache_out    : in  icache_out_type;
-    icache_in     : out icache_in_type;
-    cpu_in        : in  bus_up_type;
-    cpu_out       : out bus_down_type;
-    memory_hazard : in  std_logic);
+    clk        : in  std_logic;
+    rst        : in  std_logic;
+    imem_stall : in  std_logic;
+    imem_up    : in  imem_up_type;
+    imem_down  : out imem_down_type;
+    dmem_stall : in  std_logic;
+    dmem_up    : in  dmem_up_type;
+    dmem_down  : out dmem_down_type);
 
 end entity;
 
@@ -26,6 +27,7 @@ architecture Behavioral of cpu is
 
   type fetch_reg_type is record
     nextpc : std_logic_vector(31 downto 0);
+    stall  : std_logic;
   end record;
 
   type decode_reg_type is record
@@ -77,7 +79,8 @@ architecture Behavioral of cpu is
   end record;
 
   constant fzero : fetch_reg_type := (
-    nextpc => (others => '0')
+    nextpc => (others => '0'),
+    stall  => '0'
     );
 
   constant dzero : decode_reg_type := (
@@ -156,7 +159,7 @@ architecture Behavioral of cpu is
       res := r.e.res;
     elsif r.m.reg_write = '1' and r.m.reg_dest /= "00000" and r.m.reg_dest = reg_src then
       if r.m.reg_mem = '1' then
-        res := cpu_in.rx;
+        res := dmem_up.data;
       else
         res := r.m.res;
       end if;
@@ -216,16 +219,15 @@ architecture Behavioral of cpu is
     stall := '0';
   end procedure;
 
+  signal r_fd_data_x, r_fd_data_a : std_logic_vector(31 downto 0);
+
 begin
 
-  comb : process(r, icache_out, cpu_in, memory_hazard)
+  comb : process(r, dmem_up, imem_up, dmem_stall, imem_stall)
     variable v : reg_type;
 
     -- decode/write
     variable regfile : regfile_type;
-
-    -- fetch
-    variable pc : std_logic_vector(31 downto 0);
 
     -- decode
     variable inst : std_logic_vector(31 downto 0);
@@ -245,37 +247,42 @@ begin
     -- external
     variable i_addr : std_logic_vector(31 downto 0);
     variable d_addr : std_logic_vector(31 downto 0);
-    variable d_val : std_logic_vector(31 downto 0);
+    variable d_data : std_logic_vector(31 downto 0);
     variable d_we : std_logic;
     variable d_re : std_logic;
   begin
     v := r;
 
-    detect_hazard(icache_out.rx, v.stall);
+    detect_hazard(imem_up.data, v.stall);
 
     -- FETCH
 
     if r.d.pc_src = '0' then
-      pc := r.f.nextpc;
+      v.pc := r.f.nextpc;
     else
-      pc := r.d.pc_addr;
+      v.pc := r.d.pc_addr;
     end if;
 
-    v.pc := pc;
-    v.f.nextpc := pc + 4;
+    v.f.nextpc := v.pc + 4;
 
-    if v.stall = '1' or memory_hazard = '1' then
-      pc := r.pc;
+    --if r.d.pc_src = '0' and (v.stall = '1' or dmem_stall = '1' or imem_stall = '1') then
+    --  v.pc := r.pc;
+    --  v.f := r.f;
+    --end if;
+
+    if v.stall = '1' or dmem_stall = '1' or (r.d.pc_src = '0' and imem_stall = '1') then
       v.pc := r.pc;
       v.f := r.f;
     end if;
 
-    i_addr := pc;
+    v.f.stall := imem_stall;
+
+    i_addr := v.pc;
 
     -- WRITE (put here to avoid structual hazard between WRITE and DECODE)
 
     if r.m.reg_mem = '1' then
-      res := cpu_in.rx;
+      res := dmem_up.data;
     else
       res := r.m.res;
     end if;
@@ -294,9 +301,9 @@ begin
 
     -- DECODE
 
-    inst := icache_out.rx;
+    inst := imem_up.data;
 
-    if r.d.pc_src = '1' then
+    if r.d.pc_src = '1' or r.f.stall = '1' then
       inst := x"00000000";
     end if;
 
@@ -326,6 +333,9 @@ begin
     d_data_forward(inst(27 downto 23), fd_data_x);
     d_data_forward(inst(22 downto 18), fd_data_a);
 
+    r_fd_data_x <= fd_data_x;
+    r_fd_data_a <= fd_data_a;
+
     case inst(31 downto 28) is
       when "1011" | "1101" | "1111" =>
         v.d.pc_addr := r.f.nextpc + (repeat(inst(15), 14) & inst(15 downto 0) & "00");
@@ -346,7 +356,7 @@ begin
         v.d.pc_src := '0';
     end case;
 
-    if memory_hazard = '1' then
+    if dmem_stall = '1' then
       v.d := r.d;
     elsif v.stall = '1' then
       v.d.reg_write := '0';
@@ -437,14 +447,14 @@ begin
     v.e.mem_write := r.d.mem_write;
     v.e.mem_read := r.d.mem_read;
 
-    if memory_hazard = '1' then
+    if dmem_stall = '1' then
       v.e := r.e;
     end if;
 
     -- MEMORY
 
     d_addr := r.e.mem_addr;
-    d_val := r.e.data_x;
+    d_data := r.e.data_x;
     d_we := r.e.mem_write;
     d_re := r.e.mem_read;
     v.m.res := r.e.res;
@@ -452,7 +462,7 @@ begin
     v.m.reg_write := r.e.reg_write;
     v.m.reg_mem := r.e.reg_mem;
 
-    if memory_hazard = '1' then
+    if dmem_stall = '1' then
       v.m.reg_write := '0';
     end if;
 
@@ -460,11 +470,12 @@ begin
 
     rin <= v;
 
-    icache_in.addr <= i_addr;
-    cpu_out.addr <= d_addr;
-    cpu_out.val <= d_val;
-    cpu_out.we <= d_we;
-    cpu_out.re <= d_re;
+    imem_down.re   <= '1';
+    imem_down.addr <= i_addr;
+    dmem_down.we   <= d_we;
+    dmem_down.re   <= d_re;
+    dmem_down.addr <= d_addr;
+    dmem_down.data <= d_data;
   end process;
 
   regs : process(clk, rst)

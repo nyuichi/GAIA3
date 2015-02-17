@@ -37,22 +37,28 @@ architecture Behavioral of top is
 
   signal rst : std_logic;
 
-  signal icache_in     : icache_in_type;
-  signal icache_out    : icache_out_type;
-  signal cpu_in        : bus_up_type;
-  signal cpu_out       : bus_down_type;
-  signal memory_hazard : std_logic;
-  signal cache_in      : bus_down_type;
-  signal cache_out     : bus_up_type;
-  signal cache_hazard  : std_logic;
-  signal uart_in       : bus_down_type;
-  signal uart_out      : bus_up_type;
-  signal sram_out      : sram_out_type;
-  signal sram_in       : sram_in_type;
-  signal bram_out      : bus_up_type;
-  signal bram_in       : bus_down_type;
+  signal cpu_imem_down  : imem_down_type;
+  signal cpu_imem_up    : imem_up_type;
+  signal cpu_imem_stall : std_logic;
+  signal cpu_dmem_down  : dmem_down_type;
+  signal cpu_dmem_up    : dmem_up_type;
+  signal cpu_dmem_stall : std_logic;
+  signal uart_in        : uart_in_type;
+  signal uart_out       : uart_out_type;
+  signal ic_in          : imem_down_type;
+  signal ic_out         : imem_up_type;
+  signal ic_stall       : std_logic;
+  signal dc_in          : dmem_down_type;
+  signal dc_out         : dmem_up_type;
+  signal dc_stall       : std_logic;
+  signal ib_in          : imem_down_type;
+  signal ib_out         : imem_up_type;
+  signal db_in          : dmem_down_type;
+  signal db_out         : dmem_up_type;
+  signal sram_out       : sram_out_type;
+  signal sram_in        : sram_in_type;
 
-begin   -- architecture Behavioral
+begin  -- architecture Behavioral
 
   ib: IBUFG port map (
     i => MCLK1,
@@ -64,40 +70,52 @@ begin   -- architecture Behavioral
 
   rst <= not XRST;
 
-  cpu_1 : entity work.cpu
+  cpu_1: entity work.cpu
     port map (
-      clk           => clk,
-      rst           => rst,
-      icache_out    => icache_out,
-      icache_in     => icache_in,
-      cpu_in        => cpu_in,
-      cpu_out       => cpu_out,
-      memory_hazard => memory_hazard);
+      clk        => clk,
+      rst        => rst,
+      imem_stall => cpu_imem_stall,
+      imem_up    => cpu_imem_up,
+      imem_down  => cpu_imem_down,
+      dmem_stall => cpu_dmem_stall,
+      dmem_up    => cpu_dmem_up,
+      dmem_down  => cpu_dmem_down);
 
-  bridge_1 : entity work.bridge
+  mux_1: entity work.mux
     port map (
-      clk          => clk,
-      rst          => rst,
-      cpu_out      => cpu_out,
-      cpu_in       => cpu_in,
-      hazard       => memory_hazard,
-      cache_out    => cache_out,
-      cache_in     => cache_in,
-      cache_hazard => cache_hazard,
-      uart_out     => uart_out,
-      uart_in      => uart_in,
-      bram_out     => bram_out,
-      bram_in      => bram_in);
+      clk            => clk,
+      rst            => rst,
+      cpu_imem_down  => cpu_imem_down,
+      cpu_imem_up    => cpu_imem_up,
+      cpu_imem_stall => cpu_imem_stall,
+      cpu_dmem_down  => cpu_dmem_down,
+      cpu_dmem_up    => cpu_dmem_up,
+      cpu_dmem_stall => cpu_dmem_stall,
+      uart_in        => uart_in,
+      uart_out       => uart_out,
+      ic_in          => ic_in,
+      ic_out         => ic_out,
+      ic_stall       => ic_stall,
+      dc_in          => dc_in,
+      dc_out         => dc_out,
+      dc_stall       => dc_stall,
+      ib_in          => ib_in,
+      ib_out         => ib_out,
+      db_in          => db_in,
+      db_out         => db_out);
 
-  cache_1 : entity work.cache
+  cache_1: entity work.cache
     port map (
-      clk       => clk,
-      rst       => rst,
-      cache_in  => cache_in,
-      cache_out => cache_out,
-      hazard    => cache_hazard,
-      sram_out  => sram_out,
-      sram_in   => sram_in);
+      clk      => clk,
+      rst      => rst,
+      dc_in    => dc_in,
+      dc_out   => dc_out,
+      dc_stall => dc_stall,
+      ic_in    => ic_in,
+      ic_out   => ic_out,
+      ic_stall => ic_stall,
+      sram_out => sram_out,
+      sram_in  => sram_in);
 
   uart_1 : entity work.uart
     port map (
@@ -110,15 +128,11 @@ begin   -- architecture Behavioral
 
   bram_1: entity work.bram
     port map (
-      clk      => clk,
-      bram_in  => bram_in,
-      bram_out => bram_out);
-
-  icache_1 : entity work.icache
-    port map (
-      clk        => clk,
-      icache_in  => icache_in,
-      icache_out => icache_out);
+      clk       => clk,
+      imem_down => ib_in,
+      imem_up   => ib_out,
+      dmem_down => db_in,
+      dmem_up   => db_out);
 
   sram_1 : entity work.sram
     port map (
