@@ -31,7 +31,7 @@ begin
   begin
     if rising_edge(clk) then
       if we = '1' then
-        ram(conv_integer(reg_addr)) <= di;
+        ram(conv_integer(addr)) <= di;
       end if;
       reg_addr <= addr;
     end if;
