@@ -6,6 +6,7 @@ package types is
   -- cpu
 
   type cpu_in_type is record
+    i_stall : std_logic;
     i_data  : std_logic_vector(31 downto 0);
     d_stall : std_logic;
     d_data  : std_logic_vector(31 downto 0);
@@ -100,6 +101,8 @@ package types is
   type cache_out_type is record
     stall : std_logic;
     rx : std_logic_vector(31 downto 0);
+    stall2 : std_logic;
+    rx2 : std_logic_vector(31 downto 0);
   end record;
 
   type cache_in_type is record
@@ -107,6 +110,7 @@ package types is
     re   : std_logic;
     val  : std_logic_vector(31 downto 0);
     addr : std_logic_vector(31 downto 0);
+    addr2 : std_logic_vector(31 downto 0);
   end record;
 
   component cache is
@@ -123,13 +127,15 @@ package types is
   -- bram
 
   type bram_out_type is record
-    rx : std_logic_vector(31 downto 0);
+    rx  : std_logic_vector(31 downto 0);
+    rx2 : std_logic_vector(31 downto 0);
   end record;
 
   type bram_in_type is record
-    we   : std_logic;
-    val  : std_logic_vector(31 downto 0);
-    addr : std_logic_vector(31 downto 0);
+    we    : std_logic;
+    val   : std_logic_vector(31 downto 0);
+    addr  : std_logic_vector(31 downto 0);
+    addr2 : std_logic_vector(31 downto 0);
   end record;
 
   component bram is

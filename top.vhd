@@ -39,8 +39,6 @@ architecture Behavioral of top is
 
   signal cpu_in       : cpu_in_type;
   signal cpu_out      : cpu_out_type;
-  signal icache_in    : icache_in_type;
-  signal icache_out   : icache_out_type;
   signal cache_in     : cache_in_type;
   signal cache_out    : cache_out_type;
   signal uart_in      : uart_in_type;
@@ -75,8 +73,6 @@ begin   -- architecture Behavioral
       rst        => rst,
       cpu_out    => cpu_out,
       cpu_in     => cpu_in,
-      icache_out => icache_out,
-      icache_in  => icache_in,
       cache_out  => cache_out,
       cache_in   => cache_in,
       uart_out   => uart_out,
@@ -107,12 +103,6 @@ begin   -- architecture Behavioral
       clk      => clk,
       bram_in  => bram_in,
       bram_out => bram_out);
-
-  icache_1 : entity work.icache
-    port map (
-      clk        => clk,
-      icache_in  => icache_in,
-      icache_out => icache_out);
 
   sram_1 : entity work.sram
     port map (

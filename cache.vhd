@@ -20,6 +20,8 @@ architecture Behavioral of cache is
 
   type state_type is (NO_OP, FETCH, FLUSH);
 
+  type buf_type is array(0 to 15) of std_logic_vector(31 downto 0);
+
   type header_line_type is record
     valid : std_logic;
     tag : std_logic_vector(17 downto 0);
@@ -30,6 +32,8 @@ architecture Behavioral of cache is
 
   type reg_type is record
     state : state_type;
+
+    -- data cache
 
     header : header_type;
 
@@ -44,11 +48,22 @@ architecture Behavioral of cache is
 
     sram_addr : std_logic_vector(31 downto 0);
     sram_we   : std_logic;
+    sram_re   : std_logic;
     sram_tx   : std_logic_vector(31 downto 0);
 
     bram_addr : std_logic_vector(11 downto 0);
     bram_di   : std_logic_vector(31 downto 0);
     bram_we   : std_logic;
+    bram_re   : std_logic;
+
+    -- instruction cache
+
+    buf : buf_type;
+    buf_ptr : std_logic_vector(3 downto 0);
+    buf_len : integer range 0 to 16;
+    buf_addr : std_logic_vector(31 downto 0); -- address the head inst is from
+    req1 : std_logic;
+    req2 : std_logic;
   end record;
 
   constant rzero : reg_type := (
@@ -63,10 +78,18 @@ architecture Behavioral of cache is
     flush_n   => -1,
     sram_addr => (others => '0'),
     sram_we   => '0',
+    sram_re   => '0',
     sram_tx   => (others => '0'),
     bram_addr => (others => '0'),
     bram_di   => (others => '0'),
-    bram_we   => '0');
+    bram_we   => '0',
+    bram_re   => '0',
+    buf       => (others => (others => '0')),
+    buf_ptr   => (others => '0'),
+    buf_len   => 0,
+    buf_addr  => (others => '0'),
+    req1      => '0',
+    req2      => '0');
 
   signal r, rin : reg_type;
 
@@ -91,13 +114,18 @@ begin
   comb : process(r, cache_in, sram_out)
     variable v : reg_type;
     variable v_hazard : std_logic;
+    variable v_hazard2 : std_logic;
+    variable v_inst : std_logic_vector(31 downto 0);
   begin
     v := r;
+
+    -- data cache
 
     v.bram_addr := (others => '0');
     v.sram_addr := (others => '0');
     v.bram_we := '0';
     v.sram_we := '0';
+    v.sram_re := '0';
 
     case r.state is
       when NO_OP =>
@@ -116,6 +144,7 @@ begin
           if not (r.header(conv_integer(v.index)).valid = '1' and r.header(conv_integer(v.index)).tag = v.tag) then
             v.header(conv_integer(v.index)).valid := '0';
             v.sram_addr := v.tag & v.index & "0000" & "00";
+            v.sram_re := '1';
             v.state := FETCH;
           elsif cache_in.we = '1' then
             v.sram_we := '1';
@@ -133,9 +162,11 @@ begin
         case r.fetch_n is
           when -1 =>
             v.sram_addr := r.sram_addr + 4;
+            v.sram_re := '1';
             v.fetch_n := 0;
           when 0 to 13 =>
             v.sram_addr := r.sram_addr + 4;
+            v.sram_re := '1';
             v.bram_addr := r.index & conv_std_logic_vector(r.fetch_n, 4);
             v.bram_we := '1';
             v.bram_di := sram_out.rx;
@@ -185,13 +216,54 @@ begin
         assert false;
     end case;
 
-    -- control
-
     if v.state = NO_OP then
       v_hazard := '0';
     else
       v_hazard := '1';
     end if;
+
+
+    -- instruction cache
+
+    v_hazard2 := '0';
+    v_inst := (others => '0');
+
+    if r.req2 = '1' then               -- commit new inst to the queue
+      v.buf(conv_integer(r.buf_ptr + r.buf_len)) := sram_out.rx;
+      v.buf_len := r.buf_len + 1;
+    end if;
+
+    v.req2 := r.req1;
+
+    if r.buf_addr /= cache_in.addr2 then -- hazard! flush the queue
+      v.req1 := '0';
+      v.req2 := '0';
+      v.buf_len := 0;
+      v.buf_ptr := (others => '0');
+      v.buf_addr := cache_in.addr2;
+    end if;
+
+    if v.sram_re = '0' and v.sram_we = '0' then -- issue new req
+      if v.req2 = '1' and v.buf_len < 15 then
+        v.req1 := '1';
+        v.sram_addr := v.buf_addr + v.buf_len + 1;
+        v.sram_re := '1';
+      elsif v.req2 = '0' and v.buf_len < 16 then
+        v.req1 := '1';
+        v.sram_addr := v.buf_addr + v.buf_len;
+        v.sram_re := '1';
+      end if;
+    end if;
+
+    if v.buf_len > 0 then
+      v_inst := v.buf(conv_integer(v.buf_ptr));
+      v.buf_ptr := v.buf_ptr + 1;
+      v.buf_len := v.buf_len - 1;
+      v.buf_addr := v.buf_addr + 1;
+    else
+      v_hazard2 := '1';
+    end if;
+
 
     -- end
 
@@ -199,6 +271,8 @@ begin
 
     cache_out.stall <= v_hazard;
     cache_out.rx    <= bram_do;
+    cache_out.stall2 <= v_hazard2;
+    cache_out.rx2   <= v_inst;
     sram_in.addr    <= v.sram_addr;
     sram_in.tx      <= v.sram_tx;
     sram_in.we      <= v.sram_we;
