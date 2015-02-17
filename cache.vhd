@@ -22,6 +22,8 @@ end entity;
 
 architecture Behavioral of cache is
 
+  type state_type is (NO_OP, FETCH, FLUSH);
+
   type header_line_type is record
     valid : std_logic;
     tag : std_logic_vector(17 downto 0);
@@ -31,14 +33,18 @@ architecture Behavioral of cache is
     array(0 to 255) of header_line_type;
 
   type reg_type is record
+    state : state_type;
+
     header : header_type;
 
+    we     : std_logic;
+    tx     : std_logic_vector(31 downto 0);
     tag    : std_logic_vector(17 downto 0);
     index  : std_logic_vector(7 downto 0);
     offset : std_logic_vector(3 downto 0);
 
-    fetch_n : integer range -2 to 15;
-    flush_n : integer range -2 to 0;
+    fetch_n : integer range -1 to 15;
+    flush_n : integer range -1 to 0;
 
     sram_addr : std_logic_vector(31 downto 0);
     sram_we   : std_logic;
@@ -49,12 +55,15 @@ architecture Behavioral of cache is
   end record;
 
   constant rzero : reg_type := (
+    state     => NO_OP,
     header    => (others => (valid => '0', tag => (others => '0'))),
+    we        => '0',
+    tx        => (others => '0'),
     tag       => (others => '0'),
     index     => (others => '0'),
     offset    => (others => '0'),
-    fetch_n   => -2,
-    flush_n   => -2,
+    fetch_n   => -1,
+    flush_n   => -1,
     sram_addr => (others => '0'),
     sram_we   => '0',
     sram_tx   => (others => '0'),
@@ -62,27 +71,6 @@ architecture Behavioral of cache is
     bram_we   => '0');
 
   signal r, rin : reg_type;
-
-  impure function need_fetch (
-    index : std_logic_vector(7 downto 0);
-    tag   : std_logic_vector(17 downto 0))
-    return boolean is
-    variable v_index : integer range 0 to 255;
-  begin
-    v_index := conv_integer(index);
-    if cache_in.we = '0' and cache_in.re = '0' then
-      return false;
-    else
-      return not (r.header(v_index).valid = '1' and r.header(v_index).tag = tag);
-    end if;
-  end function;
-
-  impure function need_flush (
-    next_fetch_n : integer range -2 to 15)
-    return boolean is
-  begin
-    return cache_in.we = '1' and next_fetch_n = -2 and r.flush_n /= 0;
-  end function;
 
   signal bram_we   : std_logic;
   signal bram_addr : std_logic_vector(11 downto 0);
@@ -106,69 +94,96 @@ begin
   begin
     v := r;
 
-    v.tag    := cache_in.addr(31 downto 14);
-    v.index  := cache_in.addr(13 downto 6);
-    v.offset := cache_in.addr(5 downto 2);
-
-    -- fetcher
-
+    v.bram_addr := (others => '0');
     v.sram_addr := (others => '0');
-    v.bram_addr := v.index & v.offset;
     v.bram_we := '0';
-
-    case r.fetch_n is
-      when -2 =>
-        if need_fetch(v.index, v.tag) then
-          v.header(conv_integer(v.index)).valid := '0';
-          v.sram_addr := v.tag & v.index & "0000" & "00";
-          v.fetch_n := -1;
-        end if;
-      when -1 =>
-        v.sram_addr := r.sram_addr + 4;
-        v.fetch_n := 0;
-      when 14 =>
-        v.bram_addr := r.index & conv_std_logic_vector(r.fetch_n, 4);
-        v.bram_we := '1';
-        v.fetch_n := 15;
-      when 15 =>
-        v.header(conv_integer(r.index)).valid := '1';
-        v.header(conv_integer(r.index)).tag := r.tag;
-        v.bram_addr := r.index & conv_std_logic_vector(r.fetch_n, 4);
-        v.bram_we := '1';
-        v.fetch_n := -2;
-      when others =>
-        v.sram_addr := r.sram_addr + 4;
-        v.bram_addr := r.index & conv_std_logic_vector(r.fetch_n, 4);
-        v.bram_we := '1';
-        v.fetch_n := r.fetch_n + 1;
-    end case;
-
-    -- flusher
-
     v.sram_we := '0';
-    v.sram_tx := (others => '0');
 
-    case r.flush_n is
-      when -2 =>
-        if need_flush(v.fetch_n) then
-          v.sram_we := '1';
-          v.sram_addr := cache_in.addr;
-          v.sram_tx := cache_in.val;
-          v.flush_n := -1;
+    case r.state is
+      when NO_OP =>
+
+        assert r.fetch_n = -1;
+        assert r.flush_n = -1;
+
+        if cache_in.re = '1' or cache_in.we = '1' then
+
+          v.we     := cache_in.we;
+          v.tx     := cache_in.val;
+          v.tag    := cache_in.addr(31 downto 14);
+          v.index  := cache_in.addr(13 downto 6);
+          v.offset := cache_in.addr(5 downto 2);
+
+          if not (r.header(conv_integer(v.index)).valid = '1' and r.header(conv_integer(v.index)).tag = v.tag) then
+            v.header(conv_integer(v.index)).valid := '0';
+            v.sram_addr := v.tag & v.index & "0000" & "00";
+            v.state := FETCH;
+          elsif cache_in.we = '1' then
+            v.sram_we := '1';
+            v.sram_addr := cache_in.addr;
+            v.sram_tx := cache_in.val;
+            v.state := FLUSH;
+          else
+            v.bram_addr := v.index & v.offset;
+          end if;
+
         end if;
-      when -1 =>
-        v.flush_n := 0;
-      when 0 =>
-        v.bram_addr := r.index & r.offset;
-        v.bram_we := '1';
-        v.flush_n := -2;
+
+      when FETCH =>
+
+        case r.fetch_n is
+          when -1 =>
+            v.sram_addr := r.sram_addr + 4;
+            v.fetch_n := 0;
+          when 0 to 13 =>
+            v.sram_addr := r.sram_addr + 4;
+            v.bram_addr := r.index & conv_std_logic_vector(r.fetch_n, 4);
+            v.bram_we := '1';
+            v.fetch_n := r.fetch_n + 1;
+          when 14 =>
+            v.bram_addr := r.index & conv_std_logic_vector(r.fetch_n, 4);
+            v.bram_we := '1';
+            v.fetch_n := 15;
+          when 15 =>
+            v.header(conv_integer(r.index)).valid := '1';
+            v.header(conv_integer(r.index)).tag := r.tag;
+            v.bram_addr := r.index & conv_std_logic_vector(r.fetch_n, 4);
+            v.bram_we := '1';
+            v.fetch_n := -1;
+
+            if r.we = '1' then
+              v.sram_we := '1';
+              v.sram_addr := r.tag & r.index & r.offset & "00";
+              v.sram_tx := r.tx;
+              v.state := FLUSH;
+            else
+              v.state := NO_OP;
+            end if;
+          when others =>
+            assert false;
+        end case;
+
+      when FLUSH =>
+
+        case r.flush_n is
+          when -1 =>
+            v.flush_n := 0;
+          when 0 =>
+            v.bram_addr := r.index & r.offset;
+            v.bram_we := '1';
+            v.flush_n := -1;
+
+            v.state := NO_OP;
+          when others =>
+            assert false report "cache: invalid value stored in flush_n";
+        end case;
+
       when others =>
-        assert false report "cache: invalid value stored in flush_n";
+        assert false;
     end case;
 
     -- control
 
-    if v.fetch_n = -2 and v.flush_n = -2 then
+    if v.state = NO_OP then
       v_hazard := '0';
     else
       v_hazard := '1';
