@@ -115,6 +115,7 @@ begin
 
     v.sram_addr := (others => '0');
     v.bram_addr := v.index & v.offset;
+    v.bram_we := '0';
 
     case r.fetch_n is
       when -2 =>
@@ -128,15 +129,18 @@ begin
         v.fetch_n := 0;
       when 14 =>
         v.bram_addr := r.index & conv_std_logic_vector(r.fetch_n, 4);
+        v.bram_we := '1';
         v.fetch_n := 15;
       when 15 =>
         v.header(conv_integer(r.index)).valid := '1';
         v.header(conv_integer(r.index)).tag := r.tag;
         v.bram_addr := r.index & conv_std_logic_vector(r.fetch_n, 4);
+        v.bram_we := '1';
         v.fetch_n := -2;
       when others =>
         v.sram_addr := r.sram_addr + 4;
         v.bram_addr := r.index & conv_std_logic_vector(r.fetch_n, 4);
+        v.bram_we := '1';
         v.fetch_n := r.fetch_n + 1;
     end case;
 
@@ -144,7 +148,6 @@ begin
 
     v.sram_we := '0';
     v.sram_tx := (others => '0');
-    v.bram_we := '0';
 
     case r.flush_n is
       when -2 =>
