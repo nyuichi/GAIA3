@@ -26,6 +26,19 @@ package types is
     addr : std_logic_vector(31 downto 0);
   end record;
 
+  -- uart
+
+  type uart_out_type is record
+    rx : std_logic_vector(31 downto 0);
+  end record;
+
+  type uart_in_type is record
+    we   : std_logic;
+    re   : std_logic;
+    val  : std_logic_vector(31 downto 0);
+    addr : std_logic_vector(31 downto 0);
+  end record;
+
   -- sram
 
   type sram_out_type is record
@@ -60,8 +73,8 @@ package types is
       cache_out    : in  bus_up_type;
       cache_in     : out bus_down_type;
       cache_hazard : in  std_logic;
-      uart_out     : in  bus_up_type;
-      uart_in      : out bus_down_type;
+      uart_out     : in  uart_out_type;
+      uart_in      : out uart_in_type;
       bram_out     : in  bus_up_type;
       bram_in      : out bus_down_type);
   end component;
@@ -88,8 +101,8 @@ package types is
     port (
       clk      : in  std_logic;
       rst      : in  std_logic;
-      uart_in  : in  bus_down_type;
-      uart_out : out bus_up_type;
+      uart_in  : in  uart_in_type;
+      uart_out : out uart_out_type;
       RS_TX    : out std_logic;
       RS_RX    : in  std_logic);
   end component;

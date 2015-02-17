@@ -45,8 +45,8 @@ architecture Behavioral of top is
   signal cache_in      : bus_down_type;
   signal cache_out     : bus_up_type;
   signal cache_hazard  : std_logic;
-  signal uart_in       : bus_down_type;
-  signal uart_out      : bus_up_type;
+  signal uart_in       : uart_in_type;
+  signal uart_out      : uart_out_type;
   signal sram_out      : sram_out_type;
   signal sram_in       : sram_in_type;
   signal bram_out      : bus_up_type;

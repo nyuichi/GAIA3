@@ -15,8 +15,8 @@ entity mux is
     cache_out    : in  bus_up_type;
     cache_hazard : in  std_logic;
     cache_in     : out bus_down_type;
-    uart_out     : in  bus_up_type;
-    uart_in      : out bus_down_type;
+    uart_out     : in  uart_out_type;
+    uart_in      : out uart_in_type;
     bram_out     : in  bus_up_type;
     bram_in      : out bus_down_type);
 
@@ -39,6 +39,12 @@ architecture Behavioral of mux is
     val  => (others => '0'),
     addr => (others => '0'));
 
+  constant uart_in_zero : uart_in_type := (
+    we   => '0',
+    re   => '0',
+    val  => (others => '0'),
+    addr => (others => '0'));
+
   constant rzero : reg_type := (
     addr => (others => '0'),
     we   => '0',
@@ -54,14 +60,14 @@ begin
     variable v_hazard   : std_logic;
     variable v_cpu_in   : bus_up_type;
     variable v_cache_in : bus_down_type;
-    variable v_uart_in  : bus_down_type;
+    variable v_uart_in  : uart_in_type;
     variable v_bram_in  : bus_down_type;
   begin
     v := r;
 
     v_cpu_in   := bus_up_zero;
     v_cache_in := bus_down_zero;
-    v_uart_in  := bus_down_zero;
+    v_uart_in  := uart_in_zero;
     v_bram_in  := bus_down_zero;
 
     -- previous req
@@ -70,7 +76,7 @@ begin
         when 16#00000000# to 16#00001FFF# =>
           v_cpu_in := bram_out;
         when 16#00002000# to 16#00002008# =>
-          v_cpu_in := uart_out;
+          v_cpu_in.rx := uart_out.rx;
         when 16#00003000# to 16#003FFFFF# =>
           v_cpu_in := cache_out;
         when others =>
@@ -86,7 +92,10 @@ begin
         when 16#00000000# to 16#00001FFF# =>
           v_bram_in := cpu_out;
         when 16#00002000# to 16#00002008# =>
-          v_uart_in := cpu_out;
+          v_uart_in.we := cpu_out.we;
+          v_uart_in.re := cpu_out.re;
+          v_uart_in.val := cpu_out.val;
+          v_uart_in.addr := cpu_out.addr;
         when 16#00003000# to 16#003FFFFF# =>
           v_cache_in := cpu_out;
           v_hazard := cache_hazard;
