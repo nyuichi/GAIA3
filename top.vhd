@@ -74,7 +74,7 @@ begin   -- architecture Behavioral
       cpu_out       => cpu_out,
       memory_hazard => memory_hazard);
 
-  bridge_1 : entity work.bridge
+  mux_1 : entity work.mux
     port map (
       clk          => clk,
       rst          => rst,

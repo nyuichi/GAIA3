@@ -4,7 +4,7 @@ use IEEE.std_logic_unsigned.all;
 
 use work.types.all;
 
-entity bridge is
+entity mux is
 
   port (
     clk          : in  std_logic;
@@ -22,7 +22,7 @@ entity bridge is
 
 end entity;
 
-architecture Behavioral of bridge is
+architecture Behavioral of mux is
 
   type reg_type is record
     addr : std_logic_vector(31 downto 0);

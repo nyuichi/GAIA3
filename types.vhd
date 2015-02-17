@@ -50,7 +50,7 @@ package types is
       memory_hazard : in  std_logic);
   end component;
 
-  component bridge is
+  component mux is
     port (
       clk          : in  std_logic;
       rst          : in  std_logic;
