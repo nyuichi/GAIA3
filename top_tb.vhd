@@ -84,7 +84,7 @@ architecture Behavioral of Top_tb is
 
 begin
 
-  sram_unit0 : GS8160Z18 port map (
+  sram_unit0 : GS8160Z18 generic map (report_write => false) port map (
     A => ZA,
     CK => ZCLKMA(0),
     XBA => XZBE(0),
@@ -104,7 +104,7 @@ begin
     XFT => XFT,
     XLBO => XLBO);
 
-  sram_unit1 : GS8160Z18 port map (
+  sram_unit1 : GS8160Z18 generic map (report_write => false)  port map (
     A => ZA,
     CK => ZCLKMA(1),
     XBA => XZBE(2),

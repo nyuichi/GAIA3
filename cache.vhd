@@ -51,6 +51,7 @@ architecture Behavioral of cache is
     sram_tx   : std_logic_vector(31 downto 0);
 
     bram_addr : std_logic_vector(11 downto 0);
+    bram_di   : std_logic_vector(31 downto 0);
     bram_we   : std_logic;
   end record;
 
@@ -68,11 +69,14 @@ architecture Behavioral of cache is
     sram_we   => '0',
     sram_tx   => (others => '0'),
     bram_addr => (others => '0'),
+    bram_di   => (others => '0'),
     bram_we   => '0');
 
   signal r, rin : reg_type;
 
   signal bram_we   : std_logic;
+  signal bram_do   : std_logic_vector(31 downto 0);
+  signal bram_di   : std_logic_vector(31 downto 0);
   signal bram_addr : std_logic_vector(11 downto 0);
 
 begin
@@ -84,8 +88,8 @@ begin
     port map (
       clk  => clk,
       we   => bram_we,
-      di   => cache_in.val,
-      do   => cache_out.rx,
+      di   => bram_di,
+      do   => bram_do,
       addr => bram_addr);
 
   comb : process(r, cache_in, sram_out)
@@ -138,16 +142,19 @@ begin
             v.sram_addr := r.sram_addr + 4;
             v.bram_addr := r.index & conv_std_logic_vector(r.fetch_n, 4);
             v.bram_we := '1';
+            v.bram_di := sram_out.rx;
             v.fetch_n := r.fetch_n + 1;
           when 14 =>
             v.bram_addr := r.index & conv_std_logic_vector(r.fetch_n, 4);
             v.bram_we := '1';
+            v.bram_di := sram_out.rx;
             v.fetch_n := 15;
           when 15 =>
             v.header(conv_integer(r.index)).valid := '1';
             v.header(conv_integer(r.index)).tag := r.tag;
             v.bram_addr := r.index & conv_std_logic_vector(r.fetch_n, 4);
             v.bram_we := '1';
+            v.bram_di := sram_out.rx;
             v.fetch_n := -1;
 
             if r.we = '1' then
@@ -170,6 +177,7 @@ begin
           when 0 =>
             v.bram_addr := r.index & r.offset;
             v.bram_we := '1';
+            v.bram_di := r.tx;
             v.flush_n := -1;
 
             v.state := NO_OP;
@@ -194,12 +202,14 @@ begin
     rin <= v;
 
     cache_out.stall <= v_hazard;
+    cache_out.rx    <= bram_do;
     sram_in.addr    <= v.sram_addr;
     sram_in.tx      <= v.sram_tx;
     sram_in.we      <= v.sram_we;
     sram_in.re      <= '1';
     bram_we         <= v.bram_we;
     bram_addr       <= v.bram_addr;
+    bram_di         <= v.bram_di;
   end process;
 
   regs : process(clk, rst)
