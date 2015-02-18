@@ -233,6 +233,7 @@ begin
       v.buf_len := r.buf_len + 1;
     end if;
 
+    v.req1 := '0';
     v.req2 := r.req1;
 
     if r.buf_addr /= cache_in.addr2 then -- hazard! flush the queue
