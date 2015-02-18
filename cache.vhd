@@ -225,9 +225,6 @@ begin
 
     -- instruction cache
 
-    v_hazard2 := '0';
-    v_inst := (others => '0');
-
     if r.req2 = '1' then               -- commit new inst to the queue
       v.buf(conv_integer(r.buf_ptr + r.buf_len)) := sram_out.rx;
       v.buf_len := r.buf_len + 1;
@@ -256,13 +253,15 @@ begin
       end if;
     end if;
 
-    if v.buf_len > 0 then
+    if v.buf_len > 0 then               -- pop one from the queue
+      v_hazard2 := '0';
       v_inst := v.buf(conv_integer(v.buf_ptr));
       v.buf_ptr := v.buf_ptr + 1;
       v.buf_len := v.buf_len - 1;
       v.buf_addr := v.buf_addr + 1;
     else
       v_hazard2 := '1';
+      v_inst := (others => '0');
     end if;
 
 
