@@ -37,6 +37,8 @@ architecture Behavioral of cpu is
     data_b    : std_logic_vector(31 downto 0);
     data_l    : std_logic_vector(31 downto 0);
     data_d    : std_logic_vector(31 downto 0);
+    fd_data_x : std_logic_vector(31 downto 0);
+    fd_data_a : std_logic_vector(31 downto 0);
     tag       : std_logic_vector(4 downto 0);
     nextpc    : std_logic_vector(31 downto 0);
     reg_write : std_logic;
@@ -90,6 +92,8 @@ architecture Behavioral of cpu is
     data_b    => (others => '0'),
     data_l    => (others => '0'),
     data_d    => (others => '0'),
+    fd_data_x => (others => '0'),
+    fd_data_a => (others => '0'),
     tag       => "00000",
     nextpc    => (others => '0'),
     reg_write => '0',
@@ -217,9 +221,6 @@ begin
   comb : process(r, cpu_in)
     variable v : reg_type;
 
-    -- decode/write
-    variable regfile : regfile_type;
-
     -- decode
     variable inst : std_logic_vector(31 downto 0);
 
@@ -277,17 +278,13 @@ begin
       res := r.m.res;
     end if;
 
-    regfile := r.regfile;
-
     if r.m.reg_write = '1' then
       for i in 1 to 31 loop
         if r.m.reg_dest = i then
-          regfile(i) := res;
+          v.regfile(i) := res;
         end if;
       end loop;
     end if;
-
-    v.regfile := regfile;
 
     -- DECODE
 
@@ -305,9 +302,9 @@ begin
     v.d.reg_dest := inst(27 downto 23);
     v.d.reg_a := inst(22 downto 18);
     v.d.reg_b := inst(17 downto 13);
-    v.d.data_x := regfile(conv_integer(inst(27 downto 23)));
-    v.d.data_a := regfile(conv_integer(inst(22 downto 18)));
-    v.d.data_b := regfile(conv_integer(inst(17 downto 13)));
+    v.d.data_x := v.regfile(conv_integer(inst(27 downto 23)));
+    v.d.data_a := v.regfile(conv_integer(inst(22 downto 18)));
+    v.d.data_b := v.regfile(conv_integer(inst(17 downto 13)));
     v.d.data_l := repeat(inst(12), 24) & inst(12 downto 5);
     v.d.data_d := repeat(inst(15), 16) & inst(15 downto 0);
     v.d.tag := inst(4 downto 0);
@@ -321,17 +318,17 @@ begin
 
     -- branching...
 
-    fd_data_x := regfile(conv_integer(inst(27 downto 23)));
-    fd_data_a := regfile(conv_integer(inst(22 downto 18)));
+    v.d.fd_data_x := v.d.data_x;
+    v.d.fd_data_a := v.d.data_a;
 
-    d_data_forward(inst(27 downto 23), fd_data_x);
-    d_data_forward(inst(22 downto 18), fd_data_a);
+    d_data_forward(inst(27 downto 23), v.d.fd_data_x);
+    d_data_forward(inst(22 downto 18), v.d.fd_data_a);
 
     case inst(31 downto 28) is
       when "1011" | "1101" | "1111" =>
         v.d.pc_addr := r.f.nextpc + (repeat(inst(15), 14) & inst(15 downto 0) & "00");
       when "1100" =>
-        v.d.pc_addr := fd_data_x;
+        v.d.pc_addr := v.d.fd_data_x;
       when others =>
         v.d.pc_addr := (others => '-');
     end case;
@@ -340,9 +337,9 @@ begin
       when "1011" | "1100" =>
         v.d.pc_src := '1';
       when "1101" =>
-        v.d.pc_src := to_std_logic(fd_data_x /= fd_data_a);
+        v.d.pc_src := to_std_logic(v.d.fd_data_x /= v.d.fd_data_a);
       when "1111" =>
-        v.d.pc_src := to_std_logic(fd_data_x = fd_data_a);
+        v.d.pc_src := to_std_logic(v.d.fd_data_x = v.d.fd_data_a);
       when others =>
         v.d.pc_src := '0';
     end case;
