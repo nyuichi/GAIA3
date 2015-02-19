@@ -160,9 +160,8 @@ architecture Behavioral of cpu is
     end if;
   end procedure;
 
-  procedure detect_hazard (
-    inst  : in  std_logic_vector(31 downto 0);
-    stall : out std_logic) is
+  impure function detect_hazard (inst : std_logic_vector(31 downto 0))
+    return std_logic is
 
     variable opcode : std_logic_vector(3 downto 0);
     variable reg_x  : std_logic_vector(4 downto 0);
@@ -182,34 +181,32 @@ architecture Behavioral of cpu is
         reg_b := "00000";
     end case;
 
-    stall := '1';
-
     -- load stall
     if r.d.mem_read = '1' and r.d.reg_dest /= "00000" and (r.d.reg_dest = reg_a or r.d.reg_dest = reg_b) then
-      return;
+      return '1';
     end if;
 
     -- branch hazard
     case opcode is
       when "1101" | "1111" =>
         if r.d.reg_write = '1' and r.d.reg_dest /= "00000" and (r.d.reg_dest = reg_x or r.d.reg_dest = reg_a) then
-          return;
+          return '1';
         end if;
         if r.e.reg_write = '1' and r.e.reg_dest /= "00000" and (r.e.reg_dest = reg_x or r.e.reg_dest = reg_a) then
-          return;
+          return '1';
         end if;
       when "1100" =>
         if r.d.reg_write = '1' and r.d.reg_dest /= "00000" and r.d.reg_dest = reg_x then
-          return;
+          return '1';
         end if;
         if r.e.reg_write = '1' and r.e.reg_dest /= "00000" and r.e.reg_dest = reg_x then
-          return;
+          return '1';
         end if;
       when others =>
     end case;
 
-    stall := '0';
-  end procedure;
+    return '0';
+  end function;
 
 begin
 
@@ -244,24 +241,21 @@ begin
   begin
     v := r;
 
-    detect_hazard(cpu_in.i_data, v.stall);
+    v.stall := detect_hazard(cpu_in.i_data);
 
     -- FETCH
 
     i_re := '1';
 
-    if r.d.pc_src = '0' then
-      i_addr := r.f.nextpc;
-    else
+    if v.stall = '1' or cpu_in.d_stall = '1' then
+      i_addr := r.f.nextpc - 4;
+    elsif r.d.pc_src = '1' then
       i_addr := r.d.pc_addr;
+    else
+      i_addr := r.f.nextpc;
     end if;
 
     v.f.nextpc := i_addr + 4;
-
-    if v.stall = '1' or cpu_in.d_stall = '1' then
-      i_addr := r.f.nextpc - 4;
-      v.f.nextpc := r.f.nextpc;
-    end if;
 
     -- WRITE (put here to avoid structual hazard between WRITE and DECODE)
 
