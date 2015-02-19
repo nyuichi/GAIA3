@@ -36,10 +36,11 @@ architecture Behavioral of mux is
     d_data  => (others => '0'));
 
   constant cache_in_zero : cache_in_type := (
-    we   => '0',
-    re   => '0',
-    val  => (others => '0'),
-    addr => (others => '0'),
+    we    => '0',
+    re    => '0',
+    val   => (others => '0'),
+    addr  => (others => '0'),
+    re2   => '0',
     addr2 => (others => '0'));
 
   constant bram_in_zero : bram_in_type := (
@@ -109,6 +110,7 @@ begin
         v_bram_in.addr2 := cpu_out.i_addr;
 
       when 16#00003000# to 16#003FFFFF# =>
+        v_cache_in.re2 := cpu_out.i_re;
         v_cache_in.addr2 := cpu_out.i_addr;
 
         v_cpu_in.i_stall := cache_out.stall2;

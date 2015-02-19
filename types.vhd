@@ -13,6 +13,7 @@ package types is
   end record;
 
   type cpu_out_type is record
+    i_re   : std_logic;
     i_addr : std_logic_vector(31 downto 0);
     d_re   : std_logic;
     d_we   : std_logic;
@@ -88,10 +89,11 @@ package types is
   end record;
 
   type cache_in_type is record
-    we   : std_logic;
-    re   : std_logic;
-    val  : std_logic_vector(31 downto 0);
-    addr : std_logic_vector(31 downto 0);
+    we    : std_logic;
+    re    : std_logic;
+    val   : std_logic_vector(31 downto 0);
+    addr  : std_logic_vector(31 downto 0);
+    re2   : std_logic;
     addr2 : std_logic_vector(31 downto 0);
   end record;
 

@@ -248,6 +248,7 @@ begin
 
     -- external
     variable i_addr : std_logic_vector(31 downto 0);
+    variable i_re : std_logic;
     variable d_addr : std_logic_vector(31 downto 0);
     variable d_val : std_logic_vector(31 downto 0);
     variable d_we : std_logic;
@@ -256,6 +257,8 @@ begin
     v := r;
 
     detect_hazard(cpu_in.i_data, v.stall);
+
+    i_re := '1';
 
     -- FETCH
 
@@ -465,6 +468,7 @@ begin
     rin <= v;
 
     cpu_out.i_addr <= i_addr;
+    cpu_out.i_re   <= i_re;
     cpu_out.d_addr <= d_addr;
     cpu_out.d_data <= d_val;
     cpu_out.d_we   <= d_we;
