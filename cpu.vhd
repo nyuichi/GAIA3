@@ -391,9 +391,9 @@ begin
           when "11001" =>
             v.e.res := repeat('0', 31) & to_std_logic(data_a = data_b + r.d.data_l);
           when "11010" =>
-            v.e.res := repeat('0', 31) & to_std_logic(data_a < data_b + r.d.data_l);
+            v.e.res := repeat('0', 31) & to_std_logic(signed(data_a) < signed(data_b + r.d.data_l));
           when "11011" =>
-            v.e.res := repeat('0', 31) & to_std_logic(data_a <= data_b + r.d.data_l);
+            v.e.res := repeat('0', 31) & to_std_logic(signed(data_a) <= signed(data_b + r.d.data_l));
           when "11100" =>
             normalize_fzero(data_a);
             normalize_fzero(data_b);
