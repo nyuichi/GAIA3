@@ -184,13 +184,6 @@ architecture Behavioral of cpu is
 
     stall := '1';
 
-    -- fetch stall
-    -- | As of now, instruction fetch stall is treated as a normal
-    -- | (=decode-stage level) stall.
-    if cpu_in.i_stall = '1' then
-      return;
-    end if;
-
     -- load stall
     if r.d.mem_read = '1' and r.d.reg_dest /= "00000" and (r.d.reg_dest = reg_a or r.d.reg_dest = reg_b) then
       return;
