@@ -29,24 +29,6 @@ package types is
   end component;
 
 
-  -- icache (to be removed)
-
-  type icache_out_type is record
-    rx : std_logic_vector(31 downto 0);
-  end record;
-
-  type icache_in_type is record
-    addr : std_logic_vector(31 downto 0);
-  end record;
-
-  component icache is
-    port (
-      clk        : in  std_logic;
-      icache_in  : in  icache_in_type;
-      icache_out : out icache_out_type);
-  end component;
-
-
   -- uart
 
   type uart_out_type is record
@@ -154,8 +136,6 @@ package types is
       rst        : in  std_logic;
       cpu_out    : in  cpu_out_type;
       cpu_in     : out cpu_in_type;
-      icache_out : in  icache_out_type;
-      icache_in  : out icache_in_type;
       cache_out  : in  cache_out_type;
       cache_in   : out cache_in_type;
       uart_out   : in  uart_out_type;
