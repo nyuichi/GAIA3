@@ -22,7 +22,8 @@ architecture Behavioral of cpu is
     array(0 to 31) of std_logic_vector(31 downto 0);
 
   type fetch_reg_type is record
-    nextpc : std_logic_vector(31 downto 0);
+    nextpc  : std_logic_vector(31 downto 0);
+    i_stall : std_logic;
   end record;
 
   type decode_reg_type is record
@@ -73,7 +74,8 @@ architecture Behavioral of cpu is
   end record;
 
   constant fzero : fetch_reg_type := (
-    nextpc => (others => '0')
+    nextpc  => (others => '0'),
+    i_stall => '0'
     );
 
   constant dzero : decode_reg_type := (
@@ -255,7 +257,13 @@ begin
       i_addr := r.f.nextpc;
     end if;
 
-    v.f.nextpc := i_addr + 4;
+    if cpu_in.i_stall = '1' then
+      v.f.nextpc := i_addr;
+    else
+      v.f.nextpc := i_addr + 4;
+    end if;
+
+    v.f.i_stall := cpu_in.i_stall;
 
     -- WRITE (put here to avoid structual hazard between WRITE and DECODE)
 
@@ -279,7 +287,11 @@ begin
 
     -- DECODE
 
-    inst := cpu_in.i_data;
+    if r.f.i_stall = '0' then
+      inst := cpu_in.i_data;
+    else
+      inst := (others => '0');
+    end if;
 
     if r.d.pc_src = '1' then
       inst := x"00000000";
