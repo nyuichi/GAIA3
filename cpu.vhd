@@ -64,7 +64,6 @@ architecture Behavioral of cpu is
   end record;
 
   type reg_type is record
-    pc      : std_logic_vector(31 downto 0);
     stall   : std_logic;
     regfile : regfile_type;
     f       : fetch_reg_type;
@@ -116,7 +115,6 @@ architecture Behavioral of cpu is
     );
 
   constant rzero : reg_type := (
-    pc      => (others => '0'),
     stall   => '0',
     regfile => (others => (others => '0')),
     f       => fzero,
@@ -228,9 +226,6 @@ begin
     -- decode/write
     variable regfile : regfile_type;
 
-    -- fetch
-    variable pc : std_logic_vector(31 downto 0);
-
     -- decode
     variable inst : std_logic_vector(31 downto 0);
 
@@ -258,26 +253,22 @@ begin
 
     detect_hazard(cpu_in.i_data, v.stall);
 
-    i_re := '1';
-
     -- FETCH
 
+    i_re := '1';
+
     if r.d.pc_src = '0' then
-      pc := r.f.nextpc;
+      i_addr := r.f.nextpc;
     else
-      pc := r.d.pc_addr;
+      i_addr := r.d.pc_addr;
     end if;
 
-    v.pc := pc;
-    v.f.nextpc := pc + 4;
+    v.f.nextpc := i_addr + 4;
 
     if v.stall = '1' or cpu_in.d_stall = '1' then
-      pc := r.pc;
-      v.pc := r.pc;
-      v.f := r.f;
+      i_addr := r.f.nextpc - 4;
+      v.f.nextpc := r.f.nextpc;
     end if;
-
-    i_addr := pc;
 
     -- WRITE (put here to avoid structual hazard between WRITE and DECODE)
 
