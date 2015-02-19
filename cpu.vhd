@@ -22,6 +22,7 @@ architecture Behavioral of cpu is
     array(0 to 31) of std_logic_vector(31 downto 0);
 
   type fetch_reg_type is record
+    pc      : std_logic_vector(31 downto 0);
     nextpc  : std_logic_vector(31 downto 0);
     i_stall : std_logic;
   end record;
@@ -74,6 +75,7 @@ architecture Behavioral of cpu is
   end record;
 
   constant fzero : fetch_reg_type := (
+    pc      => (others => '0'),
     nextpc  => (others => '0'),
     i_stall => '0'
     );
@@ -250,12 +252,14 @@ begin
     i_re := '1';
 
     if v.stall = '1' or cpu_in.d_stall = '1' then
-      i_addr := r.f.nextpc - 4;
+      i_addr := r.f.pc;
     elsif r.d.pc_src = '1' then
       i_addr := r.d.pc_addr;
     else
       i_addr := r.f.nextpc;
     end if;
+
+    v.f.pc := i_addr;
 
     if cpu_in.i_stall = '1' then
       v.f.nextpc := i_addr;
