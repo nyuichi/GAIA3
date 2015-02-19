@@ -64,6 +64,7 @@ architecture Behavioral of cache is
     buf_addr : std_logic_vector(31 downto 0); -- address the head inst is from
     req1 : std_logic;
     req2 : std_logic;
+    re2 : std_logic;
   end record;
 
   constant rzero : reg_type := (
@@ -89,7 +90,8 @@ architecture Behavioral of cache is
     buf_len   => 0,
     buf_addr  => (others => '0'),
     req1      => '0',
-    req2      => '0');
+    req2      => '0',
+    re2       => '0');
 
   signal r, rin : reg_type;
 
@@ -233,7 +235,7 @@ begin
     v.req1 := '0';
     v.req2 := r.req1;
 
-    if cache_in.re2 = '1' and v.buf_len > 0 then -- pop one from the queue
+    if r.re2 = '1' and v.buf_len > 0 then -- pop one from the queue
       v_inst := v.buf(conv_integer(v.buf_ptr));
       v.buf_ptr := v.buf_ptr + 1;
       v.buf_len := v.buf_len - 1;
@@ -248,6 +250,8 @@ begin
       v.buf_ptr := (others => '0');
       v.buf_addr := cache_in.addr2;
     end if;
+
+    v.re2 := cache_in.re2;
 
     if v.sram_re = '0' and v.sram_we = '0' then -- issue new req
       if v.req2 = '1' and v.buf_len < 15 then
