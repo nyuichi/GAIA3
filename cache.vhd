@@ -58,13 +58,8 @@ architecture Behavioral of cache is
 
     -- instruction cache
 
-    buf : buf_type;
-    buf_ptr : std_logic_vector(3 downto 0);
-    buf_len : integer range 0 to 16;
-    buf_addr : std_logic_vector(31 downto 0); -- address the head inst is from
     req1 : std_logic;
-    req2 : std_logic;
-    re2 : std_logic;
+    addr1 : std_logic_vector(31 downto 0);
   end record;
 
   constant rzero : reg_type := (
@@ -85,13 +80,8 @@ architecture Behavioral of cache is
     bram_di   => (others => '0'),
     bram_we   => '0',
     bram_re   => '0',
-    buf       => (others => (others => '0')),
-    buf_ptr   => (others => '0'),
-    buf_len   => 0,
-    buf_addr  => (others => '0'),
-    req1      => '0',
-    req2      => '0',
-    re2       => '0');
+    req1 => '0',
+    addr1 => (others => '0'));
 
   signal r, rin : reg_type;
 
@@ -227,48 +217,24 @@ begin
 
     -- instruction cache
 
-    if r.req2 = '1' then -- push new inst to the queue
-      v.buf(conv_integer(r.buf_ptr + r.buf_len)) := sram_out.rx;
-      v.buf_len := r.buf_len + 1;
-    end if;
+    assert cache_in.re2 = '1';
 
-    v.req1 := '0';
-    v.req2 := r.req1;
+    v_inst := sram_out.rx;
 
-    if r.re2 = '1' and v.buf_len > 0 then -- pop one from the queue
-      v_inst := v.buf(conv_integer(v.buf_ptr));
-      v.buf_ptr := v.buf_ptr + 1;
-      v.buf_len := v.buf_len - 1;
-      v.buf_addr := v.buf_addr + 1;
-    else
-      v_inst := (others => '0');
-    end if;
-
-    if cache_in.re2 = '1' and r.buf_addr /= cache_in.addr2 then -- flush the queue!
-      v.req2 := '0';
-      v.buf_len := 0;
-      v.buf_ptr := (others => '0');
-      v.buf_addr := cache_in.addr2;
-    end if;
-
-    v.re2 := cache_in.re2;
-
-    if v.sram_re = '0' and v.sram_we = '0' then -- issue new req
-      if v.req2 = '1' and v.buf_len < 15 then
-        v.req1 := '1';
-        v.sram_addr := v.buf_addr + v.buf_len + 1;
-        v.sram_re := '1';
-      elsif v.req2 = '0' and v.buf_len < 16 then
-        v.req1 := '1';
-        v.sram_addr := v.buf_addr + v.buf_len;
-        v.sram_re := '1';
-      end if;
-    end if;
-
-    if v.buf_len > 0 or v.req2 = '1' then -- detect hazard
+    if r.req1 = '1' and r.addr1 = cache_in.addr2 then
       v_hazard2 := '0';
     else
       v_hazard2 := '1';
+    end if;
+
+    if v.sram_re = '0' and v.sram_we = '0' then
+      v.req1 := '1';
+      v.addr1 := cache_in.addr2;
+      -- request to sram
+      v.sram_addr := cache_in.addr2;
+      v.sram_re := '1';
+    else
+      v.req1 := '0';
     end if;
 
     -- end
