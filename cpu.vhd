@@ -171,6 +171,7 @@ architecture Behavioral of cpu is
   impure function detect_hazard (inst : std_logic_vector(31 downto 0))
     return std_logic is
 
+    variable stall  : std_logic;
     variable opcode : std_logic_vector(3 downto 0);
     variable reg_x  : std_logic_vector(4 downto 0);
     variable reg_a  : std_logic_vector(4 downto 0);
@@ -189,26 +190,28 @@ architecture Behavioral of cpu is
         reg_b := "00000";
     end case;
 
+    stall := '0';
+
     -- load stall
     if r.d.mem_read = '1' and r.d.reg_dest /= "00000" and (r.d.reg_dest = reg_a or r.d.reg_dest = reg_b) then
-      return '1';
+      stall := '1';
     end if;
 
     -- branch hazard
     case opcode is
       when "1101" | "1111" =>
         if r.d.reg_write = '1' and r.d.reg_dest /= "00000" and (r.d.reg_dest = reg_x or r.d.reg_dest = reg_a) then
-          return '1';
+          stall := '1';
         end if;
         if r.e.reg_write = '1' and r.e.reg_dest /= "00000" and (r.e.reg_dest = reg_x or r.e.reg_dest = reg_a) then
-          return '1';
+          stall := '1';
         end if;
       when "1100" =>
         if r.d.reg_write = '1' and r.d.reg_dest /= "00000" and r.d.reg_dest = reg_x then
-          return '1';
+          stall := '1';
         end if;
         if r.e.reg_write = '1' and r.e.reg_dest /= "00000" and r.e.reg_dest = reg_x then
-          return '1';
+          stall := '1';
         end if;
       when others =>
     end case;
