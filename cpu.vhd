@@ -344,6 +344,8 @@ begin
         v.d.pc_src := '0';
     end case;
 
+    v.d.pc_src := (not v.stall) and v.d.pc_src;
+
     if cpu_in.d_stall = '1' then
       v.d := r.d;
     elsif v.stall = '1' then
