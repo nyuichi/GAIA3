@@ -216,7 +216,7 @@ architecture Behavioral of cpu is
       when others =>
     end case;
 
-    return '0';
+    return stall;
   end function;
 
 begin
