@@ -69,7 +69,7 @@ architecture Behavioral of uart is
     we     => '1',
     prev   => (others => '0'));
 
-  signal r, rin : reg_type;
+  signal r, rin : reg_type := rzero;
 
 begin
 
