@@ -131,7 +131,7 @@ architecture Behavioral of cpu is
     m       => mzero
     );
 
-  signal r, rin : reg_type;
+  signal r, rin : reg_type := rzero;
 
   procedure normalize_fzero(
     a : inout std_logic_vector) is

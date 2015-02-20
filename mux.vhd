@@ -61,7 +61,7 @@ architecture Behavioral of mux is
     d_we   => '0',
     d_re   => '0');
 
-  signal r, rin : reg_type;
+  signal r, rin : reg_type := rzero;
 
 begin
 

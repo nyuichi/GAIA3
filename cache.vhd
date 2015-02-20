@@ -83,12 +83,12 @@ architecture Behavioral of cache is
     req1 => '0',
     addr1 => (others => '0'));
 
-  signal r, rin : reg_type;
+  signal r, rin : reg_type := rzero;
 
-  signal bram_we   : std_logic;
-  signal bram_do   : std_logic_vector(31 downto 0);
-  signal bram_di   : std_logic_vector(31 downto 0);
-  signal bram_addr : std_logic_vector(11 downto 0);
+  signal bram_we   : std_logic := '0';
+  signal bram_do   : std_logic_vector(31 downto 0) := (others => '0');
+  signal bram_di   : std_logic_vector(31 downto 0) := (others => '0');
+  signal bram_addr : std_logic_vector(11 downto 0) := (others => '0');
 
 begin
 
