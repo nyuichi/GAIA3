@@ -217,8 +217,6 @@ begin
 
     -- instruction cache
 
-    assert cache_in.re2 = '1';
-
     v_inst := sram_out.rx;
 
     if r.req1 = '1' and r.addr1 = cache_in.addr2 then
