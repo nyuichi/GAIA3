@@ -122,9 +122,6 @@ begin
     case r.state is
       when NO_OP =>
 
-        assert r.fetch_n = -1;
-        assert r.flush_n = -1;
-
         if cache_in.re = '1' or cache_in.we = '1' then
 
           v.we     := cache_in.we;
@@ -137,11 +134,13 @@ begin
             v.header(conv_integer(v.index)).valid := '0';
             v.sram_addr := v.tag & v.index & "0000" & "00";
             v.sram_re := '1';
+            v.fetch_n := -1;
             v.state := FETCH;
           elsif cache_in.we = '1' then
             v.sram_we := '1';
             v.sram_addr := cache_in.addr;
             v.sram_tx := cache_in.val;
+            v.flush_n := -1;
             v.state := FLUSH;
           else
             v.bram_addr := v.index & v.offset;
@@ -174,18 +173,19 @@ begin
             v.bram_addr := r.index & conv_std_logic_vector(r.fetch_n, 4);
             v.bram_we := '1';
             v.bram_di := sram_out.rx;
-            v.fetch_n := -1;
 
             if r.we = '1' then
               v.sram_we := '1';
               v.sram_addr := r.tag & r.index & r.offset & "00";
               v.sram_tx := r.tx;
+              v.flush_n := -1;
               v.state := FLUSH;
             else
               v.state := NO_OP;
             end if;
           when others =>
             assert false;
+            v.state := NO_OP;
         end case;
 
       when FLUSH =>
@@ -197,15 +197,16 @@ begin
             v.bram_addr := r.index & r.offset;
             v.bram_we := '1';
             v.bram_di := r.tx;
-            v.flush_n := -1;
 
             v.state := NO_OP;
           when others =>
             assert false report "cache: invalid value stored in flush_n";
+            v.state := NO_OP;
         end case;
 
       when others =>
         assert false;
+        v.state := NO_OP;
     end case;
 
     if v.state = NO_OP then
