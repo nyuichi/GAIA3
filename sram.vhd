@@ -20,8 +20,8 @@ end entity;
 
 architecture Behavioral of sram is
 
-  signal we1, we2 : std_logic;
-  signal tx1, tx2 : std_logic_vector(31 downto 0);
+  signal we1, we2 : std_logic := '0';
+  signal tx1, tx2 : std_logic_vector(31 downto 0) := (others => '0');
 
 begin
 

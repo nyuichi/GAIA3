@@ -29,32 +29,6 @@ architecture Behavioral of mux is
     d_re   : std_logic;
   end record;
 
-  constant cpu_in_zero : cpu_in_type := (
-    i_stall => '0',
-    i_data  => (others => '0'),
-    d_stall => '0',
-    d_data  => (others => '0'));
-
-  constant cache_in_zero : cache_in_type := (
-    we    => '0',
-    re    => '0',
-    val   => (others => '0'),
-    addr  => (others => '0'),
-    re2   => '0',
-    addr2 => (others => '0'));
-
-  constant bram_in_zero : bram_in_type := (
-    we   => '0',
-    val  => (others => '0'),
-    addr => (others => '0'),
-    addr2 => (others => '0'));
-
-  constant uart_in_zero : uart_in_type := (
-    we   => '0',
-    re   => '0',
-    val  => (others => '0'),
-    addr => (others => '0'));
-
   constant rzero : reg_type := (
     i_addr => (others => '0'),
     d_addr => (others => '0'),

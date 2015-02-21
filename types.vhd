@@ -12,6 +12,12 @@ package types is
     d_data  : std_logic_vector(31 downto 0);
   end record;
 
+  constant cpu_in_zero : cpu_in_type := (
+    i_stall => '0',
+    i_data  => (others => '0'),
+    d_stall => '0',
+    d_data  => (others => '0'));
+
   type cpu_out_type is record
     i_re   : std_logic;
     i_addr : std_logic_vector(31 downto 0);
@@ -43,6 +49,12 @@ package types is
     addr : std_logic_vector(31 downto 0);
   end record;
 
+  constant uart_in_zero : uart_in_type := (
+    we   => '0',
+    re   => '0',
+    val  => (others => '0'),
+    addr => (others => '0'));
+
   component uart is
     port (
       clk      : in  std_logic;
@@ -66,6 +78,12 @@ package types is
     re : std_logic;
     tx : std_logic_vector(31 downto 0);
   end record;
+
+  constant sram_in_zero : sram_in_type := (
+    addr => (others => '0'),
+    we   => '0',
+    re   => '0',
+    tx   => (others => '0'));
 
   component sram is
     port (
@@ -97,6 +115,14 @@ package types is
     addr2 : std_logic_vector(31 downto 0);
   end record;
 
+  constant cache_in_zero : cache_in_type := (
+    we    => '0',
+    re    => '0',
+    val   => (others => '0'),
+    addr  => (others => '0'),
+    re2   => '0',
+    addr2 => (others => '0'));
+
   component cache is
     port (
       clk       : in  std_logic;
@@ -121,6 +147,12 @@ package types is
     addr  : std_logic_vector(31 downto 0);
     addr2 : std_logic_vector(31 downto 0);
   end record;
+
+  constant bram_in_zero : bram_in_type := (
+    we   => '0',
+    val  => (others => '0'),
+    addr => (others => '0'),
+    addr2 => (others => '0'));
 
   component bram is
     port (
