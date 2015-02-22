@@ -130,15 +130,6 @@ architecture Behavioral of cpu is
   signal r, rin : reg_type := rzero;
 
 
-  procedure normalize_fzero (
-    a : inout std_logic_vector) is
-  begin
-    if a = x"80000000" then
-      a := x"00000000";
-    end if;
-  end procedure;
-
-
   procedure d_data_forward (
     reg_src : in  std_logic_vector(4 downto 0);
     res     : out std_logic_vector(31 downto 0)) is
@@ -354,24 +345,24 @@ begin
           when ALU_CMPLE =>
             v.e.res := repeat('0', 31) & to_std_logic(signed(data_a) <= signed(data_b + r.d.data_l));
           when ALU_FCMPNE =>
-            normalize_fzero(data_a);
-            normalize_fzero(data_b);
+            data_a := normalize_fzero(data_a);
+            data_b := normalize_fzero(data_b);
             v.e.res := repeat('0', 31) & to_std_logic(data_a /= data_b);
           when ALU_FCMPEQ =>
-            normalize_fzero(data_a);
-            normalize_fzero(data_b);
+            data_a := normalize_fzero(data_a);
+            data_b := normalize_fzero(data_b);
             v.e.res := repeat('0', 31) & to_std_logic(data_a = data_b);
           when ALU_FCMPLT =>
-            normalize_fzero(data_a);
-            normalize_fzero(data_b);
+            data_a := normalize_fzero(data_a);
+            data_b := normalize_fzero(data_b);
             if data_a(31) = '1' or data_b(31) = '1' then
               v.e.res := repeat('0', 31) & to_std_logic(data_a >= data_b);
             else
               v.e.res := repeat('0', 31) & to_std_logic(data_a < data_b);
             end if;
           when ALU_FCMPLE =>
-            normalize_fzero(data_a);
-            normalize_fzero(data_b);
+            data_a := normalize_fzero(data_a);
+            data_b := normalize_fzero(data_b);
             if data_a(31) = '1' or data_b(31) = '1' then
               v.e.res := repeat('0', 31) & to_std_logic(data_a > data_b);
             else
