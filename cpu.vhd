@@ -126,15 +126,6 @@ architecture Behavioral of cpu is
   signal r, rin : reg_type := rzero;
 
 
-  procedure normalize_fzero (
-    a : inout std_logic_vector) is
-  begin
-    if a = x"80000000" then
-      a := x"00000000";
-    end if;
-  end procedure;
-
-
   procedure d_data_forward (
     reg_src : in  std_logic_vector(4 downto 0);
     res     : out std_logic_vector(31 downto 0)) is
