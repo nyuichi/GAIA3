@@ -37,8 +37,6 @@ architecture Behavioral of cpu is
     data_b    : std_logic_vector(31 downto 0);
     data_l    : std_logic_vector(31 downto 0);
     data_d    : std_logic_vector(31 downto 0);
-    fd_data_x : std_logic_vector(31 downto 0);
-    fd_data_a : std_logic_vector(31 downto 0);
     tag       : std_logic_vector(4 downto 0);
     nextpc    : std_logic_vector(31 downto 0);
     reg_write : std_logic;
@@ -92,8 +90,6 @@ architecture Behavioral of cpu is
     data_b    => (others => '0'),
     data_l    => (others => '0'),
     data_d    => (others => '0'),
-    fd_data_x => (others => '0'),
-    fd_data_a => (others => '0'),
     tag       => "00000",
     nextpc    => (others => '0'),
     reg_write => '0',
@@ -226,7 +222,6 @@ begin
 
     -- decode
     variable inst : std_logic_vector(31 downto 0);
-
     variable fd_data_x : std_logic_vector(31 downto 0);
     variable fd_data_a : std_logic_vector(31 downto 0);
 
@@ -397,17 +392,17 @@ begin
 
     -- branching...
 
-    v.d.fd_data_x := v.d.data_x;
-    v.d.fd_data_a := v.d.data_a;
+    fd_data_x := v.d.data_x;
+    fd_data_a := v.d.data_a;
 
-    d_data_forward(inst(27 downto 23), v.d.fd_data_x);
-    d_data_forward(inst(22 downto 18), v.d.fd_data_a);
+    d_data_forward(inst(27 downto 23), fd_data_x);
+    d_data_forward(inst(22 downto 18), fd_data_a);
 
     case inst(31 downto 28) is
       when "1011" | "1101" | "1111" =>
         v.d.pc_addr := r.f.nextpc + (repeat(inst(15), 14) & inst(15 downto 0) & "00");
       when "1100" =>
-        v.d.pc_addr := v.d.fd_data_x;
+        v.d.pc_addr := fd_data_x;
       when others =>
         v.d.pc_addr := (others => '-');
     end case;
@@ -416,9 +411,9 @@ begin
       when "1011" | "1100" =>
         v.d.pc_src := '1';
       when "1101" =>
-        v.d.pc_src := to_std_logic(v.d.fd_data_x /= v.d.fd_data_a);
+        v.d.pc_src := to_std_logic(fd_data_x /= fd_data_a);
       when "1111" =>
-        v.d.pc_src := to_std_logic(v.d.fd_data_x = v.d.fd_data_a);
+        v.d.pc_src := to_std_logic(fd_data_x = fd_data_a);
       when others =>
         v.d.pc_src := '0';
     end case;
