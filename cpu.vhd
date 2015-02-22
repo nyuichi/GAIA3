@@ -207,7 +207,7 @@ architecture Behavioral of cpu is
     inst    : in  std_logic_vector(31 downto 0);
     data_x  : in  std_logic_vector(31 downto 0);
     data_a  : in  std_logic_vector(31 downto 0);
-    pc_src  : out std_logic;            -- value of pc_src may be wrong when stalling
+    pc_src  : out std_logic;            -- value of pc_src may be wrong during stall
     pc_addr : out std_logic_vector(31 downto 0)) is
 
     variable fd_data_x : std_logic_vector(31 downto 0);
