@@ -43,8 +43,6 @@ architecture Behavioral of cpu is
     reg_mem   : std_logic;
     mem_write : std_logic;
     mem_read  : std_logic;
-    pc_addr   : std_logic_vector(31 downto 0);
-    pc_src    : std_logic;
   end record;
 
   type execute_reg_type is record
@@ -96,8 +94,6 @@ architecture Behavioral of cpu is
     reg_mem   => '0',
     mem_write => '0',
     mem_read  => '0',
-    pc_addr   => (others => '0'),
-    pc_src    => '0'
     );
 
   constant ezero : execute_reg_type := (
@@ -129,13 +125,15 @@ architecture Behavioral of cpu is
 
   signal r, rin : reg_type := rzero;
 
-  procedure normalize_fzero(
+
+  procedure normalize_fzero (
     a : inout std_logic_vector) is
   begin
     if a = x"80000000" then
       a := x"00000000";
     end if;
   end procedure;
+
 
   procedure d_data_forward (
     reg_src : in  std_logic_vector(4 downto 0);
@@ -145,6 +143,7 @@ architecture Behavioral of cpu is
       res := r.e.res;
     end if;
   end procedure;
+
 
   procedure e_data_forward (
     reg_src  : in  std_logic_vector(4 downto 0);
@@ -164,10 +163,11 @@ architecture Behavioral of cpu is
     end if;
   end procedure;
 
-  impure function detect_hazard (inst : std_logic_vector(31 downto 0))
-    return std_logic is
 
-    variable stall  : std_logic;
+  procedure detect_hazard (
+    inst  : in  std_logic_vector(31 downto 0);
+    stall : out std_logic) is
+
     variable opcode : std_logic_vector(3 downto 0);
     variable reg_x  : std_logic_vector(4 downto 0);
     variable reg_a  : std_logic_vector(4 downto 0);
@@ -211,9 +211,49 @@ architecture Behavioral of cpu is
         end if;
       when others =>
     end case;
+  end procedure;
 
-    return stall;
-  end function;
+
+  procedure detect_branch (
+    inst    : in  std_logic_vector(31 downto 0);
+    data_x  : in  std_logic_vector(31 downto 0);
+    data_a  : in  std_logic_vector(31 downto 0);
+    pc_src  : out std_logic;            -- value of pc_src may be wrong when stalling
+    pc_addr : out std_logic_vector(31 downto 0)) is
+
+    variable fd_data_x : std_logic_vector(31 downto 0);
+    variable fd_data_a : std_logic_vector(31 downto 0);
+
+  begin
+
+    fd_data_x := data_x;
+    fd_data_a := data_a;
+
+    d_data_forward(inst(27 downto 23), fd_data_x);
+    d_data_forward(inst(22 downto 18), fd_data_a);
+
+    case inst(31 downto 28) is
+      when "1011" | "1101" | "1111" =>
+        pc_addr := r.f.nextpc + (repeat(inst(15), 14) & inst(15 downto 0) & "00");
+      when "1100" =>
+        pc_addr := fd_data_x;
+      when others =>
+        pc_addr := (others => '-');
+    end case;
+
+    case inst(31 downto 28) is
+      when "1011" | "1100" =>
+        pc_src := '1';
+      when "1101" =>
+        pc_src := to_std_logic(fd_data_x /= fd_data_a);
+      when "1111" =>
+        pc_src := to_std_logic(fd_data_x = fd_data_a);
+      when others =>
+        pc_src := '0';
+    end case;
+
+  end procedure;
+
 
 begin
 
@@ -222,8 +262,8 @@ begin
 
     -- decode
     variable inst : std_logic_vector(31 downto 0);
-    variable fd_data_x : std_logic_vector(31 downto 0);
-    variable fd_data_a : std_logic_vector(31 downto 0);
+    variable pc_addr : std_logic_vector(31 downto 0);
+    variable pc_src : std_logic;
 
     -- write
     variable res : std_logic_vector(31 downto 0);
@@ -242,8 +282,6 @@ begin
     variable d_re : std_logic;
   begin
     v := r;
-
-    v.stall := detect_hazard(cpu_in.i_data);
 
     -- WRITE
 
@@ -368,10 +406,6 @@ begin
       inst := (others => '0');
     end if;
 
-    if r.d.pc_src = '1' then
-      inst := x"00000000";
-    end if;
-
     v.d.opcode := inst(31 downto 28);
     v.d.reg_dest := inst(27 downto 23);
     v.d.reg_a := inst(22 downto 18);
@@ -390,35 +424,9 @@ begin
     v.d.mem_write := to_std_logic(inst(31 downto 28) = "0110");
     v.d.mem_read := to_std_logic(inst(31 downto 28) = "1000");
 
-    -- branching...
-
-    fd_data_x := v.d.data_x;
-    fd_data_a := v.d.data_a;
-
-    d_data_forward(inst(27 downto 23), fd_data_x);
-    d_data_forward(inst(22 downto 18), fd_data_a);
-
-    case inst(31 downto 28) is
-      when "1011" | "1101" | "1111" =>
-        v.d.pc_addr := r.f.nextpc + (repeat(inst(15), 14) & inst(15 downto 0) & "00");
-      when "1100" =>
-        v.d.pc_addr := fd_data_x;
-      when others =>
-        v.d.pc_addr := (others => '-');
-    end case;
-
-    case inst(31 downto 28) is
-      when "1011" | "1100" =>
-        v.d.pc_src := '1';
-      when "1101" =>
-        v.d.pc_src := to_std_logic(fd_data_x /= fd_data_a);
-      when "1111" =>
-        v.d.pc_src := to_std_logic(fd_data_x = fd_data_a);
-      when others =>
-        v.d.pc_src := '0';
-    end case;
-
-    v.d.pc_src := (not v.stall) and v.d.pc_src;
+    --// take care of hazards
+    detect_hazard(inst, v.stall);
+    detect_branch(inst, v.d.data_x, v.d.data_a, pc_src, pc_addr);
 
     if cpu_in.d_stall = '1' then
       v.d := r.d;
@@ -434,8 +442,8 @@ begin
 
     if v.stall = '1' or cpu_in.d_stall = '1' then
       i_addr := r.f.pc;
-    elsif r.d.pc_src = '1' then
-      i_addr := r.d.pc_addr;
+    elsif pc_src = '1' then
+      i_addr := pc_addr;
     else
       i_addr := r.f.nextpc;
     end if;
