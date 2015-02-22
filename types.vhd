@@ -193,4 +193,37 @@ package types is
       addr : in  std_logic_vector(awidth - 1 downto 0));
   end component;
 
+
+  -- constants
+
+  constant OP_ALU      : std_logic_vector(3 downto 0) := "0000";
+  constant OP_FPU      : std_logic_vector(3 downto 0) := "0001";
+  constant OP_LDL      : std_logic_vector(3 downto 0) := "0010";
+  constant OP_LDH      : std_logic_vector(3 downto 0) := "0011";
+  constant OP_SYSENTER : std_logic_vector(3 downto 0) := "0100";
+  constant OP_SYSEXIT  : std_logic_vector(3 downto 0) := "0101";
+  constant OP_ST       : std_logic_vector(3 downto 0) := "0110";
+  constant OP_LD       : std_logic_vector(3 downto 0) := "1000";
+  constant OP_JL       : std_logic_vector(3 downto 0) := "1011";
+  constant OP_JR       : std_logic_vector(3 downto 0) := "1100";
+  constant OP_BNE      : std_logic_vector(3 downto 0) := "1101";
+  constant OP_BEQ      : std_logic_vector(3 downto 0) := "1111";
+
+  constant ALU_ADD    : std_logic_vector(4 downto 0) := "00000";
+  constant ALU_SUB    : std_logic_vector(4 downto 0) := "00001";
+  constant ALU_SHL    : std_logic_vector(4 downto 0) := "00010";
+  constant ALU_SHR    : std_logic_vector(4 downto 0) := "00011";
+  constant ALU_SAR    : std_logic_vector(4 downto 0) := "00100";
+  constant ALU_AND    : std_logic_vector(4 downto 0) := "00101";
+  constant ALU_OR     : std_logic_vector(4 downto 0) := "00110";
+  constant ALU_XOR    : std_logic_vector(4 downto 0) := "00111";
+  constant ALU_CMPNE  : std_logic_vector(4 downto 0) := "11000";
+  constant ALU_CMPEQ  : std_logic_vector(4 downto 0) := "11001";
+  constant ALU_CMPLT  : std_logic_vector(4 downto 0) := "11010";
+  constant ALU_CMPLE  : std_logic_vector(4 downto 0) := "11011";
+  constant ALU_FCMPNE : std_logic_vector(4 downto 0) := "11100";
+  constant ALU_FCMPEQ : std_logic_vector(4 downto 0) := "11101";
+  constant ALU_FCMPLT : std_logic_vector(4 downto 0) := "11110";
+  constant ALU_FCMPLE : std_logic_vector(4 downto 0) := "11111";
+
 end package;
