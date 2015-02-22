@@ -234,7 +234,6 @@ begin
     variable res : std_logic_vector(31 downto 0);
 
     -- execute
-    variable shifter : integer;
     variable data_a : std_logic_vector(31 downto 0);
     variable data_b : std_logic_vector(31 downto 0);
     variable data_x : std_logic_vector(31 downto 0);
@@ -296,14 +295,11 @@ begin
           when "00001" =>
             v.e.res := data_a - data_b - r.d.data_l;
           when "00010" =>
-            shifter := conv_integer(data_b + r.d.data_l);
-            v.e.res := std_logic_vector(shift_left(unsigned(data_a), shifter));
+            v.e.res := std_logic_vector(shift_left(unsigned(data_a), conv_integer(data_b + r.d.data_l)));
           when "00011" =>
-            shifter := conv_integer(data_b + r.d.data_l);
-            v.e.res := std_logic_vector(shift_right(unsigned(data_a), shifter));
+            v.e.res := std_logic_vector(shift_right(unsigned(data_a), conv_integer(data_b + r.d.data_l)));
           when "00100" =>
-            shifter := conv_integer(data_b + r.d.data_l);
-            v.e.res := std_logic_vector(shift_right(signed(data_a), shifter));
+            v.e.res := std_logic_vector(shift_right(signed(data_a), conv_integer(data_b + r.d.data_l)));
           when "00101" =>
             v.e.res := data_a and data_b and r.d.data_l;
           when "00110" =>
