@@ -180,7 +180,7 @@ architecture Behavioral of cpu is
     reg_x := inst(27 downto 23);
     reg_a := inst(22 downto 18);
     case opcode is
-      when "0000" | "0001" =>
+      when OP_ALU | OP_FPU =>
         reg_b := inst(17 downto 13);
       when others =>
         reg_b := "00000";
@@ -195,14 +195,14 @@ architecture Behavioral of cpu is
 
     -- branch hazard
     case opcode is
-      when "1101" | "1111" =>
+      when OP_BNE | OP_BEQ =>
         if r.d.reg_write = '1' and r.d.reg_dest /= "00000" and (r.d.reg_dest = reg_x or r.d.reg_dest = reg_a) then
           stall := '1';
         end if;
         if r.e.reg_write = '1' and r.e.reg_dest /= "00000" and (r.e.reg_dest = reg_x or r.e.reg_dest = reg_a) then
           stall := '1';
         end if;
-      when "1100" =>
+      when OP_JR =>
         if r.d.reg_write = '1' and r.d.reg_dest /= "00000" and r.d.reg_dest = reg_x then
           stall := '1';
         end if;
@@ -233,20 +233,20 @@ architecture Behavioral of cpu is
     d_data_forward(inst(22 downto 18), fd_data_a);
 
     case inst(31 downto 28) is
-      when "1011" | "1101" | "1111" =>
+      when OP_JL | OP_BNE | OP_BEQ =>
         pc_addr := r.f.nextpc + (repeat(inst(15), 14) & inst(15 downto 0) & "00");
-      when "1100" =>
+      when OP_JR =>
         pc_addr := fd_data_x;
       when others =>
         pc_addr := (others => '-');
     end case;
 
     case inst(31 downto 28) is
-      when "1011" | "1100" =>
+      when OP_JL | OP_JR =>
         pc_src := '1';
-      when "1101" =>
+      when OP_BNE =>
         pc_src := to_std_logic(fd_data_x /= fd_data_a);
-      when "1111" =>
+      when OP_BEQ =>
         pc_src := to_std_logic(fd_data_x = fd_data_a);
       when others =>
         pc_src := '0';
@@ -321,41 +321,41 @@ begin
     e_data_forward(r.d.reg_dest, r.d.data_x, data_x);
 
     case r.d.opcode is
-      when "0000" =>
+      when OP_ALU =>
         case r.d.tag is
-          when "00000" =>
+          when ALU_ADD =>
             v.e.res := data_a + data_b + r.d.data_l;
-          when "00001" =>
+          when ALU_SUB =>
             v.e.res := data_a - data_b - r.d.data_l;
-          when "00010" =>
+          when ALU_SHL =>
             v.e.res := std_logic_vector(shift_left(unsigned(data_a), conv_integer(data_b + r.d.data_l)));
-          when "00011" =>
+          when ALU_SHR =>
             v.e.res := std_logic_vector(shift_right(unsigned(data_a), conv_integer(data_b + r.d.data_l)));
-          when "00100" =>
+          when ALU_SAR =>
             v.e.res := std_logic_vector(shift_right(signed(data_a), conv_integer(data_b + r.d.data_l)));
-          when "00101" =>
+          when ALU_AND =>
             v.e.res := data_a and data_b and r.d.data_l;
-          when "00110" =>
+          when ALU_OR =>
             v.e.res := data_a or data_b or r.d.data_l;
-          when "00111" =>
+          when ALU_XOR =>
             v.e.res := data_a xor data_b xor r.d.data_l;
-          when "11000" =>
+          when ALU_CMPNE =>
             v.e.res := repeat('0', 31) & to_std_logic(data_a /= data_b + r.d.data_l);
-          when "11001" =>
+          when ALU_CMPEQ =>
             v.e.res := repeat('0', 31) & to_std_logic(data_a = data_b + r.d.data_l);
-          when "11010" =>
+          when ALU_CMPLT =>
             v.e.res := repeat('0', 31) & to_std_logic(signed(data_a) < signed(data_b + r.d.data_l));
-          when "11011" =>
+          when ALU_CMPLE =>
             v.e.res := repeat('0', 31) & to_std_logic(signed(data_a) <= signed(data_b + r.d.data_l));
-          when "11100" =>
+          when ALU_FCMPNE =>
             normalize_fzero(data_a);
             normalize_fzero(data_b);
             v.e.res := repeat('0', 31) & to_std_logic(data_a /= data_b);
-          when "11101" =>
+          when ALU_FCMPEQ =>
             normalize_fzero(data_a);
             normalize_fzero(data_b);
             v.e.res := repeat('0', 31) & to_std_logic(data_a = data_b);
-          when "11110" =>
+          when ALU_FCMPLT =>
             normalize_fzero(data_a);
             normalize_fzero(data_b);
             if data_a(31) = '1' or data_b(31) = '1' then
@@ -363,7 +363,7 @@ begin
             else
               v.e.res := repeat('0', 31) & to_std_logic(data_a < data_b);
             end if;
-          when "11111" =>
+          when ALU_FCMPLE =>
             normalize_fzero(data_a);
             normalize_fzero(data_b);
             if data_a(31) = '1' or data_b(31) = '1' then
@@ -375,11 +375,11 @@ begin
             v.e.res := (others => '0');
             assert false report "Unknown ALU opcode";
         end case;
-      when "0010" =>
+      when OP_LDL =>
         v.e.res := r.d.data_d;
-      when "0011" =>
+      when OP_LDH =>
         v.e.res := r.d.data_d(15 downto 0) & data_a(15 downto 0);
-      when "1011" =>
+      when OP_JL =>
         v.e.res := r.d.nextpc;
       when others =>
         v.e.res := (others => '0');
@@ -406,23 +406,28 @@ begin
       inst := (others => '0');
     end if;
 
-    v.d.opcode := inst(31 downto 28);
+    v.d.opcode   := inst(31 downto 28);
     v.d.reg_dest := inst(27 downto 23);
-    v.d.reg_a := inst(22 downto 18);
-    v.d.reg_b := inst(17 downto 13);
-    v.d.data_x := v.regfile(conv_integer(inst(27 downto 23)));
-    v.d.data_a := v.regfile(conv_integer(inst(22 downto 18)));
-    v.d.data_b := v.regfile(conv_integer(inst(17 downto 13)));
-    v.d.data_l := repeat(inst(12), 24) & inst(12 downto 5);
-    v.d.data_d := repeat(inst(15), 16) & inst(15 downto 0);
-    v.d.tag := inst(4 downto 0);
+    v.d.reg_a    := inst(22 downto 18);
+    v.d.reg_b    := inst(17 downto 13);
+    v.d.data_x   := v.regfile(conv_integer(inst(27 downto 23)));
+    v.d.data_a   := v.regfile(conv_integer(inst(22 downto 18)));
+    v.d.data_b   := v.regfile(conv_integer(inst(17 downto 13)));
+    v.d.data_l   := repeat(inst(12), 24) & inst(12 downto 5);
+    v.d.data_d   := repeat(inst(15), 16) & inst(15 downto 0);
+    v.d.tag      := inst(4 downto 0);
 
     v.d.nextpc := r.f.nextpc;
 
-    v.d.reg_write := to_std_logic(inst(30) = '0');
-    v.d.reg_mem := to_std_logic(inst(31 downto 28) = "1000");
-    v.d.mem_write := to_std_logic(inst(31 downto 28) = "0110");
-    v.d.mem_read := to_std_logic(inst(31 downto 28) = "1000");
+    case inst(31 downto 28) is
+      when OP_ALU | OP_FPU | OP_LDL | OP_LDH | OP_LD | OP_JL =>
+        v.d.reg_write := '1';
+      when others =>
+        v.d.reg_write := '0';
+    end case;
+    v.d.reg_mem   := to_std_logic(inst(31 downto 28) = OP_LD);
+    v.d.mem_write := to_std_logic(inst(31 downto 28) = OP_ST);
+    v.d.mem_read  := to_std_logic(inst(31 downto 28) = OP_LD);
 
     --// take care of hazards
     detect_hazard(inst, v.stall);
