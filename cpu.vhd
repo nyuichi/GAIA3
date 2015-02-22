@@ -66,7 +66,6 @@ architecture Behavioral of cpu is
   end record;
 
   type reg_type is record
-    stall   : std_logic;
     regfile : regfile_type;
     f       : fetch_reg_type;
     d       : decode_reg_type;
@@ -119,7 +118,6 @@ architecture Behavioral of cpu is
     );
 
   constant rzero : reg_type := (
-    stall   => '0',
     regfile => (others => (others => '0')),
     f       => fzero,
     d       => dzero,
@@ -261,6 +259,7 @@ begin
 
     -- decode
     variable inst : std_logic_vector(31 downto 0);
+    variable stall : std_logic;
 
     -- write
     variable res : std_logic_vector(31 downto 0);
@@ -427,12 +426,12 @@ begin
     v.d.mem_read  := to_std_logic(inst(31 downto 28) = OP_LD);
 
     --// take care of hazards
-    detect_hazard(inst, v.stall);
-    detect_branch(inst, v.stall, v.d.data_x, v.d.data_a, v.d.pc_src, v.d.pc_addr);
+    detect_hazard(inst, stall);
+    detect_branch(inst, stall, v.d.data_x, v.d.data_a, v.d.pc_src, v.d.pc_addr);
 
     if cpu_in.d_stall = '1' then
       v.d := r.d;
-    elsif v.stall = '1' or r.d.pc_src = '1' then
+    elsif stall = '1' or r.d.pc_src = '1' then
       v.d.reg_write := '0';
       v.d.mem_write := '0';
       v.d.mem_read := '0';
@@ -442,7 +441,7 @@ begin
 
     i_re := '1';
 
-    if v.stall = '1' or cpu_in.d_stall = '1' then
+    if stall = '1' or cpu_in.d_stall = '1' then
       i_addr := r.f.pc;
     elsif r.d.pc_src = '1' then
       i_addr := r.d.pc_addr;
