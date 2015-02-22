@@ -251,29 +251,7 @@ begin
 
     v.stall := detect_hazard(cpu_in.i_data);
 
-    -- FETCH
-
-    i_re := '1';
-
-    if v.stall = '1' or cpu_in.d_stall = '1' then
-      i_addr := r.f.pc;
-    elsif r.d.pc_src = '1' then
-      i_addr := r.d.pc_addr;
-    else
-      i_addr := r.f.nextpc;
-    end if;
-
-    v.f.pc := i_addr;
-
-    if cpu_in.i_stall = '1' then
-      v.f.nextpc := i_addr;
-    else
-      v.f.nextpc := i_addr + 4;
-    end if;
-
-    v.f.i_stall := cpu_in.i_stall;
-
-    -- WRITE (put here to avoid structual hazard between WRITE and DECODE)
+    -- WRITE
 
     if r.m.reg_mem = '1' then
       res := cpu_in.d_data;
@@ -289,72 +267,19 @@ begin
       end loop;
     end if;
 
-    -- DECODE
+    -- MEMORY
 
-    if r.f.i_stall = '0' then
-      inst := cpu_in.i_data;
-    else
-      inst := (others => '0');
-    end if;
-
-    if r.d.pc_src = '1' then
-      inst := x"00000000";
-    end if;
-
-    v.d.opcode := inst(31 downto 28);
-    v.d.reg_dest := inst(27 downto 23);
-    v.d.reg_a := inst(22 downto 18);
-    v.d.reg_b := inst(17 downto 13);
-    v.d.data_x := v.regfile(conv_integer(inst(27 downto 23)));
-    v.d.data_a := v.regfile(conv_integer(inst(22 downto 18)));
-    v.d.data_b := v.regfile(conv_integer(inst(17 downto 13)));
-    v.d.data_l := repeat(inst(12), 24) & inst(12 downto 5);
-    v.d.data_d := repeat(inst(15), 16) & inst(15 downto 0);
-    v.d.tag := inst(4 downto 0);
-
-    v.d.nextpc := r.f.nextpc;
-
-    v.d.reg_write := to_std_logic(inst(30) = '0');
-    v.d.reg_mem := to_std_logic(inst(31 downto 28) = "1000");
-    v.d.mem_write := to_std_logic(inst(31 downto 28) = "0110");
-    v.d.mem_read := to_std_logic(inst(31 downto 28) = "1000");
-
-    -- branching...
-
-    v.d.fd_data_x := v.d.data_x;
-    v.d.fd_data_a := v.d.data_a;
-
-    d_data_forward(inst(27 downto 23), v.d.fd_data_x);
-    d_data_forward(inst(22 downto 18), v.d.fd_data_a);
-
-    case inst(31 downto 28) is
-      when "1011" | "1101" | "1111" =>
-        v.d.pc_addr := r.f.nextpc + (repeat(inst(15), 14) & inst(15 downto 0) & "00");
-      when "1100" =>
-        v.d.pc_addr := v.d.fd_data_x;
-      when others =>
-        v.d.pc_addr := (others => '-');
-    end case;
-
-    case inst(31 downto 28) is
-      when "1011" | "1100" =>
-        v.d.pc_src := '1';
-      when "1101" =>
-        v.d.pc_src := to_std_logic(v.d.fd_data_x /= v.d.fd_data_a);
-      when "1111" =>
-        v.d.pc_src := to_std_logic(v.d.fd_data_x = v.d.fd_data_a);
-      when others =>
-        v.d.pc_src := '0';
-    end case;
-
-    v.d.pc_src := (not v.stall) and v.d.pc_src;
+    d_addr := r.e.mem_addr;
+    d_val := r.e.data_x;
+    d_we := r.e.mem_write;
+    d_re := r.e.mem_read;
+    v.m.res := r.e.res;
+    v.m.reg_dest := r.e.reg_dest;
+    v.m.reg_write := r.e.reg_write;
+    v.m.reg_mem := r.e.reg_mem;
 
     if cpu_in.d_stall = '1' then
-      v.d := r.d;
-    elsif v.stall = '1' then
-      v.d.reg_write := '0';
-      v.d.mem_write := '0';
-      v.d.mem_read := '0';
+      v.m.reg_write := '0';
     end if;
 
     -- EXECUTE
@@ -444,20 +369,95 @@ begin
       v.e := r.e;
     end if;
 
-    -- MEMORY
+    -- DECODE
 
-    d_addr := r.e.mem_addr;
-    d_val := r.e.data_x;
-    d_we := r.e.mem_write;
-    d_re := r.e.mem_read;
-    v.m.res := r.e.res;
-    v.m.reg_dest := r.e.reg_dest;
-    v.m.reg_write := r.e.reg_write;
-    v.m.reg_mem := r.e.reg_mem;
+    if r.f.i_stall = '0' then
+      inst := cpu_in.i_data;
+    else
+      inst := (others => '0');
+    end if;
+
+    if r.d.pc_src = '1' then
+      inst := x"00000000";
+    end if;
+
+    v.d.opcode := inst(31 downto 28);
+    v.d.reg_dest := inst(27 downto 23);
+    v.d.reg_a := inst(22 downto 18);
+    v.d.reg_b := inst(17 downto 13);
+    v.d.data_x := v.regfile(conv_integer(inst(27 downto 23)));
+    v.d.data_a := v.regfile(conv_integer(inst(22 downto 18)));
+    v.d.data_b := v.regfile(conv_integer(inst(17 downto 13)));
+    v.d.data_l := repeat(inst(12), 24) & inst(12 downto 5);
+    v.d.data_d := repeat(inst(15), 16) & inst(15 downto 0);
+    v.d.tag := inst(4 downto 0);
+
+    v.d.nextpc := r.f.nextpc;
+
+    v.d.reg_write := to_std_logic(inst(30) = '0');
+    v.d.reg_mem := to_std_logic(inst(31 downto 28) = "1000");
+    v.d.mem_write := to_std_logic(inst(31 downto 28) = "0110");
+    v.d.mem_read := to_std_logic(inst(31 downto 28) = "1000");
+
+    -- branching...
+
+    v.d.fd_data_x := v.d.data_x;
+    v.d.fd_data_a := v.d.data_a;
+
+    d_data_forward(inst(27 downto 23), v.d.fd_data_x);
+    d_data_forward(inst(22 downto 18), v.d.fd_data_a);
+
+    case inst(31 downto 28) is
+      when "1011" | "1101" | "1111" =>
+        v.d.pc_addr := r.f.nextpc + (repeat(inst(15), 14) & inst(15 downto 0) & "00");
+      when "1100" =>
+        v.d.pc_addr := v.d.fd_data_x;
+      when others =>
+        v.d.pc_addr := (others => '-');
+    end case;
+
+    case inst(31 downto 28) is
+      when "1011" | "1100" =>
+        v.d.pc_src := '1';
+      when "1101" =>
+        v.d.pc_src := to_std_logic(v.d.fd_data_x /= v.d.fd_data_a);
+      when "1111" =>
+        v.d.pc_src := to_std_logic(v.d.fd_data_x = v.d.fd_data_a);
+      when others =>
+        v.d.pc_src := '0';
+    end case;
+
+    v.d.pc_src := (not v.stall) and v.d.pc_src;
 
     if cpu_in.d_stall = '1' then
-      v.m.reg_write := '0';
+      v.d := r.d;
+    elsif v.stall = '1' then
+      v.d.reg_write := '0';
+      v.d.mem_write := '0';
+      v.d.mem_read := '0';
     end if;
+
+    -- FETCH
+
+    i_re := '1';
+
+    if v.stall = '1' or cpu_in.d_stall = '1' then
+      i_addr := r.f.pc;
+    elsif r.d.pc_src = '1' then
+      i_addr := r.d.pc_addr;
+    else
+      i_addr := r.f.nextpc;
+    end if;
+
+    v.f.pc := i_addr;
+
+    if cpu_in.i_stall = '1' then
+      v.f.nextpc := i_addr;
+    else
+      v.f.nextpc := i_addr + 4;
+    end if;
+
+    v.f.i_stall := cpu_in.i_stall;
 
     -- END
 
