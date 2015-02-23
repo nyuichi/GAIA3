@@ -67,18 +67,30 @@ begin   -- architecture Behavioral
       cpu_in  => cpu_in,
       cpu_out => cpu_out);
 
-  mux_1: entity work.mux
-    port map (
-      clk        => clk,
-      rst        => rst,
-      cpu_out    => cpu_out,
-      cpu_in     => cpu_in,
-      cache_out  => cache_out,
-      cache_in   => cache_in,
-      uart_out   => uart_out,
-      uart_in    => uart_in,
-      bram_out   => bram_out,
-      bram_in    => bram_in);
+  cpu_in.d_stall <= cache_out.stall;
+  cpu_in.d_data <= cache_out.rx;
+  cpu_in.d_data <= uart_out.rx;
+  cpu_in.d_data <= bram_out.rx;
+  cpu_in.i_stall <= cache_out.stall2;
+  cpu_in.i_data <= cache_out.rx2;
+  cpu_in.i_data <= bram_out.rx2;
+
+  cache_in.we <= cpu_out.d_we;
+  cache_in.re <= cpu_out.d_re;
+  cache_in.addr <= cpu_out.d_addr;
+  cache_in.val <= cpu_out.d_data;
+  cache_in.re2 <= cpu_out.i_re;
+  cache_in.addr2 <= cpu_out.i_addr;
+
+  uart_in.addr <= cpu_out.d_addr;
+  uart_in.we <= cpu_out.d_we;
+  uart_in.re <= cpu_out.d_re;
+  uart_in.val <= cpu_out.d_data;
+
+  bram_in.addr <= cpu_out.d_addr;
+  bram_in.we <= cpu_out.d_we;
+  bram_in.val <= cpu_out.d_data;
+  bram_in.addr2 <= cpu_out.i_addr;
 
   cache_1 : entity work.cache
     port map (

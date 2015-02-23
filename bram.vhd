@@ -1358,7 +1358,7 @@ begin
   process(clk)
   begin
     if rising_edge(clk) then
-      if bram_in.we = '1' then
+      if bram_in.addr < x"2000" and bram_in.we = '1' then
         ram(conv_integer(bram_in.addr(14 downto 2))) <= bram_in.val;
       end if;
       addr_reg  <= bram_in.addr;
@@ -1366,7 +1366,11 @@ begin
     end if;
   end process;
 
-  bram_out.rx  <= ram(conv_integer(addr_reg(14 downto 2)));
-  bram_out.rx2 <= ram(conv_integer(addr_reg2(14 downto 2)));
+  bram_out.rx  <= ram(conv_integer(addr_reg(14 downto 2)))
+                  when addr_reg < x"2000"
+                  else (others => 'Z');
+  bram_out.rx2 <= ram(conv_integer(addr_reg2(14 downto 2)))
+                  when addr_reg2 < x"2000"
+                  else (others => 'Z');
 
 end architecture;

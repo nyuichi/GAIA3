@@ -42,6 +42,8 @@ architecture Behavioral of uart is
     array(0 to 255) of std_logic_vector(7 downto 0);
 
   type reg_type is record
+    ack : std_logic;
+
     -- buffer
     tx_buf : buf_t;
     tx_ptr : std_logic_vector(7 downto 0);
@@ -59,6 +61,7 @@ architecture Behavioral of uart is
   end record;
 
   constant rzero : reg_type := (
+    ack    => '0',
     tx_buf => (others => (others => '0')),
     tx_ptr => (others => '0'),
     tx_len => 0,
@@ -94,6 +97,12 @@ begin
   begin
     v := r;
 
+    if uart_in.addr = x"2000" then
+      v.ack := '1';
+    else
+      v.ack := '0';
+    end if;
+
     v_din := x"FFFFFFFF";
     v_dout := x"00";
 
@@ -107,7 +116,7 @@ begin
     end if;
 
     -- write
-    if uart_in.we = '1' then
+    if v.ack = '1' and uart_in.we = '1' then
       if v.tx_len < 256 then
         v.tx_buf(conv_integer(v.tx_ptr + v.tx_len)) := uart_in.val(7 downto 0);
         v.tx_len := v.tx_len + 1;
@@ -115,7 +124,7 @@ begin
     end if;
 
     -- read
-    if uart_in.re = '1' then
+    if v.ack = '1' and uart_in.re = '1' then
       if v.rx_len > 0 then
         v_din := x"000000" & v.rx_buf(conv_integer(v.rx_ptr));
         v.rx_ptr := v.rx_ptr + 1;
@@ -140,7 +149,11 @@ begin
     tx_go <= v.we;
     rx_done <= v.re;
     tx_dat <= v_dout;
-    uart_out.rx <= r.prev;
+    if r.ack = '1' then
+      uart_out.rx <= r.prev;
+    else
+      uart_out.rx <= (others => 'Z');
+    end if;
   end process;
 
   regs : process(clk, rst)

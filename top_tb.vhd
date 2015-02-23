@@ -2350,7 +2350,7 @@ begin
 
         wait for (2 * BR);
 
-    wait for (16 * BR);
+    wait for (100 * BR);
 
     assert false report "Simulation End." severity failure;
   end process;

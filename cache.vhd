@@ -31,6 +31,9 @@ architecture Behavioral of cache is
     array(0 to 255) of header_line_type;
 
   type reg_type is record
+    ack1 : std_logic;
+    ack2 : std_logic;
+
     state : state_type;
 
     -- data cache
@@ -57,6 +60,8 @@ architecture Behavioral of cache is
   end record;
 
   constant rzero : reg_type := (
+    ack1      => '0',
+    ack2      => '0',
     state     => NO_OP,
     header    => (others => (valid => '0', tag => (others => '0'))),
     tag       => (others => '0'),
@@ -127,19 +132,29 @@ begin
 
     -- data cache
 
+    if cache_in.addr >= x"3000" then
+      v.ack1 := '1';
+    else
+      v.ack1 := '0';
+    end if;
+
     v.sram_addr := (others => '0');
     v.sram_we := '0';
     v.sram_re := '0';
 
     v_bram_addr := (others => '0');
     v_bram_we := '0';
+    v_bram_di := (others => '0');
 
     miss := detect_miss;
 
     case r.state is
       when NO_OP =>
 
-        if cache_in.re = '1' and miss = '0' then
+        if v.ack1 = '0' then
+          -- pass
+
+        elsif cache_in.re = '1' and miss = '0' then
           v_bram_addr := cache_in.addr(13 downto 2);
 
         elsif cache_in.we = '1' and miss = '0' then
@@ -220,6 +235,12 @@ begin
 
     -- instruction cache
 
+    if cache_in.addr2 >= x"3000" then
+      v.ack2 := '1';
+    else
+      v.ack2 := '0';
+    end if;
+
     v_inst := sram_out.rx;
 
     if r.req2 = '1' and r.addr2 = cache_in.addr2 then
@@ -246,9 +267,18 @@ begin
     rin <= v;
 
     cache_out.stall  <= v_hazard;
-    cache_out.rx     <= bram_do;
+    if r.ack1 = '1' then
+      cache_out.rx <= bram_do;
+    else
+      cache_out.rx <= (others => 'Z');
+    end if;
+
     cache_out.stall2 <= v_hazard2;
-    cache_out.rx2    <= v_inst;
+    if r.ack2 = '1' then
+      cache_out.rx2 <= v_inst;
+    else
+      cache_out.rx2 <= (others => 'Z');
+    end if;
 
     bram_we          <= v_bram_we;
     bram_addr        <= v_bram_addr;
