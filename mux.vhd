@@ -61,7 +61,7 @@ begin
       when 16#00003000# to 16#003FFFFF# =>
         v_cpu_in.i_data := cache_out.rx2;
       when others =>
-        assert false report "hoge";
+        assert false report "hoge" severity failure;
     end case;
 
     if r.d_re = '1' or r.d_we = '1' then
@@ -73,7 +73,7 @@ begin
         when 16#00003000# to 16#003FFFFF# =>
           v_cpu_in.d_data := cache_out.rx;
         when others =>
-          assert false report "hoge";
+          assert false report "hoge" severity failure;
       end case;
     end if;
 
@@ -90,7 +90,7 @@ begin
         v_cpu_in.i_stall := cache_out.stall2;
 
       when others =>
-        assert false report "fuga";
+        assert false report "fuga" severity failure;
     end case;
 
     if cpu_out.d_we = '1' or cpu_out.d_re = '1' then
@@ -115,7 +115,7 @@ begin
           v_cpu_in.d_stall := cache_out.stall;
 
         when others =>
-          assert false report "fuga";
+          assert false report "fuga" severity failure;
       end case;
     end if;
 
