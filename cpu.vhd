@@ -431,6 +431,10 @@ begin
 
     if cpu_in.d_stall = '1' then
       v.d := r.d;
+      --// forwarding! see http://goo.gl/dhJQ69 for details.
+      v.d.data_x := v.regfile(conv_integer(v.d.reg_dest));
+      v.d.data_a := v.regfile(conv_integer(v.d.reg_a));
+      v.d.data_b := v.regfile(conv_integer(v.d.reg_b));
     elsif stall = '1' or r.d.pc_src = '1' then
       v.d.reg_write := '0';
       v.d.mem_write := '0';
