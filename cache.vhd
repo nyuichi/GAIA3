@@ -44,7 +44,7 @@ architecture Behavioral of cache is
     index  : std_logic_vector(7 downto 0);
     offset : std_logic_vector(3 downto 0);
 
-    fetch_n : integer range -3 to 15;
+    fetch_n : integer range -2 to 15;
 
     sram_addr : std_logic_vector(31 downto 0);
     sram_we   : std_logic;
@@ -209,12 +209,9 @@ begin
             v_bram_addr := r.index & conv_std_logic_vector(r.fetch_n, 4);
             v_bram_we := '1';
             v_bram_di := sram_out.rx;
-            v.fetch_n := -3;
+            v.fetch_n := -2;
             v.header(conv_integer(r.index)).valid := '1';
             v.header(conv_integer(r.index)).tag := r.tag;
-          when -3 =>
-            v_bram_addr := r.index & r.offset;
-            v.fetch_n := -2;
             v.state := NO_OP;
           when others =>
             assert false;
@@ -226,10 +223,10 @@ begin
         v.state := NO_OP;
     end case;
 
-    if v.state = NO_OP then
-      v_hazard := '0';
-    else
+    if v.state = FETCH or r.state = FETCH then
       v_hazard := '1';
+    else
+      v_hazard := '0';
     end if;
 
 
