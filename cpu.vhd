@@ -268,6 +268,7 @@ begin
     variable data_a : std_logic_vector(31 downto 0);
     variable data_b : std_logic_vector(31 downto 0);
     variable data_x : std_logic_vector(31 downto 0);
+    variable data_bl : std_logic_vector(31 downto 0);
 
     -- external
     variable i_addr : std_logic_vector(31 downto 0);
@@ -316,19 +317,21 @@ begin
     e_data_forward(r.d.reg_b, r.d.data_b, data_b);
     e_data_forward(r.d.reg_dest, r.d.data_x, data_x);
 
+    data_bl := std_logic_vector(signed(data_b) + signed(r.d.data_l(7 downto 0)));
+
     case r.d.opcode is
       when OP_ALU =>
         case r.d.tag is
           when ALU_ADD =>
-            v.e.res := data_a + data_b + r.d.data_l;
+            v.e.res := data_a + data_bl;
           when ALU_SUB =>
-            v.e.res := data_a - data_b - r.d.data_l;
+            v.e.res := data_a - data_bl;
           when ALU_SHL =>
-            v.e.res := std_logic_vector(shift_left(unsigned(data_a), conv_integer(data_b + r.d.data_l)));
+            v.e.res := std_logic_vector(shift_left(unsigned(data_a), conv_integer(data_bl)));
           when ALU_SHR =>
-            v.e.res := std_logic_vector(shift_right(unsigned(data_a), conv_integer(data_b + r.d.data_l)));
+            v.e.res := std_logic_vector(shift_right(unsigned(data_a), conv_integer(data_bl)));
           when ALU_SAR =>
-            v.e.res := std_logic_vector(shift_right(signed(data_a), conv_integer(data_b + r.d.data_l)));
+            v.e.res := std_logic_vector(shift_right(signed(data_a), conv_integer(data_bl)));
           when ALU_AND =>
             v.e.res := data_a and data_b and r.d.data_l;
           when ALU_OR =>
@@ -336,13 +339,13 @@ begin
           when ALU_XOR =>
             v.e.res := data_a xor data_b xor r.d.data_l;
           when ALU_CMPNE =>
-            v.e.res := repeat('0', 31) & to_std_logic(data_a /= data_b + r.d.data_l);
+            v.e.res := repeat('0', 31) & to_std_logic(data_a /= data_bl);
           when ALU_CMPEQ =>
-            v.e.res := repeat('0', 31) & to_std_logic(data_a = data_b + r.d.data_l);
+            v.e.res := repeat('0', 31) & to_std_logic(data_a = data_bl);
           when ALU_CMPLT =>
-            v.e.res := repeat('0', 31) & to_std_logic(signed(data_a) < signed(data_b + r.d.data_l));
+            v.e.res := repeat('0', 31) & to_std_logic(signed(data_a) < signed(data_bl));
           when ALU_CMPLE =>
-            v.e.res := repeat('0', 31) & to_std_logic(signed(data_a) <= signed(data_b + r.d.data_l));
+            v.e.res := repeat('0', 31) & to_std_logic(signed(data_a) <= signed(data_bl));
           when ALU_FCMPNE =>
             data_a := normalize_fzero(data_a);
             data_b := normalize_fzero(data_b);
