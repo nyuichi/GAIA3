@@ -170,8 +170,8 @@ architecture Behavioral of cpu is
 
     -- micro decoder
     opcode := inst(31 downto 28);
-    reg_x := inst(27 downto 23);
-    reg_a := inst(22 downto 18);
+    reg_x  := inst(27 downto 23);
+    reg_a  := inst(22 downto 18);
     case opcode is
       when OP_ALU | OP_FPU =>
         reg_b := inst(17 downto 13);
@@ -265,18 +265,18 @@ begin
     variable res : std_logic_vector(31 downto 0);
 
     -- execute
-    variable data_a : std_logic_vector(31 downto 0);
-    variable data_b : std_logic_vector(31 downto 0);
-    variable data_x : std_logic_vector(31 downto 0);
+    variable data_a  : std_logic_vector(31 downto 0);
+    variable data_b  : std_logic_vector(31 downto 0);
+    variable data_x  : std_logic_vector(31 downto 0);
     variable data_bl : std_logic_vector(31 downto 0);
 
     -- external
     variable i_addr : std_logic_vector(31 downto 0);
-    variable i_re : std_logic;
+    variable i_re   : std_logic;
     variable d_addr : std_logic_vector(31 downto 0);
-    variable d_val : std_logic_vector(31 downto 0);
-    variable d_we : std_logic;
-    variable d_re : std_logic;
+    variable d_val  : std_logic_vector(31 downto 0);
+    variable d_we   : std_logic;
+    variable d_re   : std_logic;
   begin
     v := r;
 
@@ -299,13 +299,13 @@ begin
     -- MEMORY
 
     d_addr := r.e.mem_addr;
-    d_val := r.e.data_x;
-    d_we := r.e.mem_write;
-    d_re := r.e.mem_read;
-    v.m.res := r.e.res;
-    v.m.reg_dest := r.e.reg_dest;
+    d_val  := r.e.data_x;
+    d_we   := r.e.mem_write;
+    d_re   := r.e.mem_read;
+    v.m.res       := r.e.res;
+    v.m.reg_dest  := r.e.reg_dest;
     v.m.reg_write := r.e.reg_write;
-    v.m.reg_mem := r.e.reg_mem;
+    v.m.reg_mem   := r.e.reg_mem;
 
     if cpu_in.d_stall = '1' then
       v.m.reg_write := '0';
@@ -386,12 +386,12 @@ begin
 
     v.e.mem_addr := data_a + (r.d.data_d(29 downto 0) & "00");
 
-    v.e.reg_dest := r.d.reg_dest;
-    v.e.data_x := data_x;
+    v.e.reg_dest  := r.d.reg_dest;
+    v.e.data_x    := data_x;
     v.e.reg_write := r.d.reg_write;
-    v.e.reg_mem := r.d.reg_mem;
+    v.e.reg_mem   := r.d.reg_mem;
     v.e.mem_write := r.d.mem_write;
-    v.e.mem_read := r.d.mem_read;
+    v.e.mem_read  := r.d.mem_read;
 
     if cpu_in.d_stall = '1' then
       v.e := r.e;
