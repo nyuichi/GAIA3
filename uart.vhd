@@ -97,7 +97,7 @@ begin
   begin
     v := r;
 
-    if uart_in.addr = x"2000" then
+    if uart_in.addr = x"80001000" then
       v.ack := '1';
     else
       v.ack := '0';

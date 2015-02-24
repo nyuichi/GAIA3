@@ -132,7 +132,7 @@ begin
 
     -- data cache
 
-    if cache_in.addr >= x"3000" then
+    if cache_in.addr < x"400000" then
       v.ack1 := '1';
     else
       v.ack1 := '0';
@@ -232,7 +232,7 @@ begin
 
     -- instruction cache
 
-    if cache_in.addr2 >= x"3000" then
+    if cache_in.addr2 < x"400000" then
       v.ack2 := '1';
     else
       v.ack2 := '0';
