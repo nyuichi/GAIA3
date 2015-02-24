@@ -134,31 +134,30 @@ package types is
   end component;
 
 
-  -- bram
+  -- rom
 
-  type bram_out_type is record
+  type rom_out_type is record
     rx  : std_logic_vector(31 downto 0);
     rx2 : std_logic_vector(31 downto 0);
   end record;
 
-  type bram_in_type is record
-    we    : std_logic;
-    val   : std_logic_vector(31 downto 0);
+  type rom_in_type is record
     addr  : std_logic_vector(31 downto 0);
     addr2 : std_logic_vector(31 downto 0);
   end record;
 
-  constant bram_in_zero : bram_in_type := (
-    we   => '0',
-    val  => (others => '0'),
-    addr => (others => '0'),
+  constant rom_in_zero : rom_in_type := (
+    addr  => (others => '0'),
     addr2 => (others => '0'));
 
-  component bram is
+  type rom_type is
+    array(0 to 4095) of std_logic_vector(31 downto 0);
+
+  component rom is
     port (
-      clk      : in  std_logic;
-      bram_in  : in  bram_in_type;
-      bram_out : out bram_out_type);
+      clk     : in  std_logic;
+      rom_in  : in  rom_in_type;
+      rom_out : out rom_out_type);
   end component;
 
 
@@ -166,16 +165,16 @@ package types is
 
   component mux is
     port (
-      clk        : in  std_logic;
-      rst        : in  std_logic;
-      cpu_out    : in  cpu_out_type;
-      cpu_in     : out cpu_in_type;
-      cache_out  : in  cache_out_type;
-      cache_in   : out cache_in_type;
-      uart_out   : in  uart_out_type;
-      uart_in    : out uart_in_type;
-      bram_out   : in  bram_out_type;
-      bram_in    : out bram_in_type);
+      clk       : in  std_logic;
+      rst       : in  std_logic;
+      cpu_out   : in  cpu_out_type;
+      cpu_in    : out cpu_in_type;
+      cache_out : in  cache_out_type;
+      cache_in  : out cache_in_type;
+      uart_out  : in  uart_out_type;
+      uart_in   : out uart_in_type;
+      rom_out   : in  rom_out_type;
+      rom_in    : out rom_in_type);
   end component;
 
 
