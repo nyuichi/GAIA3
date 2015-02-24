@@ -74,7 +74,7 @@ architecture Behavioral of cpu is
   end record;
 
   constant fzero : fetch_reg_type := (
-    pc      => x"80000000",
+    pc      => (others => '0'),
     nextpc  => x"80000000",
     i_stall => '0'
     );

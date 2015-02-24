@@ -223,7 +223,9 @@ begin
         v.state := NO_OP;
     end case;
 
-    if v.state = FETCH or r.state = FETCH then
+    if v.ack1 = '0' then
+      v_hazard := '0';
+    elsif v.state = FETCH or r.state = FETCH then
       v_hazard := '1';
     else
       v_hazard := '0';
@@ -240,7 +242,9 @@ begin
 
     v_inst := sram_out.rx;
 
-    if r.req2 = '1' and r.addr2 = cache_in.addr2 then
+    if v.ack2 = '0' then
+      v_hazard2 := '0';
+    elsif r.req2 = '1' and r.addr2 = cache_in.addr2 then
       v_hazard2 := '0';
     else
       v_hazard2 := '1';
