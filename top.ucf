@@ -240,17 +240,17 @@ TIMESPEC "TS_SYS_CLK" = PERIOD "SYS_CLK" 14.52 ns HIGH 50 %;
 # SRAM constraints                                                         #
 ############################################################################
 
-# Data Out : Setup : tKC(7.5) - tS(1.5) = 6.0
-# Data Out : Hold : tH(0.5) = 0.5
-NET XZCKE     OFFSET = OUT 6.0 ns VALID 6.5 AFTER "MCLK1" RISING;
-NET XE1       OFFSET = OUT 6.0 ns VALID 6.5 AFTER "MCLK1" RISING;
-NET E2A       OFFSET = OUT 6.0 ns VALID 6.5 AFTER "MCLK1" RISING;
-NET XE3       OFFSET = OUT 6.0 ns VALID 6.5 AFTER "MCLK1" RISING;
-NET ADVA      OFFSET = OUT 6.0 ns VALID 6.5 AFTER "MCLK1" RISING;
-NET XWA       OFFSET = OUT 6.0 ns VALID 6.5 AFTER "MCLK1" RISING;
-NET "XZBE[*]" OFFSET = OUT 6.0 ns VALID 6.5 AFTER "MCLK1" RISING;
-NET "ZA[*]"   OFFSET = OUT 6.0 ns VALID 6.5 AFTER "MCLK1" RISING;
-NET "ZD[*]"   OFFSET = OUT 6.0 ns VALID 6.5 AFTER "MCLK1" RISING;
-# Data In : Setup : tKC(7.5) - tKQ(3.8) - delay(0.5) = 3.2
-# Data In : Hold  : tKQX(1.5) = 1.5
-NET "ZD[*]" OFFSET = IN 3.2 ns VALID 4.7 ns BEFORE "MCLK1" RISING;
+# # Data Out : Setup : tKC(7.5) - tS(1.5) = 6.0
+# # Data Out : Hold : tH(0.5) = 0.5
+# NET XZCKE     OFFSET = OUT 6.0 ns VALID 6.5 AFTER "MCLK1" RISING;
+# NET XE1       OFFSET = OUT 6.0 ns VALID 6.5 AFTER "MCLK1" RISING;
+# NET E2A       OFFSET = OUT 6.0 ns VALID 6.5 AFTER "MCLK1" RISING;
+# NET XE3       OFFSET = OUT 6.0 ns VALID 6.5 AFTER "MCLK1" RISING;
+# NET ADVA      OFFSET = OUT 6.0 ns VALID 6.5 AFTER "MCLK1" RISING;
+# NET XWA       OFFSET = OUT 6.0 ns VALID 6.5 AFTER "MCLK1" RISING;
+# NET "XZBE[*]" OFFSET = OUT 6.0 ns VALID 6.5 AFTER "MCLK1" RISING;
+# NET "ZA[*]"   OFFSET = OUT 6.0 ns VALID 6.5 AFTER "MCLK1" RISING;
+# NET "ZD[*]"   OFFSET = OUT 6.0 ns VALID 6.5 AFTER "MCLK1" RISING;
+# # Data In : Setup : tKC(7.5) - tKQ(3.8) - delay(0.5) = 3.2
+# # Data In : Hold  : tKQX(1.5) = 1.5
+# NET "ZD[*]" OFFSET = IN 3.2 ns VALID 4.7 ns BEFORE "MCLK1" RISING;
