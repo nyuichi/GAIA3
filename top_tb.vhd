@@ -73,7 +73,7 @@ architecture Behavioral of Top_tb is
   signal CLK : std_logic := '0';
   signal rs_tx, rs_rx : std_logic;
 
-  signal XRST : std_logic := '0';
+  signal XRST : std_logic := '1';
 
   -- global clock period
   constant CP: time := 15.15 ns;
@@ -158,12 +158,6 @@ begin
   begin
 
     RS_RX <= '1';
-
-    XRST <= '0';
-
-    wait for 1 us;
-
-    XRST <= '1';
 
         wait for (5 * BR);
 
