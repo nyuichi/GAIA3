@@ -48,6 +48,8 @@ architecture Behavioral of top is
   signal rom_out   : rom_out_type;
   signal rom_in    : rom_in_type   := rom_in_zero;
 
+  signal buf : std_logic_vector(31 downto 0) := (others => '0');
+
 begin   -- architecture Behavioral
 
   ib: IBUFG port map (
@@ -68,9 +70,11 @@ begin   -- architecture Behavioral
       cpu_out => cpu_out);
 
   cpu_in.d_stall <= cache_out.stall;
-  cpu_in.d_data  <= cache_out.rx;
-  cpu_in.d_data  <= uart_out.rx;
-  cpu_in.d_data  <= rom_out.rx;
+  cpu_in.d_data  <= to_x01(buf);
+  buf <= cache_out.rx;
+  buf <= uart_out.rx;
+  buf <= rom_out.rx;
+  buf <= (others => 'H');
   cpu_in.i_stall <= cache_out.stall2;
   cpu_in.i_data  <= cache_out.rx2;
   cpu_in.i_data  <= rom_out.rx2;
