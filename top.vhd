@@ -37,16 +37,16 @@ architecture Behavioral of top is
 
   signal rst : std_logic;
 
-  signal cpu_in    : cpu_in_type   := cpu_in_zero;
-  signal cpu_out   : cpu_out_type;
-  signal cache_in  : cache_in_type := cache_in_zero;
-  signal cache_out : cache_out_type;
-  signal uart_in   : uart_in_type  := uart_in_zero;
-  signal uart_out  : uart_out_type;
-  signal sram_out  : sram_out_type;
-  signal sram_in   : sram_in_type  := sram_in_zero;
-  signal rom_out   : rom_out_type;
-  signal rom_in    : rom_in_type   := rom_in_zero;
+  signal cpu_in    : cpu_in_type    := cpu_in_zero;
+  signal cpu_out   : cpu_out_type   := cpu_out_zero;
+  signal cache_in  : cache_in_type  := cache_in_zero;
+  signal cache_out : cache_out_type := cache_out_zero;
+  signal uart_in   : uart_in_type   := uart_in_zero;
+  signal uart_out  : uart_out_type  := uart_out_zero;
+  signal sram_out  : sram_out_type  := sram_out_zero;
+  signal sram_in   : sram_in_type   := sram_in_zero;
+  signal rom_out   : rom_out_type   := rom_out_zero;
+  signal rom_in    : rom_in_type    := rom_in_zero;
 
 begin   -- architecture Behavioral
 

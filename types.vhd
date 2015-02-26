@@ -27,6 +27,14 @@ package types is
     d_addr : std_logic_vector(31 downto 0);
   end record;
 
+  constant cpu_out_zero : cpu_out_type := (
+    i_re   => '1',
+    i_addr => x"80000000",
+    d_re   => '0',
+    d_we   => '0',
+    d_data => (others => '0'),
+    d_addr => (others => '0'));
+
   component cpu is
     port (
       clk     : in  std_logic;
@@ -41,6 +49,9 @@ package types is
   type uart_out_type is record
     rx : std_logic_vector(31 downto 0);
   end record;
+
+  constant uart_out_zero : uart_out_type := (
+    rx => (others => 'Z'));
 
   type uart_in_type is record
     we   : std_logic;
@@ -71,6 +82,9 @@ package types is
   type sram_out_type is record
     rx : std_logic_vector(31 downto 0);
   end record;
+
+  constant sram_out_zero : sram_out_type := (
+    rx => (others => '0'));
 
   type sram_in_type is record
     addr : std_logic_vector(31 downto 0);
@@ -106,6 +120,12 @@ package types is
     rx2 : std_logic_vector(31 downto 0);
   end record;
 
+  constant cache_out_zero : cache_out_type := (
+    stall  => '0',
+    rx     => (others => 'Z'),
+    stall2 => '0',
+    rx2    => (others => 'Z'));
+
   type cache_in_type is record
     we    : std_logic;
     re    : std_logic;
@@ -140,6 +160,10 @@ package types is
     rx  : std_logic_vector(31 downto 0);
     rx2 : std_logic_vector(31 downto 0);
   end record;
+
+  constant rom_out_zero : rom_out_type := (
+    rx => (others => 'Z'),
+    rx2 => (others => 'Z'));
 
   type rom_in_type is record
     addr  : std_logic_vector(31 downto 0);
