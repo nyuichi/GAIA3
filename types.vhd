@@ -6,17 +6,21 @@ package types is
   -- cpu
 
   type cpu_in_type is record
-    i_stall : std_logic;
-    i_data  : std_logic_vector(31 downto 0);
-    d_stall : std_logic;
-    d_data  : std_logic_vector(31 downto 0);
+    i_stall   : std_logic;
+    i_data    : std_logic_vector(31 downto 0);
+    d_stall   : std_logic;
+    d_data    : std_logic_vector(31 downto 0);
+    int_go    : std_logic;
+    int_cause : std_logic_vector(31 downto 0);
   end record;
 
   constant cpu_in_zero : cpu_in_type := (
-    i_stall => '0',
-    i_data  => (others => '0'),
-    d_stall => '0',
-    d_data  => (others => '0'));
+    i_stall   => '0',
+    i_data    => (others => '0'),
+    d_stall   => '0',
+    d_data    => (others => '0'),
+    int_go    => '0',
+    int_cause => (others => '0'));
 
   type cpu_out_type is record
     i_re   : std_logic;
@@ -25,6 +29,8 @@ package types is
     d_we   : std_logic;
     d_data : std_logic_vector(31 downto 0);
     d_addr : std_logic_vector(31 downto 0);
+    eoi    : std_logic;
+    eoi_id : std_logic_vector(31 downto 0);
   end record;
 
   constant cpu_out_zero : cpu_out_type := (
@@ -33,7 +39,9 @@ package types is
     d_re   => '0',
     d_we   => '0',
     d_data => (others => '0'),
-    d_addr => (others => '0'));
+    d_addr => (others => '0'),
+    eoi    => '0',
+    eoi_id => (others => '0'));
 
   component cpu is
     port (
@@ -47,24 +55,28 @@ package types is
   -- uart
 
   type uart_out_type is record
-    rx : std_logic_vector(31 downto 0);
+    rx     : std_logic_vector(31 downto 0);
+    int_go : std_logic;
   end record;
 
   constant uart_out_zero : uart_out_type := (
-    rx => (others => 'Z'));
+    rx     => (others => 'Z'),
+    int_go => '0');
 
   type uart_in_type is record
     we   : std_logic;
     re   : std_logic;
     val  : std_logic_vector(31 downto 0);
     addr : std_logic_vector(31 downto 0);
+    eoi  : std_logic;
   end record;
 
   constant uart_in_zero : uart_in_type := (
     we   => '0',
     re   => '0',
     val  => (others => '0'),
-    addr => (others => '0'));
+    addr => (others => '0'),
+    eoi  => '0');
 
   component uart is
     port (
@@ -182,6 +194,33 @@ package types is
       clk     : in  std_logic;
       rom_in  : in  rom_in_type;
       rom_out : out rom_out_type);
+  end component;
+
+
+  -- timer
+
+  type timer_in_type is record
+    eoi : std_logic;
+  end record;
+
+  type timer_out_type is record
+    int_go : std_logic;
+  end record;
+
+  constant timer_in_zero : timer_in_type := (
+    eoi => '0'
+    );
+
+  constant timer_out_zero : timer_out_type := (
+    int_go => '0'
+    );
+
+  component timer is
+    port (
+        clk       : in  std_logic;
+        rst       : in  std_logic;
+        timer_in  : in  timer_in_type;
+        timer_out : out timer_out_type);
   end component;
 
 

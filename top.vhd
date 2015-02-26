@@ -47,6 +47,8 @@ architecture Behavioral of top is
   signal sram_in   : sram_in_type   := sram_in_zero;
   signal rom_out   : rom_out_type   := rom_out_zero;
   signal rom_in    : rom_in_type    := rom_in_zero;
+  signal timer_in  : timer_in_type  := timer_in_zero;
+  signal timer_out : timer_out_type := timer_out_zero;
 
 begin   -- architecture Behavioral
 
@@ -80,6 +82,10 @@ begin   -- architecture Behavioral
 -- pragma synthesis_off
   cpu_in.i_data  <= (others => 'H');
 -- pragma synthesis_on
+  cpu_in.int_go  <= uart_out.int_go;
+  cpu_in.int_cause <= x"00000001" when timer_out.int_go = '1' else
+                      x"00000002" when uart_out.int_go = '1' else
+                      x"00000000";
 
   cache_in.we    <= cpu_out.d_we;
   cache_in.re    <= cpu_out.d_re;
@@ -92,9 +98,12 @@ begin   -- architecture Behavioral
   uart_in.we   <= cpu_out.d_we;
   uart_in.re   <= cpu_out.d_re;
   uart_in.val  <= cpu_out.d_data;
+  uart_in.eoi  <= cpu_out.eoi when cpu_out.eoi_id = x"00000002" else '0';
 
   rom_in.addr  <= cpu_out.d_addr;
   rom_in.addr2 <= cpu_out.i_addr;
+
+  timer_in.eoi <= cpu_out.eoi when cpu_out.eoi_id = x"00000001" else '0';
 
   cache_1 : entity work.cache
     port map (
@@ -129,6 +138,13 @@ begin   -- architecture Behavioral
       ZDP      => ZDP,
       ZA       => ZA,
       XWA      => XWA);
+
+  timer_1: entity work.timer
+    port map (
+      clk       => clk,
+      rst       => rst,
+      timer_in  => timer_in,
+      timer_out => timer_out);
 
   XE1       <= '0';
   E2A       <= '1';

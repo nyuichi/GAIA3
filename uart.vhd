@@ -3,6 +3,7 @@ use IEEE.std_logic_1164.all;
 use IEEE.std_logic_unsigned.all;
 
 use work.types.all;
+use work.util.all;
 
 entity uart is
 
@@ -58,6 +59,7 @@ architecture Behavioral of uart is
 
     -- reg
     prev : std_logic_vector(31 downto 0);
+    int  : std_logic;
   end record;
 
   constant rzero : reg_type := (
@@ -70,7 +72,8 @@ architecture Behavioral of uart is
     rx_len => 0,
     re     => '0',
     we     => '1',
-    prev   => (others => '0'));
+    prev   => (others => '0'),
+    int    => '0');
 
   signal r, rin : reg_type := rzero;
 
@@ -144,6 +147,11 @@ begin
 
     v.prev := v_din;
 
+    if uart_in.eoi = '1' then
+      v.int := '0';
+    end if;
+    v.int := v.int or to_std_logic(v.rx_len /= 0);
+
     rin <= v;
 
     tx_go <= v.we;
@@ -154,6 +162,7 @@ begin
     else
       uart_out.rx <= (others => 'Z');
     end if;
+    uart_out.int_go <= r.int;
   end process;
 
   regs : process(clk, rst)
