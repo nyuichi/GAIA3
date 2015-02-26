@@ -71,9 +71,15 @@ begin   -- architecture Behavioral
   cpu_in.d_data  <= cache_out.rx;
   cpu_in.d_data  <= uart_out.rx;
   cpu_in.d_data  <= rom_out.rx;
+-- pragma synthesis_off
+  cpu_in.d_data  <= (others => 'H');
+-- pragma synthesis_on
   cpu_in.i_stall <= cache_out.stall2;
   cpu_in.i_data  <= cache_out.rx2;
   cpu_in.i_data  <= rom_out.rx2;
+-- pragma synthesis_off
+  cpu_in.i_data  <= (others => 'H');
+-- pragma synthesis_on
 
   cache_in.we    <= cpu_out.d_we;
   cache_in.re    <= cpu_out.d_re;
