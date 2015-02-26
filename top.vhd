@@ -82,7 +82,7 @@ begin   -- architecture Behavioral
 -- pragma synthesis_off
   cpu_in.i_data  <= (others => 'H');
 -- pragma synthesis_on
-  cpu_in.int_go  <= uart_out.int_go;
+  cpu_in.int_go  <= uart_out.int_go or timer_out.int_go;
   cpu_in.int_cause <= x"00000001" when timer_out.int_go = '1' else
                       x"00000002" when uart_out.int_go = '1' else
                       x"00000000";

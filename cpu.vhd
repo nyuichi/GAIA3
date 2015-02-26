@@ -424,6 +424,7 @@ begin
         if d_we = '1' then
           v.flag.mmu_pd := d_val;
         end if;
+      when others =>
     end case;
 
     if cpu_in.d_stall = '1' then
