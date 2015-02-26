@@ -185,23 +185,6 @@ package types is
   end component;
 
 
-  -- mux
-
-  component mux is
-    port (
-      clk       : in  std_logic;
-      rst       : in  std_logic;
-      cpu_out   : in  cpu_out_type;
-      cpu_in    : out cpu_in_type;
-      cache_out : in  cache_out_type;
-      cache_in  : out cache_in_type;
-      uart_out  : in  uart_out_type;
-      uart_in   : out uart_in_type;
-      rom_out   : in  rom_out_type;
-      rom_in    : out rom_in_type);
-  end component;
-
-
   -- util (to be moved)
 
   component blockram is
