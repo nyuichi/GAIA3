@@ -72,6 +72,7 @@ architecture Behavioral of cpu is
     int_epc     : std_logic_vector(31 downto 0);
     int_cause   : std_logic_vector(31 downto 0);
     int_handler : std_logic_vector(31 downto 0);
+    soft_int    : std_logic;
     mmu_en      : std_logic;
     mmu_pd      : std_logic_vector(31 downto 0);
   end record;
@@ -136,6 +137,7 @@ architecture Behavioral of cpu is
     int_epc     => (others => '0'),
     int_cause   => (others => '0'),
     int_handler => (others => '0'),
+    soft_int    => '0',
     mmu_en      => '0',
     mmu_pd      => (others => '0')
     );
@@ -513,7 +515,12 @@ begin
     v.e.mem_write := r.d.mem_write;
     v.e.mem_read  := r.d.mem_read;
 
-    detect_interrupt(r.d.soft_int, v);
+    if r.flag.eoi = '1' and r.flag.int_cause = x"00000003" then -- end of soft_int
+      v.flag.soft_int := '0';
+    end if;
+    v.flag.soft_int := v.flag.soft_int or r.d.soft_int;
+
+    detect_interrupt(v.flag.soft_int, v);
 
     if cpu_in.d_stall = '1' then
       v.e := r.e;
