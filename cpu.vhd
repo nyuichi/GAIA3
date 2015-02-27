@@ -303,7 +303,7 @@ architecture Behavioral of cpu is
     int_go := cpu_in.int_go or soft_int;
     int_epc := v.flag.int_epc;
     if soft_int = '1' then
-      int_cause := (others => '0');
+      int_cause := x"00000003";
     elsif cpu_in.int_go = '1' then
       int_cause := cpu_in.int_cause;
     end if;
