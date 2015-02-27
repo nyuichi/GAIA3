@@ -159,7 +159,7 @@ begin
 
     RS_RX <= '1';
 
-        wait for (5 * BR);
+    wait for (5 * BR);
 
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
@@ -168,7 +168,7 @@ begin
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
 
@@ -203,27 +203,13 @@ begin
         wait for (2 * BR);
 
 
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
@@ -234,12 +220,12 @@ begin
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
 
         wait for (2 * BR);
@@ -264,38 +250,24 @@ begin
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
 
         wait for (2 * BR);
 
 
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
 
         wait for (2 * BR);
@@ -331,11 +303,11 @@ begin
 
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
@@ -344,14 +316,14 @@ begin
 
 
         wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
 
         wait for (2 * BR);
@@ -388,13 +360,27 @@ begin
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
+
+        wait for (2 * BR);
+
+
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '1';
 
         wait for (2 * BR);
 
@@ -402,19 +388,19 @@ begin
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '1';
 
         wait for (2 * BR);
 
 
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
@@ -428,7 +414,7 @@ begin
 
 
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
@@ -443,12 +429,12 @@ begin
 
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
 
@@ -456,11 +442,11 @@ begin
 
 
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
@@ -498,12 +484,12 @@ begin
 
 
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
@@ -512,14 +498,14 @@ begin
 
 
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
 
         wait for (2 * BR);
@@ -540,14 +526,28 @@ begin
 
 
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
+
+        wait for (2 * BR);
+
+
         wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
 
         wait for (2 * BR);
@@ -556,12 +556,26 @@ begin
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
+
+        wait for (2 * BR);
+
+
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
 
         wait for (2 * BR);
@@ -571,7 +585,7 @@ begin
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
@@ -582,7 +596,7 @@ begin
 
 
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
@@ -597,10 +611,10 @@ begin
 
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
@@ -615,8 +629,8 @@ begin
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
 
@@ -626,11 +640,11 @@ begin
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
 
@@ -638,10 +652,10 @@ begin
 
 
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
@@ -652,14 +666,14 @@ begin
 
 
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
 
         wait for (2 * BR);
@@ -672,7 +686,7 @@ begin
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
 
@@ -713,7 +727,7 @@ begin
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
@@ -722,28 +736,14 @@ begin
 
 
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
 
         wait for (2 * BR);
@@ -752,11 +752,11 @@ begin
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
 
@@ -764,13 +764,13 @@ begin
 
 
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
 
@@ -778,10 +778,10 @@ begin
 
 
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
@@ -795,10 +795,10 @@ begin
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
 
@@ -809,7 +809,7 @@ begin
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
@@ -827,18 +827,18 @@ begin
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
 
         wait for (2 * BR);
 
 
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
@@ -851,11 +851,11 @@ begin
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
 
         wait for (2 * BR);
@@ -864,19 +864,19 @@ begin
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
 
         wait for (2 * BR);
 
 
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
@@ -890,13 +890,13 @@ begin
 
 
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
+        wait for BR; RS_RX <= '0';
+        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
 
@@ -906,1041 +906,19 @@ begin
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
 
         wait for (2 * BR);
 
 
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
@@ -1954,29 +932,15 @@ begin
 
 
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
 
         wait for (2 * BR);
 
@@ -1995,27 +959,13 @@ begin
         wait for (2 * BR);
 
 
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
@@ -2023,167 +973,55 @@ begin
         wait for (2 * BR);
 
 
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
 
         wait for (2 * BR);
 
 
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
 
         wait for (2 * BR);
 
 
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
 
         wait for (2 * BR);
 
 
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
@@ -2191,98 +1029,28 @@ begin
         wait for (2 * BR);
 
 
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
 
         wait for (2 * BR);
 
 
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
         wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
-
-        wait for (2 * BR);
-
-
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
-        wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '1';
 
