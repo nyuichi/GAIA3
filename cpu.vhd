@@ -393,7 +393,7 @@ begin
         end if;
       when x"80001104" =>
         if d_re = '1' then
-          v.m.res := repeat('0', 30) & r.flag.int_en;
+          v.m.res := repeat('0', 31) & r.flag.int_en;
         end if;
         if d_we = '1' then
           v.flag.int_en := d_val(0);
@@ -414,7 +414,7 @@ begin
         end if;
       when x"80001200" =>
         if d_re = '1' then
-          v.m.res := repeat('0', 30) & r.flag.mmu_en;
+          v.m.res := repeat('0', 31) & r.flag.mmu_en;
         end if;
         if d_we = '1' then
           v.flag.mmu_en := d_val(0);
