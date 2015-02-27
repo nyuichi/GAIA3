@@ -154,19 +154,7 @@ begin
         if v.ack1 = '0' then
           -- pass
 
-        elsif cache_in.re = '1' and miss = '0' then
-          v_bram_addr := cache_in.addr(13 downto 2);
-
-        elsif cache_in.we = '1' and miss = '0' then
-          v.sram_addr := cache_in.addr;
-          v.sram_we   := '1';
-          v.sram_tx   := cache_in.val;
-
-          v_bram_addr := cache_in.addr(13 downto 2);
-          v_bram_we   := '1';
-          v_bram_di   := cache_in.val;
-
-        elsif cache_in.re = '1' and miss = '1' then
+        elsif (cache_in.re = '1' or cache_in.we = '1') and miss = '1' then
           v.tag    := cache_in.addr(31 downto 14);
           v.index  := cache_in.addr(13 downto 6);
           v.offset := cache_in.addr(5 downto 2);
@@ -179,10 +167,17 @@ begin
 
           v.state := FETCH;
 
-        elsif cache_in.we = '1' and miss = '1' then
+        elsif cache_in.re = '1' and miss = '0' then
+          v_bram_addr := cache_in.addr(13 downto 2);
+
+        elsif cache_in.we = '1' and miss = '0' then
           v.sram_addr := cache_in.addr;
           v.sram_we   := '1';
           v.sram_tx   := cache_in.val;
+
+          v_bram_addr := cache_in.addr(13 downto 2);
+          v_bram_we   := '1';
+          v_bram_di   := cache_in.val;
 
         end if;
 
