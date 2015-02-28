@@ -181,21 +181,21 @@ package types is
   -- rom
 
   type rom_out_type is record
-    rx  : std_logic_vector(31 downto 0);
+    rx1 : std_logic_vector(31 downto 0);
     rx2 : std_logic_vector(31 downto 0);
   end record;
 
   constant rom_out_zero : rom_out_type := (
-    rx => (others => 'Z'),
+    rx1 => (others => 'Z'),
     rx2 => (others => 'Z'));
 
   type rom_in_type is record
-    addr  : std_logic_vector(31 downto 0);
+    addr1 : std_logic_vector(31 downto 0);
     addr2 : std_logic_vector(31 downto 0);
   end record;
 
   constant rom_in_zero : rom_in_type := (
-    addr  => (others => '0'),
+    addr1 => (others => '0'),
     addr2 => (others => '0'));
 
   type rom_type is

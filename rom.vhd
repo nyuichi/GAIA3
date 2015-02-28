@@ -18,7 +18,7 @@ architecture behavioral of rom is
 
   constant rom : rom_type := bootloader_prog;
 
-  signal addr_reg : std_logic_vector(31 downto 0) := (others => '0');
+  signal addr_reg1 : std_logic_vector(31 downto 0) := (others => '0');
   signal addr_reg2 : std_logic_vector(31 downto 0) := (others => '0');
 
 begin
@@ -26,13 +26,13 @@ begin
   process(clk)
   begin
     if rising_edge(clk) then
-      addr_reg  <= rom_in.addr;
+      addr_reg1 <= rom_in.addr1;
       addr_reg2 <= rom_in.addr2;
     end if;
   end process;
 
-  rom_out.rx  <= rom(conv_integer(addr_reg(13 downto 2)))
-                  when x"80000000" <= addr_reg and addr_reg < x"80001000"
+  rom_out.rx1 <= rom(conv_integer(addr_reg1(13 downto 2)))
+                  when x"80000000" <= addr_reg1 and addr_reg1 < x"80001000"
                   else (others => 'Z');
   rom_out.rx2 <= rom(conv_integer(addr_reg2(13 downto 2)))
                   when x"80000000" <= addr_reg2 and addr_reg2 < x"80001000"

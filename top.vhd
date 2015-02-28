@@ -83,7 +83,7 @@ begin   -- architecture Behavioral
   cpu_in.d_stall <= cache_out.stall;
   cpu_in.d_data  <= cache_out.rx;
   cpu_in.d_data  <= uart_out.rx;
-  cpu_in.d_data  <= rom_out.rx;
+  cpu_in.d_data  <= rom_out.rx1;
 -- pragma synthesis_off
   cpu_in.d_data  <= (others => 'H');
 -- pragma synthesis_on
@@ -112,7 +112,7 @@ begin   -- architecture Behavioral
   uart_in.val  <= cpu_out.d_data;
   uart_in.eoi  <= cpu_out.eoi when cpu_out.eoi_id = x"00000002" else '0';
 
-  rom_in.addr  <= cpu_out.d_addr;
+  rom_in.addr1 <= cpu_out.d_addr;
   rom_in.addr2 <= cpu_out.i_addr;
 
   timer_in.eoi <= cpu_out.eoi when cpu_out.eoi_id = x"00000001" else '0';
