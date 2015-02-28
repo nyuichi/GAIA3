@@ -27,6 +27,7 @@ package types is
     i_addr : std_logic_vector(31 downto 0);
     d_re   : std_logic;
     d_we   : std_logic;
+    d_b    : std_logic;
     d_data : std_logic_vector(31 downto 0);
     d_addr : std_logic_vector(31 downto 0);
     eoi    : std_logic;
@@ -38,6 +39,7 @@ package types is
     i_addr => x"80000000",
     d_re   => '0',
     d_we   => '0',
+    d_b    => '0',
     d_data => (others => '0'),
     d_addr => (others => '0'),
     eoi    => '0',
@@ -139,6 +141,7 @@ package types is
     rx2    => (others => 'Z'));
 
   type cache_in_type is record
+    b     : std_logic;
     we    : std_logic;
     re    : std_logic;
     val   : std_logic_vector(31 downto 0);
@@ -148,6 +151,7 @@ package types is
   end record;
 
   constant cache_in_zero : cache_in_type := (
+    b     => '0',
     we    => '0',
     re    => '0',
     val   => (others => '0'),
@@ -248,7 +252,9 @@ package types is
   constant OP_SYSENTER : std_logic_vector(3 downto 0) := "0100";
   constant OP_SYSEXIT  : std_logic_vector(3 downto 0) := "0101";
   constant OP_ST       : std_logic_vector(3 downto 0) := "0110";
+  constant OP_STB      : std_logic_vector(3 downto 0) := "0111";
   constant OP_LD       : std_logic_vector(3 downto 0) := "1000";
+  constant OP_LDB      : std_logic_vector(3 downto 0) := "1001";
   constant OP_JL       : std_logic_vector(3 downto 0) := "1011";
   constant OP_JR       : std_logic_vector(3 downto 0) := "1100";
   constant OP_BNE      : std_logic_vector(3 downto 0) := "1101";

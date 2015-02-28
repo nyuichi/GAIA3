@@ -43,6 +43,7 @@ architecture Behavioral of cpu is
     reg_mem   : std_logic;
     mem_write : std_logic;
     mem_read  : std_logic;
+    mem_byte  : std_logic;
     soft_int  : std_logic;
     pc_addr   : std_logic_vector(31 downto 0);
     pc_src    : std_logic;
@@ -57,6 +58,7 @@ architecture Behavioral of cpu is
     reg_mem   : std_logic;
     mem_write : std_logic;
     mem_read  : std_logic;
+    mem_byte  : std_logic;
   end record;
 
   type memory_reg_type is record
@@ -108,6 +110,7 @@ architecture Behavioral of cpu is
     reg_mem   => '0',
     mem_write => '0',
     mem_read  => '0',
+    mem_byte  => '0',
     soft_int  => '0',
     pc_addr   => (others => '0'),
     pc_src    => '0'
@@ -121,7 +124,8 @@ architecture Behavioral of cpu is
     reg_write => '0',
     reg_mem   => '0',
     mem_write => '0',
-    mem_read  => '0'
+    mem_read  => '0',
+    mem_byte  => '0'
     );
 
   constant mzero : memory_reg_type := (
@@ -348,6 +352,7 @@ begin
     variable d_val  : std_logic_vector(31 downto 0);
     variable d_we   : std_logic;
     variable d_re   : std_logic;
+    variable d_b    : std_logic;
   begin
     v := r;
 
@@ -373,6 +378,7 @@ begin
     d_val  := r.e.data_x;
     d_we   := r.e.mem_write;
     d_re   := r.e.mem_read;
+    d_b    := r.e.mem_byte;
     v.m.res       := r.e.res;
     v.m.reg_dest  := r.e.reg_dest;
     v.m.reg_write := r.e.reg_write;
@@ -506,7 +512,12 @@ begin
         v.e.res := (others => '0');
     end case;
 
-    v.e.mem_addr := data_a + (r.d.data_d(29 downto 0) & "00");
+    case r.d.opcode is
+      when OP_STB | OP_LDB =>
+        v.e.mem_addr := data_a + r.d.data_d;
+      when others =>
+        v.e.mem_addr := data_a + (r.d.data_d(29 downto 0) & "00");
+    end case;
 
     v.e.reg_dest  := r.d.reg_dest;
     v.e.data_x    := data_x;
@@ -514,6 +525,7 @@ begin
     v.e.reg_mem   := r.d.reg_mem;
     v.e.mem_write := r.d.mem_write;
     v.e.mem_read  := r.d.mem_read;
+    v.e.mem_byte  := r.d.mem_byte;
 
     if r.flag.eoi = '1' and r.flag.int_cause = x"00000003" then -- end of soft_int
       v.flag.soft_int := '0';
@@ -552,15 +564,16 @@ begin
     v.d.nextpc := r.f.nextpc;
 
     case inst(31 downto 28) is
-      when OP_ALU | OP_FPU | OP_LDL | OP_LDH | OP_LD | OP_JL =>
+      when OP_ALU | OP_FPU | OP_LDL | OP_LDH | OP_LD | OP_LDB | OP_JL =>
         v.d.reg_write := '1';
       when others =>
         v.d.reg_write := '0';
     end case;
-    v.d.reg_mem   := to_std_logic(inst(31 downto 28) = OP_LD);
-    v.d.mem_write := to_std_logic(inst(31 downto 28) = OP_ST);
-    v.d.mem_read  := to_std_logic(inst(31 downto 28) = OP_LD);
-    v.d.soft_int  := to_std_logic(inst(31 downto 28) = OP_SYSENTER);
+    v.d.reg_mem   := to_std_logic(v.d.opcode = OP_LD or v.d.opcode = OP_LDB);
+    v.d.mem_write := to_std_logic(v.d.opcode = OP_ST or v.d.opcode = OP_STB);
+    v.d.mem_read  := to_std_logic(v.d.opcode = OP_LD or v.d.opcode = OP_LDB);
+    v.d.mem_byte  := to_std_logic(v.d.opcode = OP_LDB or v.d.opcode = OP_STB);
+    v.d.soft_int  := to_std_logic(v.d.opcode = OP_SYSENTER);
 
     --// take care of hazards
     detect_hazard(inst, stall);
@@ -614,6 +627,7 @@ begin
     cpu_out.d_data <= d_val;
     cpu_out.d_we   <= d_we;
     cpu_out.d_re   <= d_re;
+    cpu_out.d_b    <= d_b;
     cpu_out.eoi    <= r.flag.eoi;
     cpu_out.eoi_id <= r.flag.int_cause;
   end process;

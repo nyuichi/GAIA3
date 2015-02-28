@@ -87,6 +87,7 @@ begin   -- architecture Behavioral
                       x"00000002" when uart_out.int_go = '1' else
                       x"00000000";
 
+  cache_in.b     <= cpu_out.d_b;
   cache_in.we    <= cpu_out.d_we;
   cache_in.re    <= cpu_out.d_re;
   cache_in.addr  <= cpu_out.d_addr;

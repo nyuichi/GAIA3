@@ -2,7 +2,9 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_unsigned.all;
 use IEEE.std_logic_arith.all;
+
 use work.types.all;
+use work.util.all;
 
 entity cache is
 
@@ -51,6 +53,13 @@ architecture Behavioral of cache is
     sram_re   : std_logic;
     sram_tx   : std_logic_vector(31 downto 0);
 
+    bram_we   : std_logic;
+    bram_di   : std_logic_vector(31 downto 0);
+    bram_addr : std_logic_vector(11 downto 0);
+
+    b     : std_logic;
+    b_out : std_logic_vector(31 downto 0);
+
     -- instruction cache
 
     req1  : std_logic;
@@ -72,6 +81,11 @@ architecture Behavioral of cache is
     sram_we   => '0',
     sram_re   => '0',
     sram_tx   => (others => '0'),
+    bram_we   => '0',
+    bram_di   => (others => '0'),
+    bram_addr => (others => '0'),
+    b         => '0',
+    b_out     => (others => '0'),
     req1      => '0',
     req2      => '0',
     addr1     => (others => '0'),
@@ -124,9 +138,8 @@ begin
     variable v_hazard2 : std_logic;
     variable v_inst : std_logic_vector(31 downto 0);
 
-    variable v_bram_addr : std_logic_vector(11 downto 0);
-    variable v_bram_di   : std_logic_vector(31 downto 0);
-    variable v_bram_we   : std_logic;
+    variable v_fst : std_logic;
+    variable v_res : std_logic_vector(31 downto 0);
   begin
     v := r;
 
@@ -142,9 +155,13 @@ begin
     v.sram_we := '0';
     v.sram_re := '0';
 
-    v_bram_addr := (others => '0');
-    v_bram_we := '0';
-    v_bram_di := (others => '0');
+    v_fst   := '0';
+    v.b     := '0';
+    v.b_out := (others => '0');
+
+    v.bram_addr := (others => '0');
+    v.bram_we := '0';
+    v.bram_di := (others => '0');
 
     miss := detect_miss;
 
@@ -167,17 +184,66 @@ begin
 
           v.state := FETCH;
 
-        elsif cache_in.re = '1' and miss = '0' then
-          v_bram_addr := cache_in.addr(13 downto 2);
+        elsif cache_in.b = '0' and cache_in.re = '1' and miss = '0' then
+          v.bram_addr := cache_in.addr(13 downto 2);
 
-        elsif cache_in.we = '1' and miss = '0' then
+        elsif cache_in.b = '0' and cache_in.we = '1' and miss = '0' then
           v.sram_addr := cache_in.addr;
           v.sram_we   := '1';
           v.sram_tx   := cache_in.val;
 
-          v_bram_addr := cache_in.addr(13 downto 2);
-          v_bram_we   := '1';
-          v_bram_di   := cache_in.val;
+          v.bram_addr := cache_in.addr(13 downto 2);
+          v.bram_we   := '1';
+          v.bram_di   := cache_in.val;
+
+        elsif cache_in.b = '1' and cache_in.re = '1' and miss = '0' then
+
+          if r.bram_addr = cache_in.addr(13 downto 2) and r.bram_we = '0' then
+            v.b := '1';
+            case cache_in.addr(1 downto 0) is
+              when "00" =>
+                v.b_out := repeat(bram_do(7), 24) & bram_do(7 downto 0);
+              when "01" =>
+                v.b_out := repeat(bram_do(15), 24) & bram_do(15 downto 8);
+              when "10" =>
+                v.b_out := repeat(bram_do(23), 24) & bram_do(23 downto 16);
+              when "11" =>
+                v.b_out := repeat(bram_do(31), 24) & bram_do(31 downto 24);
+              when others =>
+                assert false;
+            end case;
+          else
+            v_fst := '1';
+            v.bram_addr := cache_in.addr(13 downto 2);
+          end if;
+
+        elsif cache_in.b = '1' and cache_in.we = '1' and miss = '0' then
+
+          if r.bram_addr = cache_in.addr(13 downto 2) and r.bram_we = '0' then
+            case cache_in.addr(1 downto 0) is
+              when "00" =>
+                v_res := bram_do(31 downto 8) & cache_in.val(7 downto 0);
+              when "01" =>
+                v_res := bram_do(31 downto 16) & cache_in.val(7 downto 0) & bram_do(7 downto 0);
+              when "10" =>
+                v_res := bram_do(31 downto 24) & cache_in.val(7 downto 0) & bram_do(15 downto 0);
+              when "11" =>
+                v_res := cache_in.val(7 downto 0) & bram_do(23 downto 0);
+              when others =>
+                assert false;
+            end case;
+
+            v.sram_addr := cache_in.addr;
+            v.sram_we   := '1';
+            v.sram_tx   := v_res;
+
+            v.bram_addr := cache_in.addr(13 downto 2);
+            v.bram_we   := '1';
+            v.bram_di   := v_res;
+          else
+            v_fst := '1';
+            v.bram_addr := cache_in.addr(13 downto 2);
+          end if;
 
         end if;
 
@@ -191,19 +257,19 @@ begin
           when 0 to 12 =>
             v.sram_addr := r.sram_addr + 4;
             v.sram_re := '1';
-            v_bram_addr := r.index & conv_std_logic_vector(r.fetch_n, 4);
-            v_bram_we := '1';
-            v_bram_di := sram_out.rx;
+            v.bram_addr := r.index & conv_std_logic_vector(r.fetch_n, 4);
+            v.bram_we := '1';
+            v.bram_di := sram_out.rx;
             v.fetch_n := r.fetch_n + 1;
           when 13 | 14 =>
-            v_bram_addr := r.index & conv_std_logic_vector(r.fetch_n, 4);
-            v_bram_we := '1';
-            v_bram_di := sram_out.rx;
+            v.bram_addr := r.index & conv_std_logic_vector(r.fetch_n, 4);
+            v.bram_we := '1';
+            v.bram_di := sram_out.rx;
             v.fetch_n := r.fetch_n + 1;
           when 15 =>
-            v_bram_addr := r.index & conv_std_logic_vector(r.fetch_n, 4);
-            v_bram_we := '1';
-            v_bram_di := sram_out.rx;
+            v.bram_addr := r.index & conv_std_logic_vector(r.fetch_n, 4);
+            v.bram_we := '1';
+            v.bram_di := sram_out.rx;
             v.fetch_n := -2;
             v.header(conv_integer(r.index)).valid := '1';
             v.header(conv_integer(r.index)).tag := r.tag;
@@ -220,7 +286,7 @@ begin
 
     if v.ack1 = '0' then
       v_hazard := '0';
-    elsif v.state = FETCH or r.state = FETCH then
+    elsif v.state = FETCH or r.state = FETCH or v_fst = '1' then
       v_hazard := '1';
     else
       v_hazard := '0';
@@ -264,7 +330,11 @@ begin
 
     cache_out.stall  <= v_hazard;
     if r.ack1 = '1' then
-      cache_out.rx <= bram_do;
+      if r.b = '1' then
+        cache_out.rx <= r.b_out;
+      else
+        cache_out.rx <= bram_do;
+      end if;
     else
       cache_out.rx <= (others => 'Z');
     end if;
@@ -276,9 +346,9 @@ begin
       cache_out.rx2 <= (others => 'Z');
     end if;
 
-    bram_we          <= v_bram_we;
-    bram_addr        <= v_bram_addr;
-    bram_di          <= v_bram_di;
+    bram_we          <= v.bram_we;
+    bram_addr        <= v.bram_addr;
+    bram_di          <= v.bram_di;
 
     -- use value from *previous* clock
     sram_in.addr    <= r.sram_addr;
