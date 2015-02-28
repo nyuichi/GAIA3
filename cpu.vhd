@@ -466,6 +466,10 @@ begin
             v.e.res := data_a or data_b or r.d.data_l;
           when ALU_XOR =>
             v.e.res := data_a xor data_b xor r.d.data_l;
+          when ALU_CMPULT =>
+            v.e.res := repeat('0', 31) & to_std_logic(data_a < data_bl);
+          when ALU_CMPULE =>
+            v.e.res := repeat('0', 31) & to_std_logic(data_a <= data_bl);
           when ALU_CMPNE =>
             v.e.res := repeat('0', 31) & to_std_logic(data_a /= data_bl);
           when ALU_CMPEQ =>
