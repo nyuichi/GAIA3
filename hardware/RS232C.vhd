@@ -18,8 +18,9 @@ architecture Behavioral of rs232c is
 
   -- 9600 bps: 1ADB
   -- 115200 bps: 023D
+  -- 230400 bps: 011E
 
-  constant wtime : std_logic_vector(15 downto 0) := x"023D";
+  constant wtime : std_logic_vector(15 downto 0) := x"011E";
 
   component Rx is
     generic (

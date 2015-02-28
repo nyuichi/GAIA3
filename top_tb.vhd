@@ -80,7 +80,8 @@ architecture Behavioral of Top_tb is
   -- bit rate:
   --  1 / 9600bps   == 104166 ns
   --  1 / 115200bps == 8680 ns
-  constant BR: time := 8680 ns;
+  --  1 / 230400bps == 4340 ns
+  constant BR: time := 4340 ns;
 
 begin
 
