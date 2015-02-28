@@ -40,7 +40,6 @@ architecture Behavioral of cpu is
     tag       : std_logic_vector(4 downto 0);
     nextpc    : std_logic_vector(31 downto 0);
     reg_write : std_logic;
-    reg_mem   : std_logic;
     mem_write : std_logic;
     mem_read  : std_logic;
     mem_byte  : std_logic;
@@ -55,7 +54,6 @@ architecture Behavioral of cpu is
     data_x    : std_logic_vector(31 downto 0);
     reg_dest  : std_logic_vector(4 downto 0);
     reg_write : std_logic;
-    reg_mem   : std_logic;
     mem_write : std_logic;
     mem_read  : std_logic;
     mem_byte  : std_logic;
@@ -107,7 +105,6 @@ architecture Behavioral of cpu is
     tag       => "00000",
     nextpc    => (others => '0'),
     reg_write => '0',
-    reg_mem   => '0',
     mem_write => '0',
     mem_read  => '0',
     mem_byte  => '0',
@@ -122,7 +119,6 @@ architecture Behavioral of cpu is
     data_x    => (others => '0'),
     reg_dest  => "00000",
     reg_write => '0',
-    reg_mem   => '0',
     mem_write => '0',
     mem_read  => '0',
     mem_byte  => '0'
@@ -386,7 +382,7 @@ begin
     if x"80001100" <= d_addr and d_addr < x"80002000" then
       v.m.reg_mem := '0';
     else
-      v.m.reg_mem := r.e.reg_mem;
+      v.m.reg_mem := r.e.mem_read;
     end if;
 
     case d_addr is
@@ -526,7 +522,6 @@ begin
     v.e.reg_dest  := r.d.reg_dest;
     v.e.data_x    := data_x;
     v.e.reg_write := r.d.reg_write;
-    v.e.reg_mem   := r.d.reg_mem;
     v.e.mem_write := r.d.mem_write;
     v.e.mem_read  := r.d.mem_read;
     v.e.mem_byte  := r.d.mem_byte;
@@ -579,7 +574,6 @@ begin
       when others =>
         v.d.reg_write := '0';
     end case;
-    v.d.reg_mem   := to_std_logic(v.d.opcode = OP_LD or v.d.opcode = OP_LDB);
     v.d.mem_write := to_std_logic(v.d.opcode = OP_ST or v.d.opcode = OP_STB);
     v.d.mem_read  := to_std_logic(v.d.opcode = OP_LD or v.d.opcode = OP_LDB);
     v.d.mem_byte  := to_std_logic(v.d.opcode = OP_LDB or v.d.opcode = OP_STB);
