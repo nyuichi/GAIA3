@@ -50,6 +50,8 @@ architecture Behavioral of top is
   signal timer_in  : timer_in_type  := timer_in_zero;
   signal timer_out : timer_out_type := timer_out_zero;
 
+  signal count : natural := 0;
+
 begin   -- architecture Behavioral
 
   ib: IBUFG port map (
@@ -60,7 +62,16 @@ begin   -- architecture Behavioral
     i => iclk,
     o => clk);
 
-  rst <= not XRST;
+  rst <= (not XRST) when count > 100000 else '1';
+
+  process(clk)
+  begin
+    if rising_edge(clk) then
+      if count <= 100000 then
+         count <= count + 1;
+      end if;
+    end if;
+  end process;
 
   cpu_1: entity work.cpu
     port map (
