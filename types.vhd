@@ -103,14 +103,12 @@ package types is
   type sram_in_type is record
     addr : std_logic_vector(31 downto 0);
     we : std_logic;
-    re : std_logic;
     tx : std_logic_vector(31 downto 0);
   end record;
 
   constant sram_in_zero : sram_in_type := (
     addr => (others => '0'),
     we   => '0',
-    re   => '0',
     tx   => (others => '0'));
 
   component sram is

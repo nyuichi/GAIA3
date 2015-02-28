@@ -338,7 +338,6 @@ begin
     sram_in.addr    <= r.sram_addr;
     sram_in.tx      <= r.sram_tx;
     sram_in.we      <= r.sram_we;
-    sram_in.re      <= r.sram_re;
   end process;
 
   regs : process(clk, rst)
