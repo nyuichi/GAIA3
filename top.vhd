@@ -37,18 +37,22 @@ architecture Behavioral of top is
 
   signal rst : std_logic;
 
-  signal cpu_in    : cpu_in_type    := cpu_in_zero;
-  signal cpu_out   : cpu_out_type   := cpu_out_zero;
-  signal cache_in  : cache_in_type  := cache_in_zero;
-  signal cache_out : cache_out_type := cache_out_zero;
-  signal uart_in   : uart_in_type   := uart_in_zero;
-  signal uart_out  : uart_out_type  := uart_out_zero;
-  signal sram_out  : sram_out_type  := sram_out_zero;
-  signal sram_in   : sram_in_type   := sram_in_zero;
-  signal rom_out   : rom_out_type   := rom_out_zero;
-  signal rom_in    : rom_in_type    := rom_in_zero;
-  signal timer_in  : timer_in_type  := timer_in_zero;
-  signal timer_out : timer_out_type := timer_out_zero;
+  signal cpu_in     : cpu_in_type    := cpu_in_zero;
+  signal cpu_out    : cpu_out_type   := cpu_out_zero;
+  signal icache_in  : cache_in_type  := cache_in_zero;
+  signal icache_out : cache_out_type := cache_out_zero;
+  signal dcache_in  : cache_in_type  := cache_in_zero;
+  signal dcache_out : cache_out_type := cache_out_zero;
+  signal uart_in    : uart_in_type   := uart_in_zero;
+  signal uart_out   : uart_out_type  := uart_out_zero;
+  signal sram_out   : sram_out_type  := sram_out_zero;
+  signal sram_in    : sram_in_type   := sram_in_zero;
+  signal ram_out    : ram_out_type   := ram_out_zero;
+  signal ram_in     : ram_in_type    := ram_in_zero;
+  signal rom_out    : rom_out_type   := rom_out_zero;
+  signal rom_in     : rom_in_type    := rom_in_zero;
+  signal timer_in   : timer_in_type  := timer_in_zero;
+  signal timer_out  : timer_out_type := timer_out_zero;
 
   signal count : natural := 0;
 
@@ -80,31 +84,37 @@ begin   -- architecture Behavioral
       cpu_in  => cpu_in,
       cpu_out => cpu_out);
 
-  cpu_in.d_stall <= cache_out.stall;
-  cpu_in.d_data  <= cache_out.rx;
+  cpu_in.d_stall <= dcache_out.stall;
+  cpu_in.d_data  <= dcache_out.rx;
   cpu_in.d_data  <= uart_out.rx;
   cpu_in.d_data  <= rom_out.rx1;
 -- pragma synthesis_off
   cpu_in.d_data  <= (others => 'H');
 -- pragma synthesis_on
-  cpu_in.i_stall <= cache_out.stall2;
-  cpu_in.i_data  <= cache_out.rx2;
+
+  cpu_in.i_stall <= icache_out.stall;
+  cpu_in.i_data  <= icache_out.rx;
   cpu_in.i_data  <= rom_out.rx2;
 -- pragma synthesis_off
   cpu_in.i_data  <= (others => 'H');
 -- pragma synthesis_on
+
   cpu_in.int_go  <= uart_out.int_go or timer_out.int_go;
   cpu_in.int_cause <= x"00000001" when timer_out.int_go = '1' else
                       x"00000002" when uart_out.int_go = '1' else
                       x"00000000";
 
-  cache_in.b     <= cpu_out.d_b;
-  cache_in.we    <= cpu_out.d_we;
-  cache_in.re    <= cpu_out.d_re;
-  cache_in.addr  <= cpu_out.d_addr;
-  cache_in.val   <= cpu_out.d_data;
-  cache_in.re2   <= cpu_out.i_re;
-  cache_in.addr2 <= cpu_out.i_addr;
+  dcache_in.b    <= cpu_out.d_b;
+  dcache_in.we   <= cpu_out.d_we;
+  dcache_in.re   <= cpu_out.d_re;
+  dcache_in.addr <= cpu_out.d_addr;
+  dcache_in.val  <= cpu_out.d_data;
+
+  icache_in.b    <= '0';
+  icache_in.we   <= '0';
+  icache_in.val  <= (others => '0');
+  icache_in.re   <= cpu_out.i_re;
+  icache_in.addr <= cpu_out.i_addr;
 
   uart_in.addr <= cpu_out.d_addr;
   uart_in.we   <= cpu_out.d_we;
@@ -123,19 +133,60 @@ begin   -- architecture Behavioral
       awidth => 12)
     port map (
       clk  => clk,
-      we   => cache_out.bram_we,
-      di   => cache_out.bram_di,
-      do   => cache_in.bram_do,
-      addr => cache_out.bram_addr);
+      we   => dcache_out.bram_we,
+      di   => dcache_out.bram_di,
+      do   => dcache_in.bram_do,
+      addr => dcache_out.bram_addr);
 
   cache_1 : entity work.cache
     port map (
       clk       => clk,
       rst       => rst,
-      cache_in  => cache_in,
-      cache_out => cache_out,
-      sram_out  => sram_out,
-      sram_in   => sram_in);
+      cache_in  => dcache_in,
+      cache_out => dcache_out);
+
+  dcache_in.ram_grnt <= ram_out.grnt1;
+  dcache_in.ram_data <= ram_out.data1;
+
+  ram_in.req1  <= dcache_out.ram_req;
+  ram_in.data1 <= dcache_out.ram_data;
+  ram_in.addr1 <= dcache_out.ram_addr;
+  ram_in.we1   <= dcache_out.ram_we;
+
+  blockram_2: entity work.blockram
+    generic map (
+      dwidth => 32,
+      awidth => 12)
+    port map (
+      clk  => clk,
+      we   => icache_out.bram_we,
+      di   => icache_out.bram_di,
+      do   => icache_in.bram_do,
+      addr => icache_out.bram_addr);
+
+  cache_2 : entity work.cache
+    port map (
+      clk       => clk,
+      rst       => rst,
+      cache_in  => icache_in,
+      cache_out => icache_out);
+
+  icache_in.ram_grnt <= ram_out.grnt2;
+  icache_in.ram_data <= ram_out.data2;
+
+  ram_in.req2  <= icache_out.ram_req;
+  ram_in.data2 <= icache_out.ram_data;
+  ram_in.addr2 <= icache_out.ram_addr;
+  ram_in.we2   <= icache_out.ram_we;
+
+  ram_1: entity work.ram
+    port map (
+      clk      => clk,
+      rst      => rst,
+      ram_in   => ram_in,
+      ram_out  => ram_out,
+      sram_in  => sram_in,
+      sram_out => sram_out);
 
   uart_1 : entity work.uart
     port map (

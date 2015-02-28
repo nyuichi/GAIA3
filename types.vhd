@@ -123,56 +123,111 @@ package types is
   end component;
 
 
+  -- ram
+
+  type ram_in_type is record
+    req1  : std_logic;
+    req2  : std_logic;
+    data1 : std_logic_vector(31 downto 0);
+    data2 : std_logic_vector(31 downto 0);
+    addr1 : std_logic_vector(31 downto 0);
+    addr2 : std_logic_vector(31 downto 0);
+    we1   : std_logic;
+    we2   : std_logic;
+  end record;
+
+  constant ram_in_zero : ram_in_type := (
+    req1  => '0',
+    req2  => '0',
+    data1 => (others => '0'),
+    data2 => (others => '0'),
+    addr1 => (others => '0'),
+    addr2 => (others => '0'),
+    we1   => '0',
+    we2   => '0');
+
+  type ram_out_type is record
+    grnt1 : std_logic;
+    grnt2 : std_logic;
+    data1 : std_logic_vector(31 downto 0);
+    data2 : std_logic_vector(31 downto 0);
+  end record;
+
+  constant ram_out_zero : ram_out_type := (
+    grnt1 => '0',
+    grnt2 => '0',
+    data1 => (others => '0'),
+    data2 => (others => '0'));
+
+  component ram is
+    port (
+      clk      : in  std_logic;
+      rst      : in  std_logic;
+      ram_in   : in  ram_in_type;
+      ram_out  : out ram_out_type;
+      sram_in  : out sram_in_type;
+      sram_out : in  sram_out_type);
+  end component;
+
+
   -- cache
 
   type cache_out_type is record
+    -- bram
     bram_we   : std_logic;
     bram_di   : std_logic_vector(31 downto 0);
     bram_addr : std_logic_vector(11 downto 0);
-    stall : std_logic;
-    rx : std_logic_vector(31 downto 0);
-    stall2 : std_logic;
-    rx2 : std_logic_vector(31 downto 0);
+    -- ram
+    ram_req   : std_logic;
+    ram_we    : std_logic;
+    ram_data  : std_logic_vector(31 downto 0);
+    ram_addr  : std_logic_vector(31 downto 0);
+    -- cache
+    stall     : std_logic;
+    rx        : std_logic_vector(31 downto 0);
   end record;
 
   constant cache_out_zero : cache_out_type := (
     bram_we   => '0',
     bram_di   => (others => '0'),
     bram_addr => (others => '0'),
+    ram_req   => '0',
+    ram_we    => '0',
+    ram_data  => (others => '0'),
+    ram_addr  => (others => '0'),
     stall     => '0',
-    rx        => (others => 'Z'),
-    stall2    => '0',
-    rx2       => (others => 'Z'));
+    rx        => (others => 'Z'));
 
   type cache_in_type is record
-    bram_do : std_logic_vector(31 downto 0);
-    b       : std_logic;
-    we      : std_logic;
-    re      : std_logic;
-    val     : std_logic_vector(31 downto 0);
-    addr    : std_logic_vector(31 downto 0);
-    re2     : std_logic;
-    addr2   : std_logic_vector(31 downto 0);
+    -- bram
+    bram_do  : std_logic_vector(31 downto 0);
+    -- ram
+    ram_grnt : std_logic;
+    ram_data : std_logic_vector(31 downto 0);
+    -- cache
+    b        : std_logic;
+    we       : std_logic;
+    re       : std_logic;
+    val      : std_logic_vector(31 downto 0);
+    addr     : std_logic_vector(31 downto 0);
   end record;
 
   constant cache_in_zero : cache_in_type := (
-    bram_do => (others => '0'),
-    b       => '0',
-    we      => '0',
-    re      => '0',
-    val     => (others => '0'),
-    addr    => (others => '0'),
-    re2     => '0',
-    addr2   => (others => '0'));
+    bram_do  => (others => '0'),
+    ram_grnt => '0',
+    ram_data => (others => '0'),
+    b        => '0',
+    we       => '0',
+    re       => '0',
+    val      => (others => '0'),
+    addr     => (others => '0'));
 
   component cache is
     port (
       clk       : in  std_logic;
       rst       : in  std_logic;
       cache_in  : in  cache_in_type;
-      cache_out : out cache_out_type;
-      sram_out  : in  sram_out_type;
-      sram_in   : out sram_in_type);
+      cache_out : out cache_out_type);
   end component;
 
 
