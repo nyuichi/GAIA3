@@ -128,6 +128,9 @@ package types is
   -- cache
 
   type cache_out_type is record
+    bram_we   : std_logic;
+    bram_di   : std_logic_vector(31 downto 0);
+    bram_addr : std_logic_vector(11 downto 0);
     stall : std_logic;
     rx : std_logic_vector(31 downto 0);
     stall2 : std_logic;
@@ -135,29 +138,34 @@ package types is
   end record;
 
   constant cache_out_zero : cache_out_type := (
-    stall  => '0',
-    rx     => (others => 'Z'),
-    stall2 => '0',
-    rx2    => (others => 'Z'));
+    bram_we   => '0',
+    bram_di   => (others => '0'),
+    bram_addr => (others => '0'),
+    stall     => '0',
+    rx        => (others => 'Z'),
+    stall2    => '0',
+    rx2       => (others => 'Z'));
 
   type cache_in_type is record
-    b     : std_logic;
-    we    : std_logic;
-    re    : std_logic;
-    val   : std_logic_vector(31 downto 0);
-    addr  : std_logic_vector(31 downto 0);
-    re2   : std_logic;
-    addr2 : std_logic_vector(31 downto 0);
+    bram_do : std_logic_vector(31 downto 0);
+    b       : std_logic;
+    we      : std_logic;
+    re      : std_logic;
+    val     : std_logic_vector(31 downto 0);
+    addr    : std_logic_vector(31 downto 0);
+    re2     : std_logic;
+    addr2   : std_logic_vector(31 downto 0);
   end record;
 
   constant cache_in_zero : cache_in_type := (
-    b     => '0',
-    we    => '0',
-    re    => '0',
-    val   => (others => '0'),
-    addr  => (others => '0'),
-    re2   => '0',
-    addr2 => (others => '0'));
+    bram_do => (others => '0'),
+    b       => '0',
+    we      => '0',
+    re      => '0',
+    val     => (others => '0'),
+    addr    => (others => '0'),
+    re2     => '0',
+    addr2   => (others => '0'));
 
   component cache is
     port (
@@ -225,21 +233,6 @@ package types is
         rst       : in  std_logic;
         timer_in  : in  timer_in_type;
         timer_out : out timer_out_type);
-  end component;
-
-
-  -- util (to be moved)
-
-  component blockram is
-    generic (
-      dwidth : integer;
-      awidth : integer);
-    port (
-      clk  : in  std_logic;
-      we   : in  std_logic;
-      di   : in  std_logic_vector(dwidth - 1 downto 0);
-      do   : out std_logic_vector(dwidth - 1 downto 0);
-      addr : in  std_logic_vector(awidth - 1 downto 0));
   end component;
 
 

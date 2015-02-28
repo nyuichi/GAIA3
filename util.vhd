@@ -9,6 +9,18 @@ package util is
   function normalize_fzero(a : std_logic_vector(31 downto 0)) return std_logic_vector;
   function stdv2str(vec : std_logic_vector) return string;
 
+  component blockram is
+    generic (
+      dwidth : integer;
+      awidth : integer);
+    port (
+      clk  : in  std_logic;
+      we   : in  std_logic;
+      di   : in  std_logic_vector(dwidth - 1 downto 0);
+      do   : out std_logic_vector(dwidth - 1 downto 0);
+      addr : in  std_logic_vector(awidth - 1 downto 0));
+  end component;
+
 end package;
 
 package body util is
@@ -72,4 +84,4 @@ package body util is
     return str;
   end;
 
-end util;
+end package body;

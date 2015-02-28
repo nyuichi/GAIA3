@@ -160,7 +160,7 @@ begin
 
     RS_RX <= '1';
 
-    wait for (5 * BR);
+    wait for 2 ms;
 
         wait for BR; RS_RX <= '0';
         wait for BR; RS_RX <= '0';

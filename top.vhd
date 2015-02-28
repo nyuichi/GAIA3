@@ -117,6 +117,17 @@ begin   -- architecture Behavioral
 
   timer_in.eoi <= cpu_out.eoi when cpu_out.eoi_id = x"00000001" else '0';
 
+  blockram_1: entity work.blockram
+    generic map (
+      dwidth => 32,
+      awidth => 12)
+    port map (
+      clk  => clk,
+      we   => cache_out.bram_we,
+      di   => cache_out.bram_di,
+      do   => cache_in.bram_do,
+      addr => cache_out.bram_addr);
+
   cache_1 : entity work.cache
     port map (
       clk       => clk,

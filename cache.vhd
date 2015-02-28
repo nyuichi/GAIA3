@@ -93,11 +93,6 @@ architecture Behavioral of cache is
 
   signal r, rin : reg_type := rzero;
 
-  signal bram_we   : std_logic := '0';
-  signal bram_do   : std_logic_vector(31 downto 0) := (others => '0');
-  signal bram_di   : std_logic_vector(31 downto 0) := (others => '0');
-  signal bram_addr : std_logic_vector(11 downto 0) := (others => '0');
-
 
   impure function detect_miss return std_logic is
     variable index : integer;
@@ -118,17 +113,6 @@ architecture Behavioral of cache is
 
 
 begin
-
-  blockram_1: entity work.blockram
-    generic map (
-      dwidth => 32,
-      awidth => 12)
-    port map (
-      clk  => clk,
-      we   => bram_we,
-      di   => bram_di,
-      do   => bram_do,
-      addr => bram_addr);
 
   comb : process(r, cache_in, sram_out)
     variable v : reg_type;
@@ -202,13 +186,13 @@ begin
             v.b := '1';
             case cache_in.addr(1 downto 0) is
               when "00" =>
-                v.b_out := repeat(bram_do(7), 24) & bram_do(7 downto 0);
+                v.b_out := repeat(cache_in.bram_do(7), 24) & cache_in.bram_do(7 downto 0);
               when "01" =>
-                v.b_out := repeat(bram_do(15), 24) & bram_do(15 downto 8);
+                v.b_out := repeat(cache_in.bram_do(15), 24) & cache_in.bram_do(15 downto 8);
               when "10" =>
-                v.b_out := repeat(bram_do(23), 24) & bram_do(23 downto 16);
+                v.b_out := repeat(cache_in.bram_do(23), 24) & cache_in.bram_do(23 downto 16);
               when "11" =>
-                v.b_out := repeat(bram_do(31), 24) & bram_do(31 downto 24);
+                v.b_out := repeat(cache_in.bram_do(31), 24) & cache_in.bram_do(31 downto 24);
               when others =>
                 assert false;
             end case;
@@ -222,13 +206,13 @@ begin
           if r.bram_addr = cache_in.addr(13 downto 2) and r.bram_we = '0' then
             case cache_in.addr(1 downto 0) is
               when "00" =>
-                v_res := bram_do(31 downto 8) & cache_in.val(7 downto 0);
+                v_res := cache_in.bram_do(31 downto 8) & cache_in.val(7 downto 0);
               when "01" =>
-                v_res := bram_do(31 downto 16) & cache_in.val(7 downto 0) & bram_do(7 downto 0);
+                v_res := cache_in.bram_do(31 downto 16) & cache_in.val(7 downto 0) & cache_in.bram_do(7 downto 0);
               when "10" =>
-                v_res := bram_do(31 downto 24) & cache_in.val(7 downto 0) & bram_do(15 downto 0);
+                v_res := cache_in.bram_do(31 downto 24) & cache_in.val(7 downto 0) & cache_in.bram_do(15 downto 0);
               when "11" =>
-                v_res := cache_in.val(7 downto 0) & bram_do(23 downto 0);
+                v_res := cache_in.val(7 downto 0) & cache_in.bram_do(23 downto 0);
               when others =>
                 assert false;
             end case;
@@ -333,7 +317,7 @@ begin
       if r.b = '1' then
         cache_out.rx <= r.b_out;
       else
-        cache_out.rx <= bram_do;
+        cache_out.rx <= cache_in.bram_do;
       end if;
     else
       cache_out.rx <= (others => 'Z');
@@ -346,9 +330,9 @@ begin
       cache_out.rx2 <= (others => 'Z');
     end if;
 
-    bram_we          <= v.bram_we;
-    bram_addr        <= v.bram_addr;
-    bram_di          <= v.bram_di;
+    cache_out.bram_we   <= v.bram_we;
+    cache_out.bram_addr <= v.bram_addr;
+    cache_out.bram_di   <= v.bram_di;
 
     -- use value from *previous* clock
     sram_in.addr    <= r.sram_addr;
