@@ -554,6 +554,12 @@ begin
       inst := (others => '0');
     end if;
 
+--pragma synthesis_off
+    if is_x(inst) then
+      inst := (others => '0');
+    end if;
+--pragma synthesis_on
+
     v.d.opcode   := inst(31 downto 28);
     v.d.reg_dest := inst(27 downto 23);
     v.d.reg_a    := inst(22 downto 18);
