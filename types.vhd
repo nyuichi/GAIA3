@@ -170,9 +170,9 @@ package types is
   end component;
 
 
-  -- cache
+  -- data cache
 
-  type cache_out_type is record
+  type dcache_out_type is record
     -- bram
     bram_we   : std_logic;
     bram_di   : std_logic_vector(31 downto 0);
@@ -187,7 +187,7 @@ package types is
     rx        : std_logic_vector(31 downto 0);
   end record;
 
-  constant cache_out_zero : cache_out_type := (
+  constant dcache_out_zero : dcache_out_type := (
     bram_we   => '0',
     bram_di   => (others => '0'),
     bram_addr => (others => '0'),
@@ -198,7 +198,7 @@ package types is
     stall     => '0',
     rx        => (others => 'Z'));
 
-  type cache_in_type is record
+  type dcache_in_type is record
     -- bram
     bram_do  : std_logic_vector(31 downto 0);
     -- ram
@@ -212,7 +212,7 @@ package types is
     addr     : std_logic_vector(31 downto 0);
   end record;
 
-  constant cache_in_zero : cache_in_type := (
+  constant dcache_in_zero : dcache_in_type := (
     bram_do  => (others => '0'),
     ram_grnt => '0',
     ram_data => (others => '0'),
@@ -222,12 +222,73 @@ package types is
     val      => (others => '0'),
     addr     => (others => '0'));
 
-  component cache is
+  component dcache is
     port (
-      clk       : in  std_logic;
-      rst       : in  std_logic;
-      cache_in  : in  cache_in_type;
-      cache_out : out cache_out_type);
+      clk        : in  std_logic;
+      rst        : in  std_logic;
+      dcache_in  : in  dcache_in_type;
+      dcache_out : out dcache_out_type);
+  end component;
+
+
+  -- inst cache
+
+  type icache_out_type is record
+    -- bram
+    bram_we   : std_logic;
+    bram_di   : std_logic_vector(31 downto 0);
+    bram_addr : std_logic_vector(11 downto 0);
+    -- ram
+    ram_req   : std_logic;
+    ram_we    : std_logic;
+    ram_data  : std_logic_vector(31 downto 0);
+    ram_addr  : std_logic_vector(31 downto 0);
+    -- cache
+    stall     : std_logic;
+    rx        : std_logic_vector(31 downto 0);
+  end record;
+
+  constant icache_out_zero : icache_out_type := (
+    bram_we   => '0',
+    bram_di   => (others => '0'),
+    bram_addr => (others => '0'),
+    ram_req   => '0',
+    ram_we    => '0',
+    ram_data  => (others => '0'),
+    ram_addr  => (others => '0'),
+    stall     => '0',
+    rx        => (others => 'Z'));
+
+  type icache_in_type is record
+    -- bram
+    bram_do  : std_logic_vector(31 downto 0);
+    -- ram
+    ram_grnt : std_logic;
+    ram_data : std_logic_vector(31 downto 0);
+    -- cache
+    b        : std_logic;
+    we       : std_logic;
+    re       : std_logic;
+    val      : std_logic_vector(31 downto 0);
+    addr     : std_logic_vector(31 downto 0);
+  end record;
+
+  constant icache_in_zero : icache_in_type := (
+    bram_do  => (others => '0'),
+    ram_grnt => '0',
+    ram_data => (others => '0'),
+    b        => '0',
+    we       => '0',
+    re       => '0',
+    val      => (others => '0'),
+    addr     => (others => '0'));
+
+  component icache is
+    port (
+      clk        : in  std_logic;
+      rst        : in  std_logic;
+      icache_in  : in  icache_in_type;
+      icache_out : out icache_out_type);
   end component;
 
 

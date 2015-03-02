@@ -6,17 +6,17 @@ use IEEE.std_logic_arith.all;
 use work.types.all;
 use work.util.all;
 
-entity cache is
+entity icache is
 
   port (
-    clk       : in  std_logic;
-    rst       : in  std_logic;
-    cache_in  : in  cache_in_type;
-    cache_out : out cache_out_type);
+    clk        : in  std_logic;
+    rst        : in  std_logic;
+    icache_in  : in  icache_in_type;
+    icache_out : out icache_out_type);
 
 end entity;
 
-architecture Behavioral of cache is
+architecture Behavioral of icache is
 
   type state_type is (NO_OP, WRITE_REQ, FETCH_REQ, FETCH);
 
@@ -30,7 +30,7 @@ architecture Behavioral of cache is
 
     state : state_type;
 
-    -- data cache
+    -- inst cache
 
     valid : std_logic_vector(0 to 255);
 
@@ -84,8 +84,8 @@ architecture Behavioral of cache is
     variable tag : std_logic_vector(17 downto 0);
     variable miss : std_logic;
   begin
-    index := conv_integer(cache_in.addr(13 downto 6));
-    tag := cache_in.addr(31 downto 14);
+    index := conv_integer(icache_in.addr(13 downto 6));
+    tag := icache_in.addr(31 downto 14);
 
     if r.valid(index) = '1' and tag_array(index) = tag then
       miss := '0';
@@ -99,7 +99,7 @@ architecture Behavioral of cache is
 
 begin
 
-  comb : process(r, cache_in)
+  comb : process(r, icache_in)
     variable v : reg_type;
 
     variable miss : std_logic;
@@ -107,9 +107,9 @@ begin
   begin
     v := r;
 
-    -- data cache
+    -- inst cache
 
-    if cache_in.addr < x"400000" then
+    if icache_in.addr < x"400000" then
       v.ack := '1';
     else
       v.ack := '0';
@@ -130,10 +130,10 @@ begin
         if v.ack = '0' then
           -- pass
 
-        elsif (cache_in.re = '1' or cache_in.we = '1') and miss = '1' then
-          v.tag    := cache_in.addr(31 downto 14);
-          v.index  := cache_in.addr(13 downto 6);
-          v.offset := cache_in.addr(5 downto 2);
+        elsif (icache_in.re = '1' or icache_in.we = '1') and miss = '1' then
+          v.tag    := icache_in.addr(31 downto 14);
+          v.index  := icache_in.addr(13 downto 6);
+          v.offset := icache_in.addr(5 downto 2);
 
           v.ram_req := '1';
           v.ram_addr := v.tag & v.index & "0000" & "00";
@@ -141,68 +141,68 @@ begin
           v.state := FETCH_REQ;
           hazard := '1';
 
-        elsif cache_in.b = '0' and cache_in.re = '1' and miss = '0' then
-          v.bram_addr := cache_in.addr(13 downto 2);
+        elsif icache_in.b = '0' and icache_in.re = '1' and miss = '0' then
+          v.bram_addr := icache_in.addr(13 downto 2);
 
-        elsif cache_in.b = '0' and cache_in.we = '1' and miss = '0' then
-          v.bram_addr := cache_in.addr(13 downto 2);
+        elsif icache_in.b = '0' and icache_in.we = '1' and miss = '0' then
+          v.bram_addr := icache_in.addr(13 downto 2);
           v.bram_we   := '1';
-          v.bram_di   := cache_in.val;
+          v.bram_di   := icache_in.val;
 
           v.ram_req  := '1';
           v.ram_we   := '1';
-          v.ram_data := cache_in.val;
-          v.ram_addr := cache_in.addr;
+          v.ram_data := icache_in.val;
+          v.ram_addr := icache_in.addr;
           v.state := WRITE_REQ;
           hazard := '1';
 
-        elsif cache_in.b = '1' and cache_in.re = '1' and miss = '0' then
+        elsif icache_in.b = '1' and icache_in.re = '1' and miss = '0' then
 
-          if r.bram_addr = cache_in.addr(13 downto 2) and r.bram_we = '0' then
+          if r.bram_addr = icache_in.addr(13 downto 2) and r.bram_we = '0' then
             v.b := '1';
-            case cache_in.addr(1 downto 0) is
+            case icache_in.addr(1 downto 0) is
               when "00" =>
-                v.b_out := repeat(cache_in.bram_do(7), 24) & cache_in.bram_do(7 downto 0);
+                v.b_out := repeat(icache_in.bram_do(7), 24) & icache_in.bram_do(7 downto 0);
               when "01" =>
-                v.b_out := repeat(cache_in.bram_do(15), 24) & cache_in.bram_do(15 downto 8);
+                v.b_out := repeat(icache_in.bram_do(15), 24) & icache_in.bram_do(15 downto 8);
               when "10" =>
-                v.b_out := repeat(cache_in.bram_do(23), 24) & cache_in.bram_do(23 downto 16);
+                v.b_out := repeat(icache_in.bram_do(23), 24) & icache_in.bram_do(23 downto 16);
               when "11" =>
-                v.b_out := repeat(cache_in.bram_do(31), 24) & cache_in.bram_do(31 downto 24);
+                v.b_out := repeat(icache_in.bram_do(31), 24) & icache_in.bram_do(31 downto 24);
               when others =>
                 assert false;
             end case;
           else
-            v.bram_addr := cache_in.addr(13 downto 2);
+            v.bram_addr := icache_in.addr(13 downto 2);
             hazard := '1';
           end if;
 
-        elsif cache_in.b = '1' and cache_in.we = '1' and miss = '0' then
+        elsif icache_in.b = '1' and icache_in.we = '1' and miss = '0' then
 
-          if r.bram_addr = cache_in.addr(13 downto 2) and r.bram_we = '0' then
-            case cache_in.addr(1 downto 0) is
+          if r.bram_addr = icache_in.addr(13 downto 2) and r.bram_we = '0' then
+            case icache_in.addr(1 downto 0) is
               when "00" =>
-                v.bram_di := cache_in.bram_do(31 downto 8) & cache_in.val(7 downto 0);
+                v.bram_di := icache_in.bram_do(31 downto 8) & icache_in.val(7 downto 0);
               when "01" =>
-                v.bram_di := cache_in.bram_do(31 downto 16) & cache_in.val(7 downto 0) & cache_in.bram_do(7 downto 0);
+                v.bram_di := icache_in.bram_do(31 downto 16) & icache_in.val(7 downto 0) & icache_in.bram_do(7 downto 0);
               when "10" =>
-                v.bram_di := cache_in.bram_do(31 downto 24) & cache_in.val(7 downto 0) & cache_in.bram_do(15 downto 0);
+                v.bram_di := icache_in.bram_do(31 downto 24) & icache_in.val(7 downto 0) & icache_in.bram_do(15 downto 0);
               when "11" =>
-                v.bram_di := cache_in.val(7 downto 0) & cache_in.bram_do(23 downto 0);
+                v.bram_di := icache_in.val(7 downto 0) & icache_in.bram_do(23 downto 0);
               when others =>
                 assert false;
             end case;
             v.bram_we   := '1';
-            v.bram_addr := cache_in.addr(13 downto 2);
+            v.bram_addr := icache_in.addr(13 downto 2);
 
             v.ram_req  := '1';
             v.ram_we   := '1';
             v.ram_data := v.bram_di;
-            v.ram_addr := cache_in.addr;
+            v.ram_addr := icache_in.addr;
             v.state := WRITE_REQ;
             hazard := '1';
           else
-            v.bram_addr := cache_in.addr(13 downto 2);
+            v.bram_addr := icache_in.addr(13 downto 2);
             hazard := '1';
           end if;
 
@@ -213,7 +213,7 @@ begin
         v.ram_we := '1';
         hazard := '1';
 
-        if cache_in.ram_grnt = '1' then
+        if icache_in.ram_grnt = '1' then
           v.ram_req := '0';
           v.state := NO_OP;
           hazard := '0';
@@ -223,7 +223,7 @@ begin
         v.ram_req := '1';
         hazard := '1';
 
-        if cache_in.ram_grnt = '1' then
+        if icache_in.ram_grnt = '1' then
           v.state := FETCH;
         end if;
 
@@ -231,7 +231,7 @@ begin
         v.ram_req := '1';
         hazard := '1';
 
-        assert cache_in.ram_grnt = '1' severity failure;
+        assert icache_in.ram_grnt = '1' severity failure;
 
         case r.fetch_n is
           when -2 | -1 =>
@@ -241,18 +241,18 @@ begin
             v.ram_addr := r.ram_addr + 4;
             v.bram_addr := r.index & conv_std_logic_vector(r.fetch_n, 4);
             v.bram_we := '1';
-            v.bram_di := cache_in.ram_data;
+            v.bram_di := icache_in.ram_data;
             v.fetch_n := r.fetch_n + 1;
           when 13 | 14 =>
             v.bram_addr := r.index & conv_std_logic_vector(r.fetch_n, 4);
             v.bram_we := '1';
-            v.bram_di := cache_in.ram_data;
+            v.bram_di := icache_in.ram_data;
             v.fetch_n := r.fetch_n + 1;
           when 15 =>
             v.ram_req := '0';
             v.bram_addr := r.index & conv_std_logic_vector(r.fetch_n, 4);
             v.bram_we := '1';
-            v.bram_di := cache_in.ram_data;
+            v.bram_di := icache_in.ram_data;
             v.fetch_n := -2;
             v.valid(conv_integer(r.index)) := '1';
             v.state := NO_OP;
@@ -275,15 +275,15 @@ begin
 
     rin <= v;
 
-    cache_out.stall <= hazard;
+    icache_out.stall <= hazard;
     if r.ack = '1' then
       if r.b = '1' then
-        cache_out.rx <= r.b_out;
+        icache_out.rx <= r.b_out;
       else
-        cache_out.rx <= cache_in.bram_do;
+        icache_out.rx <= icache_in.bram_do;
       end if;
     else
-      cache_out.rx <= (others => 'Z');
+      icache_out.rx <= (others => 'Z');
     end if;
 
     if r.fetch_n = 15 then
@@ -294,14 +294,14 @@ begin
     tag_array_idx <= r.index;
     tag_array_tag <= r.tag;
 
-    cache_out.bram_we   <= v.bram_we;
-    cache_out.bram_addr <= v.bram_addr;
-    cache_out.bram_di   <= v.bram_di;
+    icache_out.bram_we   <= v.bram_we;
+    icache_out.bram_addr <= v.bram_addr;
+    icache_out.bram_di   <= v.bram_di;
 
-    cache_out.ram_req  <= r.ram_req;
-    cache_out.ram_addr <= r.ram_addr;
-    cache_out.ram_data <= r.ram_data;
-    cache_out.ram_we   <= r.ram_we;
+    icache_out.ram_req  <= r.ram_req;
+    icache_out.ram_addr <= r.ram_addr;
+    icache_out.ram_data <= r.ram_data;
+    icache_out.ram_we   <= r.ram_we;
   end process;
 
   regs : process(clk, rst)

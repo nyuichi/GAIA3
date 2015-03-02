@@ -37,22 +37,22 @@ architecture Behavioral of top is
 
   signal rst : std_logic;
 
-  signal cpu_in     : cpu_in_type    := cpu_in_zero;
-  signal cpu_out    : cpu_out_type   := cpu_out_zero;
-  signal icache_in  : cache_in_type  := cache_in_zero;
-  signal icache_out : cache_out_type := cache_out_zero;
-  signal dcache_in  : cache_in_type  := cache_in_zero;
-  signal dcache_out : cache_out_type := cache_out_zero;
-  signal uart_in    : uart_in_type   := uart_in_zero;
-  signal uart_out   : uart_out_type  := uart_out_zero;
-  signal sram_out   : sram_out_type  := sram_out_zero;
-  signal sram_in    : sram_in_type   := sram_in_zero;
-  signal ram_out    : ram_out_type   := ram_out_zero;
-  signal ram_in     : ram_in_type    := ram_in_zero;
-  signal rom_out    : rom_out_type   := rom_out_zero;
-  signal rom_in     : rom_in_type    := rom_in_zero;
-  signal timer_in   : timer_in_type  := timer_in_zero;
-  signal timer_out  : timer_out_type := timer_out_zero;
+  signal cpu_in     : cpu_in_type     := cpu_in_zero;
+  signal cpu_out    : cpu_out_type    := cpu_out_zero;
+  signal icache_in  : icache_in_type  := icache_in_zero;
+  signal icache_out : icache_out_type := icache_out_zero;
+  signal dcache_in  : dcache_in_type  := dcache_in_zero;
+  signal dcache_out : dcache_out_type := dcache_out_zero;
+  signal uart_in    : uart_in_type    := uart_in_zero;
+  signal uart_out   : uart_out_type   := uart_out_zero;
+  signal sram_out   : sram_out_type   := sram_out_zero;
+  signal sram_in    : sram_in_type    := sram_in_zero;
+  signal ram_out    : ram_out_type    := ram_out_zero;
+  signal ram_in     : ram_in_type     := ram_in_zero;
+  signal rom_out    : rom_out_type    := rom_out_zero;
+  signal rom_in     : rom_in_type     := rom_in_zero;
+  signal timer_in   : timer_in_type   := timer_in_zero;
+  signal timer_out  : timer_out_type  := timer_out_zero;
 
   signal count : natural := 0;
 
@@ -138,12 +138,12 @@ begin   -- architecture Behavioral
       do   => dcache_in.bram_do,
       addr => dcache_out.bram_addr);
 
-  cache_1 : entity work.cache
+  dcache_1 : entity work.dcache
     port map (
-      clk       => clk,
-      rst       => rst,
-      cache_in  => dcache_in,
-      cache_out => dcache_out);
+      clk        => clk,
+      rst        => rst,
+      dcache_in  => dcache_in,
+      dcache_out => dcache_out);
 
   dcache_in.ram_grnt <= ram_out.grnt1;
   dcache_in.ram_data <= ram_out.data1;
@@ -164,12 +164,12 @@ begin   -- architecture Behavioral
       do   => icache_in.bram_do,
       addr => icache_out.bram_addr);
 
-  cache_2 : entity work.cache
+  icache_2 : entity work.icache
     port map (
-      clk       => clk,
-      rst       => rst,
-      cache_in  => icache_in,
-      cache_out => icache_out);
+      clk        => clk,
+      rst        => rst,
+      icache_in  => icache_in,
+      icache_out => icache_out);
 
   icache_in.ram_grnt <= ram_out.grnt2;
   icache_in.ram_data <= ram_out.data2;
