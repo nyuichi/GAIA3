@@ -262,6 +262,8 @@ package types is
     ram_grnt : std_logic;
     ram_data : std_logic_vector(31 downto 0);
     -- cache
+    co_we    : std_logic;
+    co_addr  : std_logic_vector(31 downto 0);
     re       : std_logic;
     addr     : std_logic_vector(31 downto 0);
   end record;
@@ -270,6 +272,8 @@ package types is
     bram_do  => (others => '0'),
     ram_grnt => '0',
     ram_data => (others => '0'),
+    co_we    => '0',
+    co_addr  => (others => '0'),
     re       => '0',
     addr     => (others => '0'));
 

@@ -68,13 +68,16 @@ architecture Behavioral of icache is
   signal tag_array_tag : std_logic_vector(17 downto 0) := (others => '0');
 
 
-  impure function detect_miss return std_logic is
+  impure function detect_miss(addr : std_logic_vector(31 downto 0))
+    return std_logic is
+
     variable index : integer;
     variable tag : std_logic_vector(17 downto 0);
     variable miss : std_logic;
+
   begin
-    index := conv_integer(icache_in.addr(13 downto 6));
-    tag := icache_in.addr(31 downto 14);
+    index := conv_integer(addr(13 downto 6));
+    tag := addr(31 downto 14);
 
     if r.valid(index) = '1' and tag_array(index) = tag then
       miss := '0';
@@ -109,7 +112,11 @@ begin
     v.ram_req := '0';
     v.bram_we := '0';
 
-    miss := detect_miss;
+    miss := detect_miss(icache_in.addr);
+
+    if icache_in.co_we = '1' and detect_miss(icache_in.co_addr) = '0' then
+      v.valid(conv_integer(icache_in.co_addr(13 downto 6))) := '0';
+    end if;
 
     case r.state is
       when NO_OP =>
