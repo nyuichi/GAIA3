@@ -22,13 +22,8 @@ architecture Behavioral of cache is
 
   type buf_type is array(0 to 15) of std_logic_vector(31 downto 0);
 
-  type header_line_type is record
-    valid : std_logic;
-    tag   : std_logic_vector(17 downto 0);
-  end record;
-
-  type header_type is
-    array(0 to 255) of header_line_type;
+  type tag_array_type is
+    array(0 to 255) of std_logic_vector(17 downto 0);
 
   type reg_type is record
     ack : std_logic;
@@ -37,7 +32,8 @@ architecture Behavioral of cache is
 
     -- data cache
 
-    header : header_type;
+    valid     : std_logic_vector(0 to 255);
+    tag_array : tag_array_type;
 
     tag    : std_logic_vector(17 downto 0);
     index  : std_logic_vector(7 downto 0);
@@ -61,7 +57,8 @@ architecture Behavioral of cache is
   constant rzero : reg_type := (
     ack       => '0',
     state     => NO_OP,
-    header    => (others => (valid => '0', tag => (others => '0'))),
+    valid     => (others => '0'),
+    tag_array => (others => (others => '0')),
     tag       => (others => '0'),
     index     => (others => '0'),
     offset    => (others => '0'),
@@ -87,7 +84,7 @@ architecture Behavioral of cache is
     index := conv_integer(cache_in.addr(13 downto 6));
     tag := cache_in.addr(31 downto 14);
 
-    if r.header(index).valid = '1' and r.header(index).tag = tag then
+    if r.valid(index) = '1' and r.tag_array(index) = tag then
       miss := '0';
     else
       miss := '1';
@@ -254,8 +251,8 @@ begin
             v.bram_we := '1';
             v.bram_di := cache_in.ram_data;
             v.fetch_n := -2;
-            v.header(conv_integer(r.index)).valid := '1';
-            v.header(conv_integer(r.index)).tag := r.tag;
+            v.valid(conv_integer(r.index)) := '1';
+            v.tag_array(conv_integer(r.index)) := r.tag;
             v.state := NO_OP;
           when others =>
             assert false;
