@@ -18,9 +18,7 @@ end entity;
 
 architecture Behavioral of icache is
 
-  type state_type is (NO_OP, WRITE_REQ, FETCH_REQ, FETCH);
-
-  type buf_type is array(0 to 15) of std_logic_vector(31 downto 0);
+  type state_type is (NO_OP, FETCH_REQ, FETCH);
 
   type tag_array_type is
     array(0 to 255) of std_logic_vector(17 downto 0);
@@ -41,16 +39,11 @@ architecture Behavioral of icache is
     fetch_n : integer range -2 to 15;
 
     ram_req  : std_logic;
-    ram_we   : std_logic;
-    ram_data : std_logic_vector(31 downto 0);
     ram_addr : std_logic_vector(31 downto 0);
 
     bram_we   : std_logic;
     bram_di   : std_logic_vector(31 downto 0);
     bram_addr : std_logic_vector(11 downto 0);
-
-    b     : std_logic;
-    b_out : std_logic_vector(31 downto 0);
   end record;
 
   constant rzero : reg_type := (
@@ -62,14 +55,10 @@ architecture Behavioral of icache is
     offset    => (others => '0'),
     fetch_n   => -2,
     ram_req   => '0',
-    ram_we    => '0',
-    ram_data  => (others => '0'),
     ram_addr  => (others => '0'),
     bram_we   => '0',
     bram_di   => (others => '0'),
-    bram_addr => (others => '0'),
-    b         => '0',
-    b_out     => (others => '0'));
+    bram_addr => (others => '0'));
 
   signal r, rin : reg_type := rzero;
 
@@ -117,9 +106,7 @@ begin
 
     hazard := '0';
 
-    v.b := '0';
     v.ram_req := '0';
-    v.ram_we := '0';
     v.bram_we := '0';
 
     miss := detect_miss;
@@ -130,7 +117,7 @@ begin
         if v.ack = '0' then
           -- pass
 
-        elsif (icache_in.re = '1' or icache_in.we = '1') and miss = '1' then
+        elsif icache_in.re = '1' and miss = '1' then
           v.tag    := icache_in.addr(31 downto 14);
           v.index  := icache_in.addr(13 downto 6);
           v.offset := icache_in.addr(5 downto 2);
@@ -141,82 +128,9 @@ begin
           v.state := FETCH_REQ;
           hazard := '1';
 
-        elsif icache_in.b = '0' and icache_in.re = '1' and miss = '0' then
+        elsif icache_in.re = '1' and miss = '0' then
           v.bram_addr := icache_in.addr(13 downto 2);
 
-        elsif icache_in.b = '0' and icache_in.we = '1' and miss = '0' then
-          v.bram_addr := icache_in.addr(13 downto 2);
-          v.bram_we   := '1';
-          v.bram_di   := icache_in.val;
-
-          v.ram_req  := '1';
-          v.ram_we   := '1';
-          v.ram_data := icache_in.val;
-          v.ram_addr := icache_in.addr;
-          v.state := WRITE_REQ;
-          hazard := '1';
-
-        elsif icache_in.b = '1' and icache_in.re = '1' and miss = '0' then
-
-          if r.bram_addr = icache_in.addr(13 downto 2) and r.bram_we = '0' then
-            v.b := '1';
-            case icache_in.addr(1 downto 0) is
-              when "00" =>
-                v.b_out := repeat(icache_in.bram_do(7), 24) & icache_in.bram_do(7 downto 0);
-              when "01" =>
-                v.b_out := repeat(icache_in.bram_do(15), 24) & icache_in.bram_do(15 downto 8);
-              when "10" =>
-                v.b_out := repeat(icache_in.bram_do(23), 24) & icache_in.bram_do(23 downto 16);
-              when "11" =>
-                v.b_out := repeat(icache_in.bram_do(31), 24) & icache_in.bram_do(31 downto 24);
-              when others =>
-                assert false;
-            end case;
-          else
-            v.bram_addr := icache_in.addr(13 downto 2);
-            hazard := '1';
-          end if;
-
-        elsif icache_in.b = '1' and icache_in.we = '1' and miss = '0' then
-
-          if r.bram_addr = icache_in.addr(13 downto 2) and r.bram_we = '0' then
-            case icache_in.addr(1 downto 0) is
-              when "00" =>
-                v.bram_di := icache_in.bram_do(31 downto 8) & icache_in.val(7 downto 0);
-              when "01" =>
-                v.bram_di := icache_in.bram_do(31 downto 16) & icache_in.val(7 downto 0) & icache_in.bram_do(7 downto 0);
-              when "10" =>
-                v.bram_di := icache_in.bram_do(31 downto 24) & icache_in.val(7 downto 0) & icache_in.bram_do(15 downto 0);
-              when "11" =>
-                v.bram_di := icache_in.val(7 downto 0) & icache_in.bram_do(23 downto 0);
-              when others =>
-                assert false;
-            end case;
-            v.bram_we   := '1';
-            v.bram_addr := icache_in.addr(13 downto 2);
-
-            v.ram_req  := '1';
-            v.ram_we   := '1';
-            v.ram_data := v.bram_di;
-            v.ram_addr := icache_in.addr;
-            v.state := WRITE_REQ;
-            hazard := '1';
-          else
-            v.bram_addr := icache_in.addr(13 downto 2);
-            hazard := '1';
-          end if;
-
-        end if;
-
-      when WRITE_REQ =>
-        v.ram_req := '1';
-        v.ram_we := '1';
-        hazard := '1';
-
-        if icache_in.ram_grnt = '1' then
-          v.ram_req := '0';
-          v.state := NO_OP;
-          hazard := '0';
         end if;
 
       when FETCH_REQ =>
@@ -277,11 +191,7 @@ begin
 
     icache_out.stall <= hazard;
     if r.ack = '1' then
-      if r.b = '1' then
-        icache_out.rx <= r.b_out;
-      else
-        icache_out.rx <= icache_in.bram_do;
-      end if;
+      icache_out.rx <= icache_in.bram_do;
     else
       icache_out.rx <= (others => 'Z');
     end if;
@@ -300,8 +210,6 @@ begin
 
     icache_out.ram_req  <= r.ram_req;
     icache_out.ram_addr <= r.ram_addr;
-    icache_out.ram_data <= r.ram_data;
-    icache_out.ram_we   <= r.ram_we;
   end process;
 
   regs : process(clk, rst)

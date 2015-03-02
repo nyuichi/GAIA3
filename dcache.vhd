@@ -20,8 +20,6 @@ architecture Behavioral of dcache is
 
   type state_type is (NO_OP, WRITE_REQ, FETCH_REQ, FETCH);
 
-  type buf_type is array(0 to 15) of std_logic_vector(31 downto 0);
-
   type tag_array_type is
     array(0 to 255) of std_logic_vector(17 downto 0);
 

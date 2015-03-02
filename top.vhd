@@ -110,9 +110,6 @@ begin   -- architecture Behavioral
   dcache_in.addr <= cpu_out.d_addr;
   dcache_in.val  <= cpu_out.d_data;
 
-  icache_in.b    <= '0';
-  icache_in.we   <= '0';
-  icache_in.val  <= (others => '0');
   icache_in.re   <= cpu_out.i_re;
   icache_in.addr <= cpu_out.i_addr;
 
@@ -175,9 +172,7 @@ begin   -- architecture Behavioral
   icache_in.ram_data <= ram_out.data2;
 
   ram_in.req2  <= icache_out.ram_req;
-  ram_in.data2 <= icache_out.ram_data;
   ram_in.addr2 <= icache_out.ram_addr;
-  ram_in.we2   <= icache_out.ram_we;
 
   ram_1: entity work.ram
     port map (

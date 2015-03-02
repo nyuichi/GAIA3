@@ -240,8 +240,6 @@ package types is
     bram_addr : std_logic_vector(11 downto 0);
     -- ram
     ram_req   : std_logic;
-    ram_we    : std_logic;
-    ram_data  : std_logic_vector(31 downto 0);
     ram_addr  : std_logic_vector(31 downto 0);
     -- cache
     stall     : std_logic;
@@ -253,8 +251,6 @@ package types is
     bram_di   => (others => '0'),
     bram_addr => (others => '0'),
     ram_req   => '0',
-    ram_we    => '0',
-    ram_data  => (others => '0'),
     ram_addr  => (others => '0'),
     stall     => '0',
     rx        => (others => 'Z'));
@@ -266,10 +262,7 @@ package types is
     ram_grnt : std_logic;
     ram_data : std_logic_vector(31 downto 0);
     -- cache
-    b        : std_logic;
-    we       : std_logic;
     re       : std_logic;
-    val      : std_logic_vector(31 downto 0);
     addr     : std_logic_vector(31 downto 0);
   end record;
 
@@ -277,10 +270,7 @@ package types is
     bram_do  => (others => '0'),
     ram_grnt => '0',
     ram_data => (others => '0'),
-    b        => '0',
-    we       => '0',
     re       => '0',
-    val      => (others => '0'),
     addr     => (others => '0'));
 
   component icache is
