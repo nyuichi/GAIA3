@@ -208,8 +208,17 @@ architecture Behavioral of cpu is
     stall := '0';
 
     -- load stall
-    if r.d.mem_read = '1' and r.d.reg_dest /= "00000" and (r.d.reg_dest = reg_a or r.d.reg_dest = reg_b) then
-      stall := '1';
+    if r.d.mem_read = '1' and r.d.reg_dest /= "00000" then
+      case opcode is
+        when OP_ST | OP_STB =>
+          if r.d.reg_dest = reg_x or r.d.reg_dest = reg_a then
+            stall := '1';
+          end if;
+        when others =>
+          if r.d.reg_dest = reg_a or r.d.reg_dest = reg_b then
+            stall := '1';
+          end if;
+      end case;
     end if;
 
     -- branch hazard
