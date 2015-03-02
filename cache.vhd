@@ -32,8 +32,7 @@ architecture Behavioral of cache is
 
     -- data cache
 
-    valid     : std_logic_vector(0 to 255);
-    tag_array : tag_array_type;
+    valid : std_logic_vector(0 to 255);
 
     tag    : std_logic_vector(17 downto 0);
     index  : std_logic_vector(7 downto 0);
@@ -58,7 +57,6 @@ architecture Behavioral of cache is
     ack       => '0',
     state     => NO_OP,
     valid     => (others => '0'),
-    tag_array => (others => (others => '0')),
     tag       => (others => '0'),
     index     => (others => '0'),
     offset    => (others => '0'),
@@ -75,6 +73,11 @@ architecture Behavioral of cache is
 
   signal r, rin : reg_type := rzero;
 
+  signal tag_array : tag_array_type := (others => (others => '0'));
+  signal tag_array_we : std_logic := '0';
+  signal tag_array_idx : std_logic_vector(7 downto 0) := (others => '0');
+  signal tag_array_tag : std_logic_vector(17 downto 0) := (others => '0');
+
 
   impure function detect_miss return std_logic is
     variable index : integer;
@@ -84,7 +87,7 @@ architecture Behavioral of cache is
     index := conv_integer(cache_in.addr(13 downto 6));
     tag := cache_in.addr(31 downto 14);
 
-    if r.valid(index) = '1' and r.tag_array(index) = tag then
+    if r.valid(index) = '1' and tag_array(index) = tag then
       miss := '0';
     else
       miss := '1';
@@ -252,7 +255,6 @@ begin
             v.bram_di := cache_in.ram_data;
             v.fetch_n := -2;
             v.valid(conv_integer(r.index)) := '1';
-            v.tag_array(conv_integer(r.index)) := r.tag;
             v.state := NO_OP;
           when others =>
             assert false;
@@ -284,6 +286,14 @@ begin
       cache_out.rx <= (others => 'Z');
     end if;
 
+    if r.fetch_n = 15 then
+      tag_array_we <= '1';
+    else
+      tag_array_we <= '0';
+    end if;
+    tag_array_idx <= r.index;
+    tag_array_tag <= r.tag;
+
     cache_out.bram_we   <= v.bram_we;
     cache_out.bram_addr <= v.bram_addr;
     cache_out.bram_di   <= v.bram_di;
@@ -300,6 +310,9 @@ begin
       r <= rzero;
     elsif rising_edge(clk) then
       r <= rin;
+      if tag_array_we = '1' then
+        tag_array(conv_integer(tag_array_idx)) <= tag_array_tag;
+      end if;
     end if;
   end process;
 
