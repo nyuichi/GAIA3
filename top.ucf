@@ -227,9 +227,8 @@ NET RS_RX		   IOSTANDARD = LVTTL;
 # Clock constraints                                                        #
 ############################################################################
 
-#NET "u_mig/u_infrastructure/sys_clk_ibufg" TNM_NET =  "SYS_CLK";
-NET "bufg_66" TNM_NET = "SYS_CLK";
-TIMESPEC "TS_SYS_CLK" = PERIOD "SYS_CLK" 14.52 ns HIGH 50 %;
+NET "MCLK1" TNM_NET = "SYS_CLK";
+TIMESPEC "TS_SYS_CLK" = PERIOD "SYS_CLK" 66.66 MHz HIGH 50 %;
 
 ###############################################################################
 # Define multicycle paths - these paths may take longer because additional
