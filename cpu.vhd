@@ -244,17 +244,14 @@ architecture Behavioral of cpu is
 
   procedure detect_branch (
     inst    : in  std_logic_vector(31 downto 0);
-    stall   : in  std_logic;
     data_x  : in  std_logic_vector(31 downto 0);
     data_a  : in  std_logic_vector(31 downto 0);
     int_epc : in  std_logic_vector(31 downto 0);
-    int_en  : out std_logic;
     pc_src  : out std_logic;  -- value of pc_src may be wrong when stalling
     pc_addr : out std_logic_vector(31 downto 0)) is
 
     variable fd_data_x : std_logic_vector(31 downto 0);
     variable fd_data_a : std_logic_vector(31 downto 0);
-    variable taken : std_logic;
 
   begin
 
@@ -277,22 +274,16 @@ architecture Behavioral of cpu is
 
     case inst(31 downto 28) is
       when OP_JL | OP_JR =>
-        taken := '1';
+        pc_src := '1';
       when OP_BNE =>
-        taken := to_std_logic(fd_data_x /= fd_data_a);
+        pc_src := to_std_logic(fd_data_x /= fd_data_a);
       when OP_BEQ =>
-        taken := to_std_logic(fd_data_x = fd_data_a);
+        pc_src := to_std_logic(fd_data_x = fd_data_a);
       when OP_SYSEXIT =>
-        taken := '1';
+        pc_src := '1';
       when others =>
-        taken := '0';
+        pc_src := '0';
     end case;
-
-    if inst(31 downto 28) = OP_SYSEXIT then
-      int_en := '1';
-    end if;
-
-    pc_src := (not stall) and taken;
 
   end procedure;
 
@@ -588,9 +579,13 @@ begin
     v.d.mem_byte  := to_std_logic(v.d.opcode = OP_LDB or v.d.opcode = OP_STB);
     v.d.soft_int  := to_std_logic(v.d.opcode = OP_SYSENTER);
 
+    if inst(31 downto 28) = OP_SYSEXIT then
+      v.flag.int_en := '1';
+    end if;
+
     --// take care of hazards
     detect_hazard(inst, stall);
-    detect_branch(inst, stall, v.d.data_x, v.d.data_a, v.flag.int_epc, v.flag.int_en, v.d.pc_src, v.d.pc_addr);
+    detect_branch(inst, v.d.data_x, v.d.data_a, v.flag.int_epc, v.d.pc_src, v.d.pc_addr);
 
     if cpu_in.d_stall = '1' then
       v.d := r.d;
