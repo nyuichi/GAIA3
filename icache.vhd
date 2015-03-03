@@ -160,7 +160,7 @@ begin
         hazard := '1';
 
         if icache_in.ram_grnt = '1' then
-          v.ram_addr := icache_in.vmm_pd(31 downto 12) & r.pdi;
+          v.ram_addr := icache_in.vmm_pd(31 downto 12) & r.pdi & "00";
           v.vmm_n := 0;
           v.state := VMM;
         end if;
@@ -176,7 +176,7 @@ begin
             v.vmm_n := r.vmm_n + 1;
           when 2 =>
             v.vmm_n := r.vmm_n + 1;
-            v.ram_addr := icache_in.ram_data(31 downto 12) & r.pti;
+            v.ram_addr := icache_in.ram_data(31 downto 12) & r.pti & "00";
           when 3 | 4 =>
             v.vmm_n := r.vmm_n + 1;
           when 5 =>
