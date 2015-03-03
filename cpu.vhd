@@ -643,6 +643,8 @@ begin
     cpu_out.eoi    <= r.flag.eoi;
     cpu_out.eoi_id <= r.flag.int_cause;
     cpu_out.cai    <= cai;
+    cpu_out.vmm_en <= r.flag.vmm_en;
+    cpu_out.vmm_pd <= r.flag.vmm_pd;
   end process;
 
   regs : process(clk, rst)

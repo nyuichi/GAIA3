@@ -33,6 +33,8 @@ package types is
     eoi    : std_logic;
     eoi_id : std_logic_vector(31 downto 0);
     cai    : std_logic;
+    vmm_en : std_logic;
+    vmm_pd : std_logic_vector(31 downto 0);
   end record;
 
   constant cpu_out_zero : cpu_out_type := (
@@ -45,7 +47,9 @@ package types is
     d_addr => (others => '0'),
     eoi    => '0',
     eoi_id => (others => '0'),
-    cai    => '0');
+    cai    => '0',
+    vmm_en => '0',
+    vmm_pd => (others => '0'));
 
   component cpu is
     port (
@@ -213,6 +217,9 @@ package types is
     val      : std_logic_vector(31 downto 0);
     addr     : std_logic_vector(31 downto 0);
     cai      : std_logic;
+    -- vmm
+    vmm_en   : std_logic;
+    vmm_pd   : std_logic_vector(31 downto 0);
   end record;
 
   constant dcache_in_zero : dcache_in_type := (
@@ -224,7 +231,9 @@ package types is
     re       => '0',
     val      => (others => '0'),
     addr     => (others => '0'),
-    cai      => '0');
+    cai      => '0',
+    vmm_en   => '0',
+    vmm_pd   => (others => '0'));
 
   component dcache is
     port (
@@ -271,6 +280,9 @@ package types is
     re       : std_logic;
     addr     : std_logic_vector(31 downto 0);
     cai      : std_logic;
+    -- vmm
+    vmm_en   : std_logic;
+    vmm_pd   : std_logic_vector(31 downto 0);
   end record;
 
   constant icache_in_zero : icache_in_type := (
@@ -281,7 +293,9 @@ package types is
     co_addr  => (others => '0'),
     re       => '0',
     addr     => (others => '0'),
-    cai      => '0');
+    cai      => '0',
+    vmm_en   => '0',
+    vmm_pd   => (others => '0'));
 
   component icache is
     port (
