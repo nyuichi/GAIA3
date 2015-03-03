@@ -191,6 +191,9 @@ begin
       hazard := '0';
     end if;
 
+    if icache_in.cai = '1' then
+      v.valid := (others => '0');
+    end if;
 
     -- end
 

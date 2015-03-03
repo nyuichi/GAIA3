@@ -268,6 +268,10 @@ begin
       hazard := '0';
     end if;
 
+    if dcache_in.cai = '1' then
+      v.valid := (others => '0');
+    end if;
+
 
     -- end
 

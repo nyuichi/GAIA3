@@ -104,16 +104,18 @@ begin   -- architecture Behavioral
                       x"00000002" when uart_out.int_go = '1' else
                       x"00000000";
 
+  dcache_in.cai  <= cpu_out.cai;
   dcache_in.b    <= cpu_out.d_b;
   dcache_in.we   <= cpu_out.d_we;
   dcache_in.re   <= cpu_out.d_re;
   dcache_in.addr <= cpu_out.d_addr;
   dcache_in.val  <= cpu_out.d_data;
 
+  icache_in.cai     <= cpu_out.cai;
   icache_in.co_we   <= cpu_out.d_we;
   icache_in.co_addr <= cpu_out.d_addr;
-  icache_in.re     <= cpu_out.i_re;
-  icache_in.addr   <= cpu_out.i_addr;
+  icache_in.re      <= cpu_out.i_re;
+  icache_in.addr    <= cpu_out.i_addr;
 
   uart_in.addr <= cpu_out.d_addr;
   uart_in.we   <= cpu_out.d_we;

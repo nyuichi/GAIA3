@@ -349,6 +349,7 @@ begin
     variable d_we   : std_logic;
     variable d_re   : std_logic;
     variable d_b    : std_logic;
+    variable cai    : std_logic;
   begin
     v := r;
 
@@ -384,6 +385,8 @@ begin
     else
       v.m.reg_mem := r.e.mem_read;
     end if;
+
+    cai := '0';
 
     case d_addr is
       when x"80001100" =>
@@ -427,6 +430,7 @@ begin
         end if;
         if d_we = '1' then
           v.flag.mmu_pd := d_val;
+          cai := '1';
         end if;
       when others =>
     end case;
@@ -638,6 +642,7 @@ begin
     cpu_out.d_b    <= d_b;
     cpu_out.eoi    <= r.flag.eoi;
     cpu_out.eoi_id <= r.flag.int_cause;
+    cpu_out.cai    <= cai;
   end process;
 
   regs : process(clk, rst)
