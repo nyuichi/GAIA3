@@ -95,6 +95,20 @@ architecture Behavioral of dcache is
   end function;
 
 
+  impure function v2p (vaddr : std_logic_vector(31 downto 0)) return std_logic_vector is
+    variable paddr : std_logic_vector(31 downto 0);
+  begin
+
+    if dcache_in.vmm_en = '0' then
+      paddr := vaddr;
+    else
+      assert false severity failure;
+    end if;
+
+    return paddr;
+  end function;
+
+
 begin
 
   comb : process(r, dcache_in)
@@ -134,10 +148,13 @@ begin
           v.offset := dcache_in.addr(5 downto 2);
 
           v.ram_req := '1';
-          v.ram_addr := v.tag & v.index & "0000" & "00";
-          v.fetch_n  := -2;
-          v.state := FETCH_REQ;
           hazard := '1';
+
+          if dcache_in.vmm_en = '0' then
+            v.state := FETCH_REQ;
+          else
+            assert false severity failure;
+          end if;
 
         elsif dcache_in.b = '0' and dcache_in.re = '1' and miss = '0' then
           v.bram_addr := dcache_in.addr(13 downto 2);
@@ -150,7 +167,7 @@ begin
           v.ram_req  := '1';
           v.ram_we   := '1';
           v.ram_data := dcache_in.val;
-          v.ram_addr := dcache_in.addr;
+          v.ram_addr := v2p(dcache_in.addr);
           v.state := WRITE_REQ;
           hazard := '1';
 
@@ -196,7 +213,7 @@ begin
             v.ram_req  := '1';
             v.ram_we   := '1';
             v.ram_data := v.bram_di;
-            v.ram_addr := dcache_in.addr;
+            v.ram_addr := v2p(dcache_in.addr);
             v.state := WRITE_REQ;
             hazard := '1';
           else
@@ -222,6 +239,8 @@ begin
         hazard := '1';
 
         if dcache_in.ram_grnt = '1' then
+          v.ram_addr := r.tag & r.index & "0000" & "00";
+          v.fetch_n  := -2;
           v.state := FETCH;
         end if;
 

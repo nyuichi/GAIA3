@@ -130,10 +130,13 @@ begin
           v.offset := icache_in.addr(5 downto 2);
 
           v.ram_req := '1';
-          v.ram_addr := v.tag & v.index & "0000" & "00";
-          v.fetch_n  := -2;
-          v.state := FETCH_REQ;
           hazard := '1';
+
+          if icache_in.vmm_en = '0' then
+            v.state := FETCH_REQ;
+          else
+            assert false severity failure;
+          end if;
 
         elsif icache_in.re = '1' and miss = '0' then
           v.bram_addr := icache_in.addr(13 downto 2);
@@ -145,6 +148,8 @@ begin
         hazard := '1';
 
         if icache_in.ram_grnt = '1' then
+          v.ram_addr := r.tag & r.index & "0000" & "00";
+          v.fetch_n  := -2;
           v.state := FETCH;
         end if;
 
