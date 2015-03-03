@@ -138,7 +138,7 @@ begin
 
     -- data cache
 
-    if dcache_in.addr < x"400000" then
+    if dcache_in.addr < x"80000000" or dcache_in.addr >= x"80002000" then
       v.ack := '1';
     else
       v.ack := '0';

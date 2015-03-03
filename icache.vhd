@@ -110,7 +110,7 @@ begin
 
     -- inst cache
 
-    if icache_in.addr < x"400000" then
+    if icache_in.addr < x"80000000" or icache_in.addr >= x"80002000" then
       v.ack := '1';
     else
       v.ack := '0';
