@@ -423,6 +423,7 @@ begin
         end if;
         if d_we = '1' then
           v.flag.vmm_en := d_val(0);
+          cai := '1';
         end if;
       when x"80001204" =>
         if d_re = '1' then
