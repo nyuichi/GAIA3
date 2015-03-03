@@ -73,8 +73,8 @@ architecture Behavioral of cpu is
     int_cause   : std_logic_vector(31 downto 0);
     int_handler : std_logic_vector(31 downto 0);
     soft_int    : std_logic;
-    mmu_en      : std_logic;
-    mmu_pd      : std_logic_vector(31 downto 0);
+    vmm_en      : std_logic;
+    vmm_pd      : std_logic_vector(31 downto 0);
   end record;
 
   type reg_type is record
@@ -138,8 +138,8 @@ architecture Behavioral of cpu is
     int_cause   => (others => '0'),
     int_handler => (others => '0'),
     soft_int    => '0',
-    mmu_en      => '0',
-    mmu_pd      => (others => '0')
+    vmm_en      => '0',
+    vmm_pd      => (others => '0')
     );
 
   constant rzero : reg_type := (
@@ -419,17 +419,17 @@ begin
         end if;
       when x"80001200" =>
         if d_re = '1' then
-          v.m.res := repeat('0', 31) & r.flag.mmu_en;
+          v.m.res := repeat('0', 31) & r.flag.vmm_en;
         end if;
         if d_we = '1' then
-          v.flag.mmu_en := d_val(0);
+          v.flag.vmm_en := d_val(0);
         end if;
       when x"80001204" =>
         if d_re = '1' then
-          v.m.res := r.flag.mmu_pd;
+          v.m.res := r.flag.vmm_pd;
         end if;
         if d_we = '1' then
-          v.flag.mmu_pd := d_val;
+          v.flag.vmm_pd := d_val;
           cai := '1';
         end if;
       when others =>
