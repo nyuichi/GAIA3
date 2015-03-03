@@ -18,10 +18,7 @@ end entity;
 
 architecture Behavioral of icache is
 
-  type state_type is (NO_OP, FETCH_REQ, FETCH);
-
-  type tag_array_type is
-    array(0 to 255) of std_logic_vector(17 downto 0);
+  type state_type is (NO_OP, VMM_REQ, VMM, FETCH_REQ, FETCH);
 
   type reg_type is record
     ack : std_logic;
@@ -36,6 +33,11 @@ architecture Behavioral of icache is
     index  : std_logic_vector(7 downto 0);
     offset : std_logic_vector(3 downto 0);
 
+    pdi : std_logic_vector(9 downto 0);
+    pti : std_logic_vector(9 downto 0);
+    off : std_logic_vector(11 downto 0);
+
+    vmm_n : integer range 0 to 5;
     fetch_n : integer range -2 to 15;
 
     ram_req  : std_logic;
@@ -53,6 +55,10 @@ architecture Behavioral of icache is
     tag       => (others => '0'),
     index     => (others => '0'),
     offset    => (others => '0'),
+    pdi       => (others => '0'),
+    pti       => (others => '0'),
+    off       => (others => '0'),
+    vmm_n     => 0,
     fetch_n   => -2,
     ram_req   => '0',
     ram_addr  => (others => '0'),
@@ -61,6 +67,9 @@ architecture Behavioral of icache is
     bram_addr => (others => '0'));
 
   signal r, rin : reg_type := rzero;
+
+  type tag_array_type is
+    array(0 to 255) of std_logic_vector(17 downto 0);
 
   signal tag_array : tag_array_type := (others => (others => '0'));
   signal tag_array_we : std_logic := '0';
@@ -128,6 +137,9 @@ begin
           v.tag    := icache_in.addr(31 downto 14);
           v.index  := icache_in.addr(13 downto 6);
           v.offset := icache_in.addr(5 downto 2);
+          v.pdi    := icache_in.addr(31 downto 22);
+          v.pti    := icache_in.addr(21 downto 12);
+          v.off    := icache_in.addr(11 downto 0);
 
           v.ram_req := '1';
           hazard := '1';
@@ -135,13 +147,47 @@ begin
           if icache_in.vmm_en = '0' then
             v.state := FETCH_REQ;
           else
-            assert false severity failure;
+            v.state := VMM_REQ;
           end if;
 
         elsif icache_in.re = '1' and miss = '0' then
           v.bram_addr := icache_in.addr(13 downto 2);
 
         end if;
+
+      when VMM_REQ =>
+        v.ram_req := '1';
+        hazard := '1';
+
+        if icache_in.ram_grnt = '1' then
+          v.ram_addr := icache_in.vmm_pd(31 downto 12) & r.pdi;
+          v.vmm_n := 0;
+          v.state := VMM;
+        end if;
+
+      when VMM =>
+        v.ram_req := '1';
+        hazard := '1';
+
+        assert icache_in.ram_grnt = '1' severity failure;
+
+        case r.vmm_n is
+          when 0 | 1 =>
+            v.vmm_n := r.vmm_n + 1;
+          when 2 =>
+            v.vmm_n := r.vmm_n + 1;
+            v.ram_addr := icache_in.ram_data(31 downto 12) & r.pti;
+          when 3 | 4 =>
+            v.vmm_n := r.vmm_n + 1;
+          when 5 =>
+            v.vmm_n := 0;
+            v.ram_addr := icache_in.ram_data(31 downto 12) & r.off;
+            v.fetch_n := -2;
+            v.state := FETCH;
+          when others =>
+            assert false;
+            v.state := NO_OP;
+        end case;
 
       when FETCH_REQ =>
         v.ram_req := '1';
