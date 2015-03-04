@@ -181,7 +181,7 @@ begin
             v.vmm_n := r.vmm_n + 1;
           when 5 =>
             v.vmm_n := 0;
-            v.ram_addr := icache_in.ram_data(31 downto 12) & r.off;
+            v.ram_addr := icache_in.ram_data(31 downto 12) & r.off(11 downto 6) & "0000" & "00";
             v.fetch_n := -2;
             v.state := FETCH;
           when others =>
