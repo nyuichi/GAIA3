@@ -584,10 +584,6 @@ begin
     v.d.mem_byte  := to_std_logic(v.d.opcode = OP_LDB or v.d.opcode = OP_STB);
     v.d.soft_int  := to_std_logic(v.d.opcode = OP_SYSENTER);
 
-    if inst(31 downto 28) = OP_SYSEXIT then
-      v.flag.int_en := '1';
-    end if;
-
     --// take care of hazards
     detect_hazard(inst, stall);
     detect_branch(inst, v.d.data_x, v.d.data_a, v.flag.int_epc, v.d.pc_src, v.d.pc_addr);
@@ -604,6 +600,8 @@ begin
       v.d.mem_read := '0';
       v.d.pc_src := '0';
       v.d.soft_int := '0';
+    elsif v.d.opcode = OP_SYSEXIT then
+      v.flag.int_en := '1';
     end if;
 
     -- FETCH
