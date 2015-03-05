@@ -315,7 +315,11 @@ architecture Behavioral of cpu is
     if r.flag.eoi = '0' and int_en = '1' and int_go = '1' then
       v.flag.int_en := '0';
       v.flag.int_cause := int_cause;
-      v.flag.int_epc := r.d.nextpc;
+      if cpu_in.int_go = '0' then       -- soft
+        v.flag.int_epc := r.d.nextpc + 4;
+      else
+        v.flag.int_epc := r.d.nextpc;
+      end if;
       v.flag.eoi := '1';
     else
       v.flag.eoi := '0';
