@@ -44,6 +44,7 @@ architecture Behavioral of cpu is
     mem_read  : std_logic;
     mem_byte  : std_logic;
     soft_int  : std_logic;
+    soft_exit : std_logic;
     pc_addr   : std_logic_vector(31 downto 0);
     pc_src    : std_logic;
   end record;
@@ -109,6 +110,7 @@ architecture Behavioral of cpu is
     mem_read  => '0',
     mem_byte  => '0',
     soft_int  => '0',
+    soft_exit => '0',
     pc_addr   => (others => '0'),
     pc_src    => '0'
     );
@@ -315,7 +317,9 @@ architecture Behavioral of cpu is
     if r.flag.eoi = '0' and int_en = '1' and int_go = '1' then
       v.flag.int_en := '0';
       v.flag.int_cause := int_cause;
-      if cpu_in.int_go = '0' then       -- soft
+      if r.d.soft_exit = '1' then
+        v.flag.int_epc := r.d.pc_addr + 4;
+      elsif cpu_in.int_go = '0' then       -- soft
         v.flag.int_epc := r.d.nextpc + 4;
       else
         v.flag.int_epc := r.d.nextpc;
@@ -587,6 +591,7 @@ begin
     v.d.mem_read  := to_std_logic(v.d.opcode = OP_LD or v.d.opcode = OP_LDB);
     v.d.mem_byte  := to_std_logic(v.d.opcode = OP_LDB or v.d.opcode = OP_STB);
     v.d.soft_int  := to_std_logic(v.d.opcode = OP_SYSENTER);
+    v.d.soft_exit := to_std_logic(v.d.opcode = OP_SYSEXIT);
 
     --// take care of hazards
     detect_hazard(inst, stall);
@@ -604,6 +609,7 @@ begin
       v.d.mem_read := '0';
       v.d.pc_src := '0';
       v.d.soft_int := '0';
+      v.d.soft_exit := '0';
     elsif v.d.opcode = OP_SYSEXIT then
       v.flag.int_en := '1';
     end if;
