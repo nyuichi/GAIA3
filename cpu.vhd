@@ -304,10 +304,10 @@ architecture Behavioral of cpu is
     int_en := v.flag.int_en;           -- v: forwarding from mem stage!
     int_go := cpu_in.int_go or soft_int;
     int_epc := v.flag.int_epc;
-    if soft_int = '1' then
-      int_cause := x"00000003";
-    elsif cpu_in.int_go = '1' then
+    if cpu_in.int_go = '1' then
       int_cause := cpu_in.int_cause;
+    elsif soft_int = '1' then
+      int_cause := x"00000003";
     end if;
 
     -- to interrupt or not to do?
