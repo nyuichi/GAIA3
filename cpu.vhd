@@ -583,9 +583,6 @@ begin
     v.d.reg_dest := inst(27 downto 23);
     v.d.reg_a    := inst(22 downto 18);
     v.d.reg_b    := inst(17 downto 13);
-    v.d.data_x   := v.regfile(conv_integer(inst(27 downto 23)));
-    v.d.data_a   := v.regfile(conv_integer(inst(22 downto 18)));
-    v.d.data_b   := v.regfile(conv_integer(inst(17 downto 13)));
     v.d.data_l   := repeat(inst(12), 24) & inst(12 downto 5);
     v.d.data_d   := repeat(inst(15), 16) & inst(15 downto 0);
     v.d.tag      := inst(4 downto 0);
@@ -607,10 +604,6 @@ begin
 
     if cpu_in.d_stall = '1' then
       v.d := r.d;
-      --// forwarding! see http://goo.gl/dhJQ69 for details.
-      v.d.data_x := v.regfile(conv_integer(v.d.reg_dest));
-      v.d.data_a := v.regfile(conv_integer(v.d.reg_a));
-      v.d.data_b := v.regfile(conv_integer(v.d.reg_b));
     elsif stall = '1' or r.d.pc_src = '1' or v.eoi = '1' then
       v.d.reg_write := '0';
       v.d.mem_write := '0';
@@ -627,6 +620,11 @@ begin
         when others =>
       end case;
     end if;
+
+    --// see http://goo.gl/dhJQ69 for detail
+    v.d.data_x := v.regfile(conv_integer(v.d.reg_dest));
+    v.d.data_a := v.regfile(conv_integer(v.d.reg_a));
+    v.d.data_b := v.regfile(conv_integer(v.d.reg_b));
 
     -- FETCH
 
