@@ -318,7 +318,7 @@ architecture Behavioral of cpu is
 
     -- interrupt, if possible!
 
-    if r.eoi = '0' and int_en = '1' and cpu_in.int_go = '1' then
+    if r.eoi = '0' and int_en = '1' and int_go = '1' then
       v.flag.int_en    := '0';
       v.flag.int_cause := int_cause;
       v.flag.int_pc    := int_pc;
