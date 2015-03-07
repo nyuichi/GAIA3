@@ -150,17 +150,7 @@ architecture Behavioral of cpu is
   signal r, rin : reg_type := rzero;
 
 
-  procedure d_data_forward (
-    reg_src : in  std_logic_vector(4 downto 0);
-    res     : out std_logic_vector(31 downto 0)) is
-  begin
-    if r.e.reg_write = '1' and r.e.reg_dest /= "00000" and r.e.reg_dest = reg_src then
-      res := r.e.res;
-    end if;
-  end procedure;
-
-
-  procedure e_data_forward (
+  procedure data_forward (
     reg_src  : in  std_logic_vector(4 downto 0);
     reg_data : in  std_logic_vector(31 downto 0);
     res      : out std_logic_vector(31 downto 0)) is
@@ -248,29 +238,42 @@ architecture Behavioral of cpu is
 
   procedure detect_branch (
     inst    : in  std_logic_vector(31 downto 0);
-    data_x  : in  std_logic_vector(31 downto 0);
-    data_a  : in  std_logic_vector(31 downto 0);
+    regfile : in  regfile_type;
     int_hdr : in  std_logic_vector(31 downto 0);
     int_pc  : in  std_logic_vector(31 downto 0);
     pc_src  : out std_logic;
     pc_addr : out std_logic_vector(31 downto 0)) is
 
-    variable fd_data_x : std_logic_vector(31 downto 0);
-    variable fd_data_a : std_logic_vector(31 downto 0);
+    variable opcode : std_logic_vector(3 downto 0);
+    variable reg_x  : std_logic_vector(4 downto 0);
+    variable reg_a  : std_logic_vector(4 downto 0);
+    variable data_x : std_logic_vector(31 downto 0);
+    variable data_a : std_logic_vector(31 downto 0);
 
   begin
 
-    fd_data_x := data_x;
-    fd_data_a := data_a;
+    opcode := inst(31 downto 28);
+    reg_x  := inst(27 downto 23);
+    reg_a  := inst(22 downto 18);
 
-    d_data_forward(inst(27 downto 23), fd_data_x);
-    d_data_forward(inst(22 downto 18), fd_data_a);
+    -- forwarding, but results may be wrong...
+    if r.e.reg_write = '1' and r.e.reg_dest /= "00000" and r.e.reg_dest = reg_x then
+      data_x := r.e.res;
+    else
+      data_x := regfile(conv_integer(reg_x));
+    end if;
 
-    case inst(31 downto 28) is
+    if r.e.reg_write = '1' and r.e.reg_dest /= "00000" and r.e.reg_dest = reg_a then
+      data_a := r.e.res;
+    else
+      data_a := regfile(conv_integer(reg_a));
+    end if;
+
+    case opcode is
       when OP_JL | OP_BNE | OP_BEQ =>
         pc_addr := r.f.nextpc + (repeat(inst(15), 14) & inst(15 downto 0) & "00");
       when OP_JR =>
-        pc_addr := fd_data_x;
+        pc_addr := data_x;
       when OP_SYSENTER =>
         pc_addr := int_hdr;
       when OP_SYSEXIT =>
@@ -279,13 +282,13 @@ architecture Behavioral of cpu is
         pc_addr := (others => '-');
     end case;
 
-    case inst(31 downto 28) is
+    case opcode is
       when OP_JL | OP_JR | OP_SYSENTER | OP_SYSEXIT =>
         pc_src := '1';
       when OP_BNE =>
-        pc_src := to_std_logic(fd_data_x /= fd_data_a);
+        pc_src := to_std_logic(data_x /= data_a);
       when OP_BEQ =>
-        pc_src := to_std_logic(fd_data_x = fd_data_a);
+        pc_src := to_std_logic(data_x = data_a);
       when others =>
         pc_src := '0';
     end case;
@@ -445,9 +448,9 @@ begin
 
     -- EXECUTE
 
-    e_data_forward(r.d.reg_a, r.d.data_a, data_a);
-    e_data_forward(r.d.reg_b, r.d.data_b, data_b);
-    e_data_forward(r.d.reg_dest, r.d.data_x, data_x);
+    data_forward(r.d.reg_a, r.d.data_a, data_a);
+    data_forward(r.d.reg_b, r.d.data_b, data_b);
+    data_forward(r.d.reg_dest, r.d.data_x, data_x);
 
     data_bl := std_logic_vector(signed(data_b) + signed(r.d.data_l(7 downto 0)));
 
@@ -582,7 +585,7 @@ begin
     v.d.mem_byte  := to_std_logic(v.d.opcode = OP_LDB or v.d.opcode = OP_STB);
 
     detect_hazard(inst, stall);
-    detect_branch(inst, v.d.data_x, v.d.data_a, v.flag.int_handler, v.flag.int_pc, v.d.pc_src, v.d.pc_addr);
+    detect_branch(inst, v.regfile, v.flag.int_handler, v.flag.int_pc, v.d.pc_src, v.d.pc_addr);
 
     if cpu_in.d_stall = '1' then
       v.d := r.d;
