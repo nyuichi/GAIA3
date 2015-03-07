@@ -22,9 +22,9 @@ architecture Behavioral of cpu is
     array(0 to 31) of std_logic_vector(31 downto 0);
 
   type fetch_reg_type is record
-    pc      : std_logic_vector(31 downto 0);
-    nextpc  : std_logic_vector(31 downto 0);
-    i_stall : std_logic;
+    pc     : std_logic_vector(31 downto 0);
+    nextpc : std_logic_vector(31 downto 0);
+    bubble : std_logic;
   end record;
 
   type decode_reg_type is record
@@ -85,9 +85,9 @@ architecture Behavioral of cpu is
   end record;
 
   constant fzero : fetch_reg_type := (
-    pc      => (others => '0'),
-    nextpc  => x"80000000",
-    i_stall => '0'
+    pc     => (others => '0'),
+    nextpc => x"80000000",
+    bubble => '0'
     );
 
   constant dzero : decode_reg_type := (
@@ -546,10 +546,10 @@ begin
 
     -- DECODE
 
-    if r.f.i_stall = '0' then
-      inst := cpu_in.i_data;
-    else
+    if r.f.bubble = '1' then
       inst := (others => '0');
+    else
+      inst := cpu_in.i_data;
     end if;
 
 --pragma synthesis_off
@@ -629,7 +629,7 @@ begin
       v.f.nextpc := i_addr + 4;
     end if;
 
-    v.f.i_stall := cpu_in.i_stall or v.eoi;
+    v.f.bubble := cpu_in.i_stall or v.eoi;
 
     -- END
 
