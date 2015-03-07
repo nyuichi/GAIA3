@@ -222,7 +222,7 @@ architecture Behavioral of cpu is
       when others =>
     end case;
 
-    -- exception hazard
+    -- interrupt hazard
     case opcode is
       when OP_SYSENTER | OP_SYSEXIT =>
         if r.d.mem_write = '1' or r.d.mem_read = '1' then
@@ -326,6 +326,7 @@ architecture Behavioral of cpu is
     end if;
 
   end procedure;
+
 
   function alu (
     optag  : std_logic_vector(4 downto 0);
@@ -604,21 +605,26 @@ begin
 
     if cpu_in.d_stall = '1' then
       v.d := r.d;
-    elsif stall = '1' or r.d.pc_src = '1' or v.eoi = '1' then
+    elsif stall = '1' then
       v.d.reg_write := '0';
       v.d.mem_write := '0';
       v.d.mem_read := '0';
       v.d.pc_src := '0';
     else
-      case v.d.opcode is
-        when OP_SYSENTER =>
-          v.flag.int_cause := x"00000003";
-          v.flag.int_pc := r.f.nextpc + 4;
-          v.flag.int_en := '0';
-        when OP_SYSEXIT =>
-          v.flag.int_en := '1';
-        when others =>
-      end case;
+      if v.d.opcode = OP_SYSENTER then
+        v.flag.int_cause := x"00000003";
+        v.flag.int_pc := r.f.nextpc + 4;
+        v.flag.int_en := '0';
+      elsif v.d.opcode = OP_SYSEXIT then
+        v.flag.int_en := '1';
+      end if;
+    end if;
+
+    if r.d.pc_src = '1' or r.eoi = '1' or v.eoi = '1' then
+      v.d.reg_write := '0';
+      v.d.mem_write := '0';
+      v.d.mem_read := '0';
+      v.d.pc_src := '0';
     end if;
 
     --// see http://goo.gl/dhJQ69 for detail
@@ -648,7 +654,7 @@ begin
       v.f.nextpc := i_addr + 4;
     end if;
 
-    v.f.bubble := cpu_in.i_stall or v.eoi;
+    v.f.bubble := cpu_in.i_stall;
 
     -- END
 
