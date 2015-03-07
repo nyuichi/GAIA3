@@ -50,7 +50,6 @@ architecture Behavioral of cpu is
   type execute_reg_type is record
     res       : std_logic_vector(31 downto 0);
     mem_addr  : std_logic_vector(31 downto 0);
-    data_x    : std_logic_vector(31 downto 0);
     reg_dest  : std_logic_vector(4 downto 0);
     reg_write : std_logic;
     mem_write : std_logic;
@@ -113,7 +112,6 @@ architecture Behavioral of cpu is
   constant ezero : execute_reg_type := (
     res       => (others => '0'),
     mem_addr  => (others => '0'),
-    data_x    => (others => '0'),
     reg_dest  => "00000",
     reg_write => '0',
     mem_write => '0',
@@ -378,7 +376,7 @@ begin
     -- MEMORY
 
     d_addr := r.e.mem_addr;
-    d_val  := r.e.data_x;
+    d_val  := r.e.res;
     d_we   := r.e.mem_write;
     d_re   := r.e.mem_read;
     d_b    := r.e.mem_byte;
@@ -519,6 +517,8 @@ begin
         v.e.res := r.d.data_d(15 downto 0) & data_a(15 downto 0);
       when OP_JL =>
         v.e.res := r.d.nextpc;
+      when OP_ST | OP_STB =>
+        v.e.res := data_x;
       when others =>
         v.e.res := (others => '0');
     end case;
@@ -531,7 +531,6 @@ begin
     end case;
 
     v.e.reg_dest  := r.d.reg_dest;
-    v.e.data_x    := data_x;
     v.e.reg_write := r.d.reg_write;
     v.e.mem_write := r.d.mem_write;
     v.e.mem_read  := r.d.mem_read;
