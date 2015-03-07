@@ -327,6 +327,84 @@ architecture Behavioral of cpu is
 
   end procedure;
 
+  function alu (
+    optag  : std_logic_vector(4 downto 0);
+    data_a : std_logic_vector(31 downto 0);
+    data_b : std_logic_vector(31 downto 0);
+    data_l : std_logic_vector(31 downto 0))
+    return std_logic_vector is
+
+    variable res     : std_logic_vector(31 downto 0);
+    variable data_bl : std_logic_vector(31 downto 0);
+    variable data_na : std_logic_vector(31 downto 0);
+    variable data_nb : std_logic_vector(31 downto 0);
+
+  begin
+
+    data_bl := std_logic_vector(signed(data_b) + signed(data_l(7 downto 0)));
+
+    case optag is
+      when ALU_ADD =>
+        res := data_a + data_bl;
+      when ALU_SUB =>
+        res := data_a - data_bl;
+      when ALU_SHL =>
+        res := std_logic_vector(shift_left(unsigned(data_a), conv_integer(data_bl)));
+      when ALU_SHR =>
+        res := std_logic_vector(shift_right(unsigned(data_a), conv_integer(data_bl)));
+      when ALU_SAR =>
+        res := std_logic_vector(shift_right(signed(data_a), conv_integer(data_bl)));
+      when ALU_AND =>
+        res := data_a and data_b and data_l;
+      when ALU_OR =>
+        res := data_a or data_b or data_l;
+      when ALU_XOR =>
+        res := data_a xor data_b xor data_l;
+      when ALU_CMPULT =>
+        res := repeat('0', 31) & to_std_logic(data_a < data_bl);
+      when ALU_CMPULE =>
+        res := repeat('0', 31) & to_std_logic(data_a <= data_bl);
+      when ALU_CMPNE =>
+        res := repeat('0', 31) & to_std_logic(data_a /= data_bl);
+      when ALU_CMPEQ =>
+        res := repeat('0', 31) & to_std_logic(data_a = data_bl);
+      when ALU_CMPLT =>
+        res := repeat('0', 31) & to_std_logic(signed(data_a) < signed(data_bl));
+      when ALU_CMPLE =>
+        res := repeat('0', 31) & to_std_logic(signed(data_a) <= signed(data_bl));
+      when ALU_FCMPNE =>
+        data_na := normalize_fzero(data_a);
+        data_nb := normalize_fzero(data_b);
+        res := repeat('0', 31) & to_std_logic(data_na /= data_nb);
+      when ALU_FCMPEQ =>
+        data_na := normalize_fzero(data_a);
+        data_nb := normalize_fzero(data_b);
+        res := repeat('0', 31) & to_std_logic(data_na = data_nb);
+      when ALU_FCMPLT =>
+        data_na := normalize_fzero(data_a);
+        data_nb := normalize_fzero(data_b);
+        if data_na(31) = '1' or data_nb(31) = '1' then
+          res := repeat('0', 31) & to_std_logic(data_na >= data_nb);
+        else
+          res := repeat('0', 31) & to_std_logic(data_na < data_nb);
+        end if;
+      when ALU_FCMPLE =>
+        data_na := normalize_fzero(data_a);
+        data_nb := normalize_fzero(data_b);
+        if data_na(31) = '1' or data_nb(31) = '1' then
+          res := repeat('0', 31) & to_std_logic(data_na > data_nb);
+        else
+          res := repeat('0', 31) & to_std_logic(data_na <= data_nb);
+        end if;
+      when others =>
+        res := (others => '0');
+        assert false report "Unknown ALU opcode";
+    end case;
+
+    return res;
+
+  end function;
+
 begin
 
   comb : process(r, cpu_in)
@@ -450,67 +528,9 @@ begin
     data_forward(r.d.reg_b, r.d.data_b, data_b);
     data_forward(r.d.reg_dest, r.d.data_x, data_x);
 
-    data_bl := std_logic_vector(signed(data_b) + signed(r.d.data_l(7 downto 0)));
-
     case r.d.opcode is
       when OP_ALU =>
-        case r.d.tag is
-          when ALU_ADD =>
-            v.e.res := data_a + data_bl;
-          when ALU_SUB =>
-            v.e.res := data_a - data_bl;
-          when ALU_SHL =>
-            v.e.res := std_logic_vector(shift_left(unsigned(data_a), conv_integer(data_bl)));
-          when ALU_SHR =>
-            v.e.res := std_logic_vector(shift_right(unsigned(data_a), conv_integer(data_bl)));
-          when ALU_SAR =>
-            v.e.res := std_logic_vector(shift_right(signed(data_a), conv_integer(data_bl)));
-          when ALU_AND =>
-            v.e.res := data_a and data_b and r.d.data_l;
-          when ALU_OR =>
-            v.e.res := data_a or data_b or r.d.data_l;
-          when ALU_XOR =>
-            v.e.res := data_a xor data_b xor r.d.data_l;
-          when ALU_CMPULT =>
-            v.e.res := repeat('0', 31) & to_std_logic(data_a < data_bl);
-          when ALU_CMPULE =>
-            v.e.res := repeat('0', 31) & to_std_logic(data_a <= data_bl);
-          when ALU_CMPNE =>
-            v.e.res := repeat('0', 31) & to_std_logic(data_a /= data_bl);
-          when ALU_CMPEQ =>
-            v.e.res := repeat('0', 31) & to_std_logic(data_a = data_bl);
-          when ALU_CMPLT =>
-            v.e.res := repeat('0', 31) & to_std_logic(signed(data_a) < signed(data_bl));
-          when ALU_CMPLE =>
-            v.e.res := repeat('0', 31) & to_std_logic(signed(data_a) <= signed(data_bl));
-          when ALU_FCMPNE =>
-            data_a := normalize_fzero(data_a);
-            data_b := normalize_fzero(data_b);
-            v.e.res := repeat('0', 31) & to_std_logic(data_a /= data_b);
-          when ALU_FCMPEQ =>
-            data_a := normalize_fzero(data_a);
-            data_b := normalize_fzero(data_b);
-            v.e.res := repeat('0', 31) & to_std_logic(data_a = data_b);
-          when ALU_FCMPLT =>
-            data_a := normalize_fzero(data_a);
-            data_b := normalize_fzero(data_b);
-            if data_a(31) = '1' or data_b(31) = '1' then
-              v.e.res := repeat('0', 31) & to_std_logic(data_a >= data_b);
-            else
-              v.e.res := repeat('0', 31) & to_std_logic(data_a < data_b);
-            end if;
-          when ALU_FCMPLE =>
-            data_a := normalize_fzero(data_a);
-            data_b := normalize_fzero(data_b);
-            if data_a(31) = '1' or data_b(31) = '1' then
-              v.e.res := repeat('0', 31) & to_std_logic(data_a > data_b);
-            else
-              v.e.res := repeat('0', 31) & to_std_logic(data_a <= data_b);
-            end if;
-          when others =>
-            v.e.res := (others => '0');
-            assert false report "Unknown ALU opcode";
-        end case;
+        v.e.res := alu(r.d.tag, data_a, data_b, r.d.data_l);
       when OP_LDL =>
         v.e.res := r.d.data_d;
       when OP_LDH =>
@@ -523,12 +543,11 @@ begin
         v.e.res := (others => '0');
     end case;
 
-    case r.d.opcode is
-      when OP_STB | OP_LDB =>
-        v.e.mem_addr := data_a + r.d.data_d;
-      when others =>
-        v.e.mem_addr := data_a + (r.d.data_d(29 downto 0) & "00");
-    end case;
+    if r.d.mem_byte = '1' then
+      v.e.mem_addr := data_a + r.d.data_d;
+    else
+      v.e.mem_addr := data_a + (r.d.data_d(29 downto 0) & "00");
+    end if;
 
     v.e.reg_dest  := r.d.reg_dest;
     v.e.reg_write := r.d.reg_write;
