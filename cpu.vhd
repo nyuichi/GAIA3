@@ -221,14 +221,14 @@ architecture Behavioral of cpu is
         if r.d.reg_write = '1' and r.d.reg_dest /= "00000" and (r.d.reg_dest = reg_x or r.d.reg_dest = reg_a) then
           stall := '1';
         end if;
-        if r.e.reg_write = '1' and r.e.reg_dest /= "00000" and (r.e.reg_dest = reg_x or r.e.reg_dest = reg_a) then
+        if r.e.mem_read = '1' and r.e.reg_dest /= "00000" and (r.e.reg_dest = reg_x or r.e.reg_dest = reg_a) then
           stall := '1';
         end if;
       when OP_JR =>
         if r.d.reg_write = '1' and r.d.reg_dest /= "00000" and r.d.reg_dest = reg_x then
           stall := '1';
         end if;
-        if r.e.reg_write = '1' and r.e.reg_dest /= "00000" and r.e.reg_dest = reg_x then
+        if r.e.mem_read = '1' and r.e.reg_dest /= "00000" and r.e.reg_dest = reg_x then
           stall := '1';
         end if;
       when others =>
