@@ -43,8 +43,6 @@ architecture Behavioral of cpu is
     mem_write : std_logic;
     mem_read  : std_logic;
     mem_byte  : std_logic;
-    soft_int  : std_logic;
-    soft_exit : std_logic;
     pc_addr   : std_logic_vector(31 downto 0);
     pc_src    : std_logic;
   end record;
@@ -68,12 +66,10 @@ architecture Behavioral of cpu is
   end record;
 
   type flag_type is record
-    eoi         : std_logic;
     int_en      : std_logic;
-    int_epc     : std_logic_vector(31 downto 0);
+    int_pc      : std_logic_vector(31 downto 0);
     int_cause   : std_logic_vector(31 downto 0);
     int_handler : std_logic_vector(31 downto 0);
-    soft_int    : std_logic;
     vmm_en      : std_logic;
     vmm_pd      : std_logic_vector(31 downto 0);
   end record;
@@ -85,6 +81,7 @@ architecture Behavioral of cpu is
     e       : execute_reg_type;
     m       : memory_reg_type;
     flag    : flag_type;
+    eoi     : std_logic;
   end record;
 
   constant fzero : fetch_reg_type := (
@@ -109,8 +106,6 @@ architecture Behavioral of cpu is
     mem_write => '0',
     mem_read  => '0',
     mem_byte  => '0',
-    soft_int  => '0',
-    soft_exit => '0',
     pc_addr   => (others => '0'),
     pc_src    => '0'
     );
@@ -134,12 +129,10 @@ architecture Behavioral of cpu is
     );
 
   constant flag_zero : flag_type := (
-    eoi         => '0',
     int_en      => '0',
-    int_epc     => (others => '0'),
+    int_pc      => (others => '0'),
     int_cause   => (others => '0'),
     int_handler => (others => '0'),
-    soft_int    => '0',
     vmm_en      => '0',
     vmm_pd      => (others => '0')
     );
@@ -150,7 +143,8 @@ architecture Behavioral of cpu is
     d       => dzero,
     e       => ezero,
     m       => mzero,
-    flag    => flag_zero
+    flag    => flag_zero,
+    eoi     => '0'
     );
 
   signal r, rin : reg_type := rzero;
@@ -241,6 +235,16 @@ architecture Behavioral of cpu is
         end if;
       when others =>
     end case;
+
+    -- exception hazard
+    case opcode is
+      when OP_SYSENTER | OP_SYSEXIT =>
+        if r.d.mem_write = '1' or r.d.mem_read = '1' then
+          stall := '1';
+        end if;
+      when others =>
+    end case;
+
   end procedure;
 
 
@@ -248,8 +252,9 @@ architecture Behavioral of cpu is
     inst    : in  std_logic_vector(31 downto 0);
     data_x  : in  std_logic_vector(31 downto 0);
     data_a  : in  std_logic_vector(31 downto 0);
-    int_epc : in  std_logic_vector(31 downto 0);
-    pc_src  : out std_logic;  -- value of pc_src may be wrong when stalling
+    int_hdr : in  std_logic_vector(31 downto 0);
+    int_pc  : in  std_logic_vector(31 downto 0);
+    pc_src  : out std_logic;
     pc_addr : out std_logic_vector(31 downto 0)) is
 
     variable fd_data_x : std_logic_vector(31 downto 0);
@@ -268,21 +273,21 @@ architecture Behavioral of cpu is
         pc_addr := r.f.nextpc + (repeat(inst(15), 14) & inst(15 downto 0) & "00");
       when OP_JR =>
         pc_addr := fd_data_x;
+      when OP_SYSENTER =>
+        pc_addr := int_hdr;
       when OP_SYSEXIT =>
-        pc_addr := int_epc;
+        pc_addr := int_pc;
       when others =>
         pc_addr := (others => '-');
     end case;
 
     case inst(31 downto 28) is
-      when OP_JL | OP_JR =>
+      when OP_JL | OP_JR | OP_SYSENTER | OP_SYSEXIT =>
         pc_src := '1';
       when OP_BNE =>
         pc_src := to_std_logic(fd_data_x /= fd_data_a);
       when OP_BEQ =>
         pc_src := to_std_logic(fd_data_x = fd_data_a);
-      when OP_SYSEXIT =>
-        pc_src := '1';
       when others =>
         pc_src := '0';
     end case;
@@ -291,42 +296,34 @@ architecture Behavioral of cpu is
 
 
   procedure detect_interrupt (
-    soft_int : in    std_logic;
-    v        : inout reg_type) is
+    v : inout reg_type) is
 
-    variable int_en      : std_logic;
-    variable int_go      : std_logic;
-    variable int_epc     : std_logic_vector(31 downto 0);
-    variable int_cause   : std_logic_vector(31 downto 0);
+    variable int_en    : std_logic;
+    variable int_go    : std_logic;
+    variable int_pc    : std_logic_vector(31 downto 0);
+    variable int_cause : std_logic_vector(31 downto 0);
 
   begin
 
-    -- prepare data
+    int_en := v.flag.int_en;
+    int_go := cpu_in.int_go;
+    int_cause := cpu_in.int_cause;
 
-    int_en := v.flag.int_en;           -- v: forwarding from mem stage!
-    int_go := cpu_in.int_go or soft_int;
-    int_epc := v.flag.int_epc;
-    if cpu_in.int_go = '1' then
-      int_cause := cpu_in.int_cause;
-    elsif soft_int = '1' then
-      int_cause := x"00000003";
+    if r.d.opcode = OP_SYSEXIT then     -- int right after sysexit
+      int_pc := r.d.pc_addr + 4;
+    else
+      int_pc := r.d.nextpc;
     end if;
 
-    -- to interrupt or not to do?
+    -- interrupt, if possible!
 
-    if r.flag.eoi = '0' and int_en = '1' and int_go = '1' then
-      v.flag.int_en := '0';
+    if r.eoi = '0' and int_en = '1' and cpu_in.int_go = '1' then
+      v.flag.int_en    := '0';
       v.flag.int_cause := int_cause;
-      if r.d.soft_exit = '1' then
-        v.flag.int_epc := r.d.pc_addr + 4;
-      elsif cpu_in.int_go = '0' then       -- soft
-        v.flag.int_epc := r.d.nextpc + 4;
-      else
-        v.flag.int_epc := r.d.nextpc;
-      end if;
-      v.flag.eoi := '1';
+      v.flag.int_pc    := int_pc;
+      v.eoi := '1';
     else
-      v.flag.eoi := '0';
+      v.eoi := '0';
     end if;
 
   end procedure;
@@ -413,10 +410,10 @@ begin
         end if;
       when x"80001108" =>
         if d_re = '1' then
-          v.m.res := r.flag.int_epc;
+          v.m.res := r.flag.int_pc;
         end if;
         if d_we = '1' then
-          v.flag.int_epc := d_val;
+          v.flag.int_pc := d_val;
         end if;
       when x"8000110C" =>
         if d_re = '1' then
@@ -539,16 +536,11 @@ begin
     v.e.mem_read  := r.d.mem_read;
     v.e.mem_byte  := r.d.mem_byte;
 
-    if r.flag.eoi = '1' and r.flag.int_cause = x"00000003" then -- end of soft_int
-      v.flag.soft_int := '0';
-    end if;
-    v.flag.soft_int := v.flag.soft_int or r.d.soft_int;
-
-    detect_interrupt(v.flag.soft_int, v);
+    detect_interrupt(v);
 
     if cpu_in.d_stall = '1' then
       v.e := r.e;
-    elsif v.flag.eoi = '1' or r.flag.eoi = '1' then
+    elsif v.eoi = '1' then
       v.e.reg_write := '0';
       v.e.mem_write := '0';
       v.e.mem_read := '0';
@@ -590,12 +582,9 @@ begin
     v.d.mem_write := to_std_logic(v.d.opcode = OP_ST or v.d.opcode = OP_STB);
     v.d.mem_read  := to_std_logic(v.d.opcode = OP_LD or v.d.opcode = OP_LDB);
     v.d.mem_byte  := to_std_logic(v.d.opcode = OP_LDB or v.d.opcode = OP_STB);
-    v.d.soft_int  := to_std_logic(v.d.opcode = OP_SYSENTER);
-    v.d.soft_exit := to_std_logic(v.d.opcode = OP_SYSEXIT);
 
-    --// take care of hazards
     detect_hazard(inst, stall);
-    detect_branch(inst, v.d.data_x, v.d.data_a, v.flag.int_epc, v.d.pc_src, v.d.pc_addr);
+    detect_branch(inst, v.d.data_x, v.d.data_a, v.flag.int_handler, v.flag.int_pc, v.d.pc_src, v.d.pc_addr);
 
     if cpu_in.d_stall = '1' then
       v.d := r.d;
@@ -603,22 +592,28 @@ begin
       v.d.data_x := v.regfile(conv_integer(v.d.reg_dest));
       v.d.data_a := v.regfile(conv_integer(v.d.reg_a));
       v.d.data_b := v.regfile(conv_integer(v.d.reg_b));
-    elsif stall = '1' or r.d.pc_src = '1' or r.flag.eoi = '1' then
+    elsif stall = '1' or r.d.pc_src = '1' or v.eoi = '1' then
       v.d.reg_write := '0';
       v.d.mem_write := '0';
       v.d.mem_read := '0';
       v.d.pc_src := '0';
-      v.d.soft_int := '0';
-      v.d.soft_exit := '0';
-    elsif v.d.opcode = OP_SYSEXIT then
-      v.flag.int_en := '1';
+    else
+      case v.d.opcode is
+        when OP_SYSENTER =>
+          v.flag.int_cause := x"00000003";
+          v.flag.int_pc := r.f.nextpc + 4;
+          v.flag.int_en := '0';
+        when OP_SYSEXIT =>
+          v.flag.int_en := '1';
+        when others =>
+      end case;
     end if;
 
     -- FETCH
 
     i_re := '1';
 
-    if r.flag.eoi = '1' then
+    if r.eoi = '1' then
       i_addr := r.flag.int_handler;
     elsif stall = '1' or cpu_in.d_stall = '1' then
       i_addr := r.f.pc;
@@ -636,7 +631,7 @@ begin
       v.f.nextpc := i_addr + 4;
     end if;
 
-    v.f.i_stall := cpu_in.i_stall;
+    v.f.i_stall := cpu_in.i_stall or v.eoi;
 
     -- END
 
@@ -649,7 +644,7 @@ begin
     cpu_out.d_we   <= d_we;
     cpu_out.d_re   <= d_re;
     cpu_out.d_b    <= d_b;
-    cpu_out.eoi    <= r.flag.eoi;
+    cpu_out.eoi    <= r.eoi;
     cpu_out.eoi_id <= r.flag.int_cause;
     cpu_out.cai    <= cai;
     cpu_out.vmm_en <= r.flag.vmm_en;
