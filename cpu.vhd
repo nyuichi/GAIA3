@@ -231,6 +231,12 @@ architecture Behavioral of cpu is
       when others =>
     end case;
 
+    if cpu_in.int_go = '1' then
+      if r.d.mem_write = '1' or r.d.mem_read = '1' then
+        stall := '1';
+      end if;
+    end if;
+
   end procedure;
 
 
@@ -295,36 +301,14 @@ architecture Behavioral of cpu is
 
 
   procedure detect_interrupt (
-    v : inout reg_type) is
-
-    variable int_en    : std_logic;
-    variable int_go    : std_logic;
-    variable int_pc    : std_logic_vector(31 downto 0);
-    variable int_cause : std_logic_vector(31 downto 0);
-
+    int_en : in  std_logic;
+    eoi    : out std_logic) is
   begin
-
-    int_en := v.flag.int_en;
-    int_go := cpu_in.int_go;
-    int_cause := cpu_in.int_cause;
-
-    if r.d.opcode = OP_SYSEXIT then     -- int right after sysexit
-      int_pc := r.d.pc_addr + 4;
+    if r.eoi = '0' and int_en = '1' and cpu_in.int_go = '1' then
+      eoi := '1';
     else
-      int_pc := r.d.nextpc;
+      eoi := '0';
     end if;
-
-    -- interrupt, if possible!
-
-    if r.eoi = '0' and int_en = '1' and int_go = '1' then
-      v.flag.int_en    := '0';
-      v.flag.int_cause := int_cause;
-      v.flag.int_pc    := int_pc;
-      v.eoi := '1';
-    else
-      v.eoi := '0';
-    end if;
-
   end procedure;
 
 
@@ -556,14 +540,12 @@ begin
     v.e.mem_read  := r.d.mem_read;
     v.e.mem_byte  := r.d.mem_byte;
 
-    detect_interrupt(v);
-
     if cpu_in.d_stall = '1' then
       v.e := r.e;
-    elsif v.eoi = '1' then
+    elsif r.eoi = '1' then
       v.e.reg_write := '0';
       v.e.mem_write := '0';
-      v.e.mem_read := '0';
+      v.e.mem_read  := '0';
     end if;
 
     -- DECODE
@@ -602,29 +584,29 @@ begin
 
     detect_hazard(inst, stall);
     detect_branch(inst, v.regfile, v.flag.int_handler, v.flag.int_pc, v.d.pc_src, v.d.pc_addr);
+    detect_interrupt(v.flag.int_en, v.eoi);
 
     if cpu_in.d_stall = '1' then
       v.d := r.d;
-    elsif stall = '1' then
+      v.eoi := '0';
+    elsif stall = '1' or r.d.pc_src = '1' or r.eoi = '1' then
       v.d.reg_write := '0';
       v.d.mem_write := '0';
       v.d.mem_read := '0';
       v.d.pc_src := '0';
+      v.eoi := '0';
     else
-      if v.d.opcode = OP_SYSENTER then
+      if v.eoi = '1' then
+        v.flag.int_cause := cpu_in.int_cause;
+        v.flag.int_pc    := r.f.nextpc;
+        v.flag.int_en    := '0';
+      elsif v.d.opcode = OP_SYSENTER then
         v.flag.int_cause := x"00000003";
-        v.flag.int_pc := r.f.nextpc + 4;
-        v.flag.int_en := '0';
+        v.flag.int_pc    := r.f.nextpc + 4;
+        v.flag.int_en    := '0';
       elsif v.d.opcode = OP_SYSEXIT then
         v.flag.int_en := '1';
       end if;
-    end if;
-
-    if r.d.pc_src = '1' or r.eoi = '1' or v.eoi = '1' then
-      v.d.reg_write := '0';
-      v.d.mem_write := '0';
-      v.d.mem_read := '0';
-      v.d.pc_src := '0';
     end if;
 
     --// see http://goo.gl/dhJQ69 for detail
