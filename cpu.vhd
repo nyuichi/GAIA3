@@ -599,17 +599,14 @@ begin
       i_addr := r.f.pc;
     elsif r.d.pc_src = '1' then
       i_addr := r.d.pc_addr;
+    elsif r.f.bubble = '1' then
+      i_addr := r.f.pc;
     else
       i_addr := r.f.nextpc;
     end if;
 
     v.f.pc := i_addr;
-
-    if cpu_in.i_stall = '1' then
-      v.f.nextpc := i_addr;
-    else
-      v.f.nextpc := i_addr + 4;
-    end if;
+    v.f.nextpc := i_addr + 4;
 
     v.f.bubble := cpu_in.i_stall;
 
