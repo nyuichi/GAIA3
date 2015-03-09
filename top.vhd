@@ -39,6 +39,8 @@ architecture Behavioral of top is
 
   signal cpu_in     : cpu_in_type     := cpu_in_zero;
   signal cpu_out    : cpu_out_type    := cpu_out_zero;
+  signal alu_in     : alu_in_type     := alu_in_zero;
+  signal alu_out    : alu_out_type    := alu_out_zero;
   signal icache_in  : icache_in_type  := icache_in_zero;
   signal icache_out : icache_out_type := icache_out_zero;
   signal dcache_in  : dcache_in_type  := dcache_in_zero;
@@ -83,6 +85,12 @@ begin   -- architecture Behavioral
       rst     => rst,
       cpu_in  => cpu_in,
       cpu_out => cpu_out);
+
+  alu_in.optag   <= cpu_out.optag;
+  alu_in.data_a  <= cpu_out.data_a;
+  alu_in.data_b  <= cpu_out.data_b;
+  alu_in.data_l  <= cpu_out.data_l;
+  cpu_in.alu_res <= alu_out.res;
 
   cpu_in.d_stall <= dcache_out.stall;
   cpu_in.d_data  <= dcache_out.rx;
@@ -132,7 +140,14 @@ begin   -- architecture Behavioral
 
   timer_in.eoi <= cpu_out.eoi when cpu_out.eoi_id = x"00000001" else '0';
 
-  blockram_1: entity work.blockram
+  alu_1: entity work.alu
+    port map (
+      clk     => clk,
+      rst     => rst,
+      alu_in  => alu_in,
+      alu_out => alu_out);
+
+  blockram_1 : entity work.blockram
     generic map (
       dwidth => 32,
       awidth => 12)

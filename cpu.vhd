@@ -1,7 +1,6 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_unsigned.all;
-use IEEE.numeric_std.all;
 
 use work.types.all;
 use work.util.all;
@@ -40,6 +39,7 @@ architecture Behavioral of cpu is
     tag       : std_logic_vector(4 downto 0);
     nextpc    : std_logic_vector(31 downto 0);
     reg_write : std_logic;
+    res_unit  : integer range 0 to 1;
     mem_write : std_logic;
     mem_read  : std_logic;
     mem_byte  : std_logic;
@@ -52,6 +52,7 @@ architecture Behavioral of cpu is
     mem_addr  : std_logic_vector(31 downto 0);
     reg_dest  : std_logic_vector(4 downto 0);
     reg_write : std_logic;
+    res_unit  : integer range 0 to 1;
     mem_write : std_logic;
     mem_read  : std_logic;
     mem_byte  : std_logic;
@@ -102,6 +103,7 @@ architecture Behavioral of cpu is
     tag       => "00000",
     nextpc    => (others => '0'),
     reg_write => '0',
+    res_unit  => 0,
     mem_write => '0',
     mem_read  => '0',
     mem_byte  => '0',
@@ -114,6 +116,7 @@ architecture Behavioral of cpu is
     mem_addr  => (others => '0'),
     reg_dest  => "00000",
     reg_write => '0',
+    res_unit  => 0,
     mem_write => '0',
     mem_read  => '0',
     mem_byte  => '0'
@@ -154,7 +157,14 @@ architecture Behavioral of cpu is
     res      : out std_logic_vector(31 downto 0)) is
   begin
     if r.e.reg_write = '1' and r.e.reg_dest /= "00000" and r.e.reg_dest = reg_src then
-      res := r.e.res;
+      case r.e.res_unit is
+        when 0 =>
+          res := r.e.res;
+        when 1 =>
+          res := cpu_in.alu_res;
+        when others =>
+          assert false severity failure;
+      end case;
     elsif r.m.reg_write = '1' and r.m.reg_dest /= "00000" and r.m.reg_dest = reg_src then
       if r.m.reg_mem = '1' then
         res := cpu_in.d_data;
@@ -262,13 +272,27 @@ architecture Behavioral of cpu is
 
     -- forwarding, but results may be wrong...
     if r.e.reg_write = '1' and r.e.reg_dest /= "00000" and r.e.reg_dest = reg_x then
-      data_x := r.e.res;
+      case r.e.res_unit is
+        when 0 =>
+          data_x := r.e.res;
+        when 1 =>
+          data_x := cpu_in.alu_res;
+        when others =>
+          assert false severity failure;
+      end case;
     else
       data_x := regfile(conv_integer(reg_x));
     end if;
 
     if r.e.reg_write = '1' and r.e.reg_dest /= "00000" and r.e.reg_dest = reg_a then
-      data_a := r.e.res;
+      case r.e.res_unit is
+        when 0 =>
+          data_a := r.e.res;
+        when 1 =>
+          data_a := cpu_in.alu_res;
+        when others =>
+          assert false severity failure;
+      end case;
     else
       data_a := regfile(conv_integer(reg_a));
     end if;
@@ -312,83 +336,68 @@ architecture Behavioral of cpu is
   end procedure;
 
 
-  function alu (
-    optag  : std_logic_vector(4 downto 0);
-    data_a : std_logic_vector(31 downto 0);
-    data_b : std_logic_vector(31 downto 0);
-    data_l : std_logic_vector(31 downto 0))
-    return std_logic_vector is
-
-    variable res     : std_logic_vector(31 downto 0);
-    variable data_bl : std_logic_vector(31 downto 0);
-    variable data_na : std_logic_vector(31 downto 0);
-    variable data_nb : std_logic_vector(31 downto 0);
-
+  procedure memory_flag (
+    addr : in  std_logic_vector(31 downto 0);
+    re   : in  std_logic;
+    we   : in  std_logic;
+    val  : in  std_logic_vector(31 downto 0);
+    flag : out flag_type;
+    res  : out std_logic_vector(31 downto 0);
+    cai  : out std_logic) is
   begin
 
-    data_bl := std_logic_vector(signed(data_b) + signed(data_l(7 downto 0)));
+    cai := '0';
 
-    case optag is
-      when ALU_ADD =>
-        res := data_a + data_bl;
-      when ALU_SUB =>
-        res := data_a - data_bl;
-      when ALU_SHL =>
-        res := std_logic_vector(shift_left(unsigned(data_a), conv_integer(data_bl)));
-      when ALU_SHR =>
-        res := std_logic_vector(shift_right(unsigned(data_a), conv_integer(data_bl)));
-      when ALU_SAR =>
-        res := std_logic_vector(shift_right(signed(data_a), conv_integer(data_bl)));
-      when ALU_AND =>
-        res := data_a and data_b and data_l;
-      when ALU_OR =>
-        res := data_a or data_b or data_l;
-      when ALU_XOR =>
-        res := data_a xor data_b xor data_l;
-      when ALU_CMPULT =>
-        res := repeat('0', 31) & to_std_logic(data_a < data_bl);
-      when ALU_CMPULE =>
-        res := repeat('0', 31) & to_std_logic(data_a <= data_bl);
-      when ALU_CMPNE =>
-        res := repeat('0', 31) & to_std_logic(data_a /= data_bl);
-      when ALU_CMPEQ =>
-        res := repeat('0', 31) & to_std_logic(data_a = data_bl);
-      when ALU_CMPLT =>
-        res := repeat('0', 31) & to_std_logic(signed(data_a) < signed(data_bl));
-      when ALU_CMPLE =>
-        res := repeat('0', 31) & to_std_logic(signed(data_a) <= signed(data_bl));
-      when ALU_FCMPNE =>
-        data_na := normalize_fzero(data_a);
-        data_nb := normalize_fzero(data_b);
-        res := repeat('0', 31) & to_std_logic(data_na /= data_nb);
-      when ALU_FCMPEQ =>
-        data_na := normalize_fzero(data_a);
-        data_nb := normalize_fzero(data_b);
-        res := repeat('0', 31) & to_std_logic(data_na = data_nb);
-      when ALU_FCMPLT =>
-        data_na := normalize_fzero(data_a);
-        data_nb := normalize_fzero(data_b);
-        if data_na(31) = '1' or data_nb(31) = '1' then
-          res := repeat('0', 31) & to_std_logic(data_na >= data_nb);
-        else
-          res := repeat('0', 31) & to_std_logic(data_na < data_nb);
+    case addr is
+      when x"80001100" =>
+        if re = '1' then
+          res := r.flag.int_handler;
         end if;
-      when ALU_FCMPLE =>
-        data_na := normalize_fzero(data_a);
-        data_nb := normalize_fzero(data_b);
-        if data_na(31) = '1' or data_nb(31) = '1' then
-          res := repeat('0', 31) & to_std_logic(data_na > data_nb);
-        else
-          res := repeat('0', 31) & to_std_logic(data_na <= data_nb);
+        if we = '1' then
+          flag.int_handler := val;
+        end if;
+      when x"80001104" =>
+        if re = '1' then
+          res := repeat('0', 31) & r.flag.int_en;
+        end if;
+        if we = '1' then
+          flag.int_en := val(0);
+        end if;
+      when x"80001108" =>
+        if re = '1' then
+          res := r.flag.int_pc;
+        end if;
+        if we = '1' then
+          flag.int_pc := val;
+        end if;
+      when x"8000110C" =>
+        if re = '1' then
+          res := r.flag.int_cause;
+        end if;
+        if we = '1' then
+          flag.int_cause := val;
+        end if;
+      when x"80001200" =>
+        if re = '1' then
+          res := repeat('0', 31) & r.flag.vmm_en;
+        end if;
+        if we = '1' then
+          flag.vmm_en := val(0);
+          cai := '1';
+        end if;
+      when x"80001204" =>
+        if re = '1' then
+          res := r.flag.vmm_pd;
+        end if;
+        if we = '1' then
+          flag.vmm_pd := val;
+          cai := '1';
         end if;
       when others =>
-        res := (others => '0');
-        assert false report "Unknown ALU opcode";
     end case;
 
-    return res;
+  end procedure;
 
-  end function;
 
 begin
 
@@ -443,9 +452,15 @@ begin
     d_we   := r.e.mem_write;
     d_re   := r.e.mem_read;
     d_b    := r.e.mem_byte;
-    v.m.res       := r.e.res;
-    v.m.reg_dest  := r.e.reg_dest;
-    v.m.reg_write := r.e.reg_write;
+
+    case r.e.res_unit is
+      when 0 =>
+        v.m.res := r.e.res;
+      when 1 =>
+        v.m.res := cpu_in.alu_res;
+      when others =>
+        assert false severity failure;
+    end case;
 
     if x"80001100" <= d_addr and d_addr < x"80002000" then
       v.m.reg_mem := '0';
@@ -453,55 +468,10 @@ begin
       v.m.reg_mem := r.e.mem_read;
     end if;
 
-    cai := '0';
+    memory_flag(d_addr, d_re, d_we, d_val, v.flag, v.m.res, cai);
 
-    case d_addr is
-      when x"80001100" =>
-        if d_re = '1' then
-          v.m.res := r.flag.int_handler;
-        end if;
-        if d_we = '1' then
-          v.flag.int_handler := d_val;
-        end if;
-      when x"80001104" =>
-        if d_re = '1' then
-          v.m.res := repeat('0', 31) & r.flag.int_en;
-        end if;
-        if d_we = '1' then
-          v.flag.int_en := d_val(0);
-        end if;
-      when x"80001108" =>
-        if d_re = '1' then
-          v.m.res := r.flag.int_pc;
-        end if;
-        if d_we = '1' then
-          v.flag.int_pc := d_val;
-        end if;
-      when x"8000110C" =>
-        if d_re = '1' then
-          v.m.res := r.flag.int_cause;
-        end if;
-        if d_we = '1' then
-          v.flag.int_cause := d_val;
-        end if;
-      when x"80001200" =>
-        if d_re = '1' then
-          v.m.res := repeat('0', 31) & r.flag.vmm_en;
-        end if;
-        if d_we = '1' then
-          v.flag.vmm_en := d_val(0);
-          cai := '1';
-        end if;
-      when x"80001204" =>
-        if d_re = '1' then
-          v.m.res := r.flag.vmm_pd;
-        end if;
-        if d_we = '1' then
-          v.flag.vmm_pd := d_val;
-          cai := '1';
-        end if;
-      when others =>
-    end case;
+    v.m.reg_dest  := r.e.reg_dest;
+    v.m.reg_write := r.e.reg_write;
 
     if cpu_in.d_stall = '1' then
       v.m.reg_write := '0';
@@ -514,8 +484,6 @@ begin
     data_forward(r.d.reg_dest, r.d.data_x, data_x);
 
     case r.d.opcode is
-      when OP_ALU =>
-        v.e.res := alu(r.d.tag, data_a, data_b, r.d.data_l);
       when OP_LDL =>
         v.e.res := r.d.data_d;
       when OP_LDH =>
@@ -535,6 +503,7 @@ begin
     end if;
 
     v.e.reg_dest  := r.d.reg_dest;
+    v.e.res_unit  := r.d.res_unit;
     v.e.reg_write := r.d.reg_write;
     v.e.mem_write := r.d.mem_write;
     v.e.mem_read  := r.d.mem_read;
@@ -577,6 +546,14 @@ begin
         v.d.reg_write := '1';
       when others =>
         v.d.reg_write := '0';
+    end case;
+    case inst(31 downto 28) is
+      when OP_ALU =>
+        v.d.res_unit := 1;
+      when OP_FPU =>
+        v.d.res_unit := 2;
+      when others =>
+        v.d.res_unit := 0;
     end case;
     v.d.mem_write := to_std_logic(v.d.opcode = OP_ST or v.d.opcode = OP_STB);
     v.d.mem_read  := to_std_logic(v.d.opcode = OP_LD or v.d.opcode = OP_LDB);
@@ -654,6 +631,10 @@ begin
     cpu_out.cai    <= cai;
     cpu_out.vmm_en <= r.flag.vmm_en;
     cpu_out.vmm_pd <= r.flag.vmm_pd;
+    cpu_out.optag  <= r.d.tag;
+    cpu_out.data_a <= data_a;
+    cpu_out.data_b <= data_b;
+    cpu_out.data_l <= r.d.data_l;
   end process;
 
   regs : process(clk, rst)

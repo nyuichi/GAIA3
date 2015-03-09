@@ -12,6 +12,7 @@ package types is
     d_data    : std_logic_vector(31 downto 0);
     int_go    : std_logic;
     int_cause : std_logic_vector(31 downto 0);
+    alu_res   : std_logic_vector(31 downto 0);
   end record;
 
   constant cpu_in_zero : cpu_in_type := (
@@ -20,7 +21,8 @@ package types is
     d_stall   => '0',
     d_data    => (others => '0'),
     int_go    => '0',
-    int_cause => (others => '0'));
+    int_cause => (others => '0'),
+    alu_res   => (others => '0'));
 
   type cpu_out_type is record
     i_re   : std_logic;
@@ -35,6 +37,10 @@ package types is
     cai    : std_logic;
     vmm_en : std_logic;
     vmm_pd : std_logic_vector(31 downto 0);
+    optag  : std_logic_vector(4 downto 0);
+    data_a : std_logic_vector(31 downto 0);
+    data_b : std_logic_vector(31 downto 0);
+    data_l : std_logic_vector(31 downto 0);
   end record;
 
   constant cpu_out_zero : cpu_out_type := (
@@ -49,7 +55,11 @@ package types is
     eoi_id => (others => '0'),
     cai    => '0',
     vmm_en => '0',
-    vmm_pd => (others => '0'));
+    vmm_pd => (others => '0'),
+    optag  => (others => '0'),
+    data_a => (others => '0'),
+    data_b => (others => '0'),
+    data_l => (others => '0'));
 
   component cpu is
     port (
@@ -57,6 +67,37 @@ package types is
       rst     : in  std_logic;
       cpu_in  : in  cpu_in_type;
       cpu_out : out cpu_out_type);
+  end component;
+
+
+  -- alu
+
+  type alu_in_type is record
+    optag  : std_logic_vector(4 downto 0);
+    data_a : std_logic_vector(31 downto 0);
+    data_b : std_logic_vector(31 downto 0);
+    data_l : std_logic_vector(31 downto 0);
+  end record;
+
+  constant alu_in_zero : alu_in_type := (
+    optag  => (others => '0'),
+    data_a => (others => '0'),
+    data_b => (others => '0'),
+    data_l => (others => '0'));
+
+  type alu_out_type is record
+    res : std_logic_vector(31 downto 0);
+  end record;
+
+  constant alu_out_zero : alu_out_type := (
+    res => (others => '0'));
+
+  component alu is
+    port (
+      clk     : in  std_logic;
+      rst     : in  std_logic;
+      alu_in  : in  alu_in_type;
+      alu_out : out alu_out_type);
   end component;
 
 
