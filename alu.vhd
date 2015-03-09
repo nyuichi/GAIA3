@@ -59,11 +59,11 @@ begin
       when ALU_SUB =>
         v.res := data_a - data_bl;
       when ALU_SHL =>
-        v.res := std_logic_vector(shift_left(unsigned(data_a), conv_integer(data_bl)));
+        v.res := std_logic_vector(shift_left(unsigned(data_a), conv_integer(data_bl(4 downto 0))));
       when ALU_SHR =>
-        v.res := std_logic_vector(shift_right(unsigned(data_a), conv_integer(data_bl)));
+        v.res := std_logic_vector(shift_right(unsigned(data_a), conv_integer(data_bl(4 downto 0))));
       when ALU_SAR =>
-        v.res := std_logic_vector(shift_right(signed(data_a), conv_integer(data_bl)));
+        v.res := std_logic_vector(shift_right(signed(data_a), conv_integer(data_bl(4 downto 0))));
       when ALU_AND =>
         v.res := data_a and data_b and data_l;
       when ALU_OR =>
