@@ -550,8 +550,6 @@ begin
     case inst(31 downto 28) is
       when OP_ALU =>
         v.d.res_unit := 1;
-      when OP_FPU =>
-        v.d.res_unit := 2;
       when others =>
         v.d.res_unit := 0;
     end case;
