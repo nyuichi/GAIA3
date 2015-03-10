@@ -13,6 +13,7 @@ package types is
     int_go    : std_logic;
     int_cause : std_logic_vector(31 downto 0);
     alu_res   : std_logic_vector(31 downto 0);
+    fpu_res   : std_logic_vector(31 downto 0);
   end record;
 
   constant cpu_in_zero : cpu_in_type := (
@@ -22,7 +23,8 @@ package types is
     d_data    => (others => '0'),
     int_go    => '0',
     int_cause => (others => '0'),
-    alu_res   => (others => '0'));
+    alu_res   => (others => '0'),
+    fpu_res   => (others => '0'));
 
   type cpu_out_type is record
     i_re   : std_logic;
@@ -98,6 +100,35 @@ package types is
       rst     : in  std_logic;
       alu_in  : in  alu_in_type;
       alu_out : out alu_out_type);
+  end component;
+
+
+  -- fpu
+
+  type fpu_in_type is record
+    optag  : std_logic_vector(4 downto 0);
+    data_a : std_logic_vector(31 downto 0);
+    data_b : std_logic_vector(31 downto 0);
+  end record;
+
+  constant fpu_in_zero : fpu_in_type := (
+    optag  => (others => '0'),
+    data_a => (others => '0'),
+    data_b => (others => '0'));
+
+  type fpu_out_type is record
+    res : std_logic_vector(31 downto 0);
+  end record;
+
+  constant fpu_out_zero : fpu_out_type := (
+    res => (others => '0'));
+
+  component fpu is
+    port (
+      clk     : in  std_logic;
+      rst     : in  std_logic;
+      fpu_in  : in  fpu_in_type;
+      fpu_out : out fpu_out_type);
   end component;
 
 
@@ -440,5 +471,9 @@ package types is
   constant ALU_FCMPEQ : std_logic_vector(4 downto 0) := "11101";
   constant ALU_FCMPLT : std_logic_vector(4 downto 0) := "11110";
   constant ALU_FCMPLE : std_logic_vector(4 downto 0) := "11111";
+
+  constant FPU_FADD : std_logic_vector(4 downto 0) := "00000";
+  constant FPU_FSUB : std_logic_vector(4 downto 0) := "00001";
+  constant FPU_FMUL : std_logic_vector(4 downto 0) := "00010";
 
 end package;

@@ -39,7 +39,7 @@ architecture Behavioral of cpu is
     tag       : std_logic_vector(4 downto 0);
     nextpc    : std_logic_vector(31 downto 0);
     reg_write : std_logic;
-    res_unit  : integer range 0 to 1;
+    res_unit  : integer range 0 to 2;
     mem_write : std_logic;
     mem_read  : std_logic;
     mem_byte  : std_logic;
@@ -52,7 +52,7 @@ architecture Behavioral of cpu is
     mem_addr  : std_logic_vector(31 downto 0);
     reg_dest  : std_logic_vector(4 downto 0);
     reg_write : std_logic;
-    res_unit  : integer range 0 to 1;
+    res_unit  : integer range 0 to 2;
     mem_write : std_logic;
     mem_read  : std_logic;
     mem_byte  : std_logic;
@@ -162,6 +162,8 @@ architecture Behavioral of cpu is
           res := r.e.res;
         when 1 =>
           res := cpu_in.alu_res;
+        when 2 =>
+          res := cpu_in.fpu_res;
         when others =>
           assert false severity failure;
       end case;
@@ -273,6 +275,8 @@ architecture Behavioral of cpu is
           data_x := r.e.res;
         when 1 =>
           data_x := cpu_in.alu_res;
+        when 2 =>
+          data_x := cpu_in.fpu_res;
         when others =>
           assert false severity failure;
       end case;
@@ -286,6 +290,8 @@ architecture Behavioral of cpu is
           data_a := r.e.res;
         when 1 =>
           data_a := cpu_in.alu_res;
+        when 2 =>
+          data_a := cpu_in.fpu_res;
         when others =>
           assert false severity failure;
       end case;
@@ -456,6 +462,8 @@ begin
         v.m.res := r.e.res;
       when 1 =>
         v.m.res := cpu_in.alu_res;
+      when 2 =>
+        v.m.res := cpu_in.fpu_res;
       when others =>
         assert false severity failure;
     end case;
@@ -548,6 +556,8 @@ begin
     case v.d.opcode is
       when OP_ALU =>
         v.d.res_unit := 1;
+      when OP_FPU =>
+        v.d.res_unit := 2;
       when others =>
         v.d.res_unit := 0;
     end case;
