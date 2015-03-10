@@ -229,11 +229,6 @@ architecture Behavioral of cpu is
         if r.e.mem_read = '1' and r.e.reg_dest /= "00000" and r.e.reg_dest = reg_x then
           stall := '1';
         end if;
-      when others =>
-    end case;
-
-    -- interrupt hazard
-    case opcode is
       when OP_SYSENTER | OP_SYSEXIT =>
         if r.d.mem_write = '1' or r.d.mem_read = '1' then
           stall := '1';
@@ -241,6 +236,7 @@ architecture Behavioral of cpu is
       when others =>
     end case;
 
+    -- interrupt hazard
     if cpu_in.int_go = '1' then
       if r.d.mem_write = '1' or r.d.mem_read = '1' then
         stall := '1';
