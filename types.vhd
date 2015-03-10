@@ -411,15 +411,15 @@ package types is
   constant OP_FPU      : std_logic_vector(3 downto 0) := "0001";
   constant OP_LDL      : std_logic_vector(3 downto 0) := "0010";
   constant OP_LDH      : std_logic_vector(3 downto 0) := "0011";
-  constant OP_SYSENTER : std_logic_vector(3 downto 0) := "0100";
-  constant OP_SYSEXIT  : std_logic_vector(3 downto 0) := "0101";
-  constant OP_ST       : std_logic_vector(3 downto 0) := "0110";
-  constant OP_STB      : std_logic_vector(3 downto 0) := "0111";
-  constant OP_LD       : std_logic_vector(3 downto 0) := "1000";
-  constant OP_LDB      : std_logic_vector(3 downto 0) := "1001";
-  constant OP_JL       : std_logic_vector(3 downto 0) := "1011";
-  constant OP_JR       : std_logic_vector(3 downto 0) := "1100";
-  constant OP_BNE      : std_logic_vector(3 downto 0) := "1101";
+  constant OP_JL       : std_logic_vector(3 downto 0) := "0100";
+  constant OP_JR       : std_logic_vector(3 downto 0) := "0101";
+  constant OP_LD       : std_logic_vector(3 downto 0) := "0110";
+  constant OP_LDB      : std_logic_vector(3 downto 0) := "0111";
+  constant OP_ST       : std_logic_vector(3 downto 0) := "1000";
+  constant OP_STB      : std_logic_vector(3 downto 0) := "1001";
+  constant OP_SYSENTER : std_logic_vector(3 downto 0) := "1100";
+  constant OP_SYSEXIT  : std_logic_vector(3 downto 0) := "1101";
+  constant OP_BNE      : std_logic_vector(3 downto 0) := "1110";
   constant OP_BEQ      : std_logic_vector(3 downto 0) := "1111";
 
   constant ALU_ADD    : std_logic_vector(4 downto 0) := "00000";
