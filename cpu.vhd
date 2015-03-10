@@ -499,7 +499,7 @@ begin
       when OP_ST | OP_STB =>
         v.e.res := data_x;
       when others =>
-        v.e.res := (others => '0');
+        v.e.res := (others => '-');
     end case;
 
     if r.d.mem_byte = '1' then
@@ -544,14 +544,14 @@ begin
     v.d.data_l   := repeat(inst(12), 24) & inst(12 downto 5);
     v.d.data_d   := repeat(inst(15), 16) & inst(15 downto 0);
     v.d.tag      := inst(4 downto 0);
-
-    v.d.nextpc := r.f.nextpc;
-
+    v.d.nextpc   := r.f.nextpc;
     case v.d.opcode is
       when OP_ALU | OP_FPU | OP_LDL | OP_LDH | OP_LD | OP_LDB | OP_JL | OP_JR =>
         v.d.reg_write := '1';
-      when others =>
+      when OP_ST | OP_STB | OP_SYSENTER | OP_SYSEXIT | OP_BNE | OP_BEQ =>
         v.d.reg_write := '0';
+      when others =>
+        v.d.reg_write := '-';
     end case;
     case v.d.opcode is
       when OP_ALU =>
