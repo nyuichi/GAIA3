@@ -52,6 +52,8 @@ begin
     data_l := alu_in.data_l;
 
     data_bl := std_logic_vector(signed(data_b) + signed(data_l(7 downto 0)));
+    data_na := normalize_fzero(data_a);
+    data_nb := normalize_fzero(data_b);
 
     case optag is
       when ALU_ADD =>
@@ -65,11 +67,11 @@ begin
       when ALU_SAR =>
         v.res := std_logic_vector(shift_right(signed(data_a), conv_integer(data_bl(4 downto 0))));
       when ALU_AND =>
-        v.res := data_a and data_b and data_l;
+        v.res := data_a and data_bl;
       when ALU_OR =>
-        v.res := data_a or data_b or data_l;
+        v.res := data_a or data_bl;
       when ALU_XOR =>
-        v.res := data_a xor data_b xor data_l;
+        v.res := data_a xor data_bl;
       when ALU_CMPULT =>
         v.res := repeat('0', 31) & to_std_logic(data_a < data_bl);
       when ALU_CMPULE =>
@@ -83,24 +85,16 @@ begin
       when ALU_CMPLE =>
         v.res := repeat('0', 31) & to_std_logic(signed(data_a) <= signed(data_bl));
       when ALU_FCMPNE =>
-        data_na := normalize_fzero(data_a);
-        data_nb := normalize_fzero(data_b);
         v.res := repeat('0', 31) & to_std_logic(data_na /= data_nb);
       when ALU_FCMPEQ =>
-        data_na := normalize_fzero(data_a);
-        data_nb := normalize_fzero(data_b);
         v.res := repeat('0', 31) & to_std_logic(data_na = data_nb);
       when ALU_FCMPLT =>
-        data_na := normalize_fzero(data_a);
-        data_nb := normalize_fzero(data_b);
         if data_na(31) = '1' or data_nb(31) = '1' then
           v.res := repeat('0', 31) & to_std_logic(data_na >= data_nb);
         else
           v.res := repeat('0', 31) & to_std_logic(data_na < data_nb);
         end if;
       when ALU_FCMPLE =>
-        data_na := normalize_fzero(data_a);
-        data_nb := normalize_fzero(data_b);
         if data_na(31) = '1' or data_nb(31) = '1' then
           v.res := repeat('0', 31) & to_std_logic(data_na > data_nb);
         else
