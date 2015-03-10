@@ -223,10 +223,10 @@ architecture Behavioral of cpu is
           stall := '1';
         end if;
       when OP_JR =>
-        if r.d.reg_write = '1' and r.d.reg_dest /= "00000" and r.d.reg_dest = reg_x then
+        if r.d.reg_write = '1' and r.d.reg_dest /= "00000" and r.d.reg_dest = reg_a then
           stall := '1';
         end if;
-        if r.e.mem_read = '1' and r.e.reg_dest /= "00000" and r.e.reg_dest = reg_x then
+        if r.e.mem_read = '1' and r.e.reg_dest /= "00000" and r.e.reg_dest = reg_a then
           stall := '1';
         end if;
       when OP_SYSENTER | OP_SYSEXIT =>
@@ -297,7 +297,7 @@ architecture Behavioral of cpu is
       when OP_JL | OP_BNE | OP_BEQ =>
         pc_addr := r.f.nextpc + (repeat(inst(15), 14) & inst(15 downto 0) & "00");
       when OP_JR =>
-        pc_addr := data_x;
+        pc_addr := data_a;
       when OP_SYSENTER =>
         pc_addr := int_hdr;
       when OP_SYSEXIT =>
@@ -341,6 +341,8 @@ architecture Behavioral of cpu is
     res  : out std_logic_vector(31 downto 0);
     cai  : out std_logic) is
   begin
+
+    flag := r.flag;
 
     cai := '0';
 
@@ -484,7 +486,7 @@ begin
         v.e.res := r.d.data_d;
       when OP_LDH =>
         v.e.res := r.d.data_d(15 downto 0) & data_a(15 downto 0);
-      when OP_JL =>
+      when OP_JL | OP_JR =>
         v.e.res := r.d.nextpc;
       when OP_ST | OP_STB =>
         v.e.res := data_x;
@@ -537,13 +539,13 @@ begin
 
     v.d.nextpc := r.f.nextpc;
 
-    case inst(31 downto 28) is
-      when OP_ALU | OP_FPU | OP_LDL | OP_LDH | OP_LD | OP_LDB | OP_JL =>
+    case v.d.opcode is
+      when OP_ALU | OP_FPU | OP_LDL | OP_LDH | OP_LD | OP_LDB | OP_JL | OP_JR =>
         v.d.reg_write := '1';
       when others =>
         v.d.reg_write := '0';
     end case;
-    case inst(31 downto 28) is
+    case v.d.opcode is
       when OP_ALU =>
         v.d.res_unit := 1;
       when others =>
