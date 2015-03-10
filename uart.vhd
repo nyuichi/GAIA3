@@ -44,6 +44,7 @@ architecture Behavioral of uart is
 
   type reg_type is record
     ack : std_logic;
+    ack_ready : std_logic;
 
     -- buffer
     tx_buf : buf_t;
@@ -62,16 +63,17 @@ architecture Behavioral of uart is
   end record;
 
   constant rzero : reg_type := (
-    ack    => '0',
-    tx_buf => (others => (others => '0')),
-    tx_ptr => (others => '0'),
-    tx_len => 0,
-    rx_buf => (others => (others => '0')),
-    rx_ptr => (others => '0'),
-    rx_len => 0,
-    re     => '0',
-    we     => '1',
-    prev   => (others => '0'));
+    ack       => '0',
+    ack_ready => '0',
+    tx_buf    => (others => (others => '0')),
+    tx_ptr    => (others => '0'),
+    tx_len    => 0,
+    rx_buf    => (others => (others => '0')),
+    rx_ptr    => (others => '0'),
+    rx_len    => 0,
+    re        => '0',
+    we        => '1',
+    prev      => (others => '0'));
 
   signal r, rin : reg_type := rzero;
 
@@ -102,6 +104,12 @@ begin
       v.ack := '1';
     else
       v.ack := '0';
+    end if;
+
+    if uart_in.addr = x"80001004" then
+      v.ack_ready := '1';
+    else
+      v.ack_ready := '0';
     end if;
 
     v_din := x"FFFFFFFF";
@@ -152,6 +160,8 @@ begin
     tx_dat <= v_dout;
     if r.ack = '1' then
       uart_out.rx <= r.prev;
+    elsif r.ack_ready = '1' then
+      uart_out.rx <= repeat('0', 31) & to_std_logic(v.tx_len < 256);
     else
       uart_out.rx <= (others => 'Z');
     end if;
