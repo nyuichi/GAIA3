@@ -585,7 +585,7 @@ begin
         v.flag.int_en    := '0';
       elsif v.d.opcode = OP_SYSENTER then
         v.flag.int_cause := x"00000003";
-        v.flag.int_pc    := r.f.nextpc + 4;
+        v.flag.int_pc    := r.f.nextpc;
         v.flag.int_en    := '0';
       elsif v.d.opcode = OP_SYSEXIT then
         v.flag.int_en := '1';
