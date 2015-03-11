@@ -6,7 +6,6 @@ package util is
 
   function to_std_logic(b : boolean) return std_logic;
   function repeat(B: std_logic; N: natural) return std_logic_vector;
-  function normalize_fzero(a : std_logic_vector(31 downto 0)) return std_logic_vector;
   function stdv2str(vec : std_logic_vector) return string;
 
   component blockram is
@@ -44,18 +43,6 @@ package body util is
     end loop;
     return result;
   end;
-
-  function normalize_fzero (a : std_logic_vector(31 downto 0))
-    return std_logic_vector is
-    variable result : std_logic_vector(31 downto 0);
-  begin
-    if a = x"80000000" then
-      result := x"00000000";
-    else
-      result := a;
-    end if;
-    return result;
-  end function;
 
   function stdv2str(vec:std_logic_vector) return string is
     variable str: string(vec'left+1 downto 1);

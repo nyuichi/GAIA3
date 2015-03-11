@@ -66,16 +66,11 @@ begin
 
     variable v : reg_type;
 
-    variable res     : std_logic_vector(31 downto 0);
-    variable data_na : std_logic_vector(31 downto 0);
-    variable data_nb : std_logic_vector(31 downto 0);
+    variable res : std_logic_vector(31 downto 0);
 
   begin
 
     v := r;
-
-    data_na := normalize_fzero(fpu_in.data_a);
-    data_nb := normalize_fzero(fpu_in.data_b);
 
     case fpu_in.optag is
       when FPU_FADD =>
@@ -90,9 +85,9 @@ begin
 
     rin <= v;
 
-    x <= data_na;
-    y <= data_nb;
-    yn <= (not data_nb(31)) & data_nb(30 downto 0);
+    x <= fpu_in.data_a;
+    y <= fpu_in.data_b;
+    yn <= (not fpu_in.data_b(31)) & fpu_in.data_b(30 downto 0);
     fpu_out.res <= r.res;
 
   end process;
