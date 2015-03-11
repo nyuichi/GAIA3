@@ -464,6 +464,12 @@ begin
     data_forward(r.d.reg_b, r.d.data_b, data_b);
     data_forward(r.d.reg_dest, r.d.data_x, data_x);
 
+--pragma synthesis_off
+    if is_x(data_a) then data_a := (others => '0'); end if;
+    if is_x(data_b) then data_b := (others => '0'); end if;
+    if is_x(data_x) then data_x := (others => '0'); end if;
+--pragma synthesis_on
+
     case r.d.opcode is
       when OP_LDL =>
         v.e.res := r.d.data_d;
