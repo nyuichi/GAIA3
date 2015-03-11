@@ -161,7 +161,7 @@ begin
     if r.ack = '1' then
       uart_out.rx <= r.prev;
     elsif r.ack_ready = '1' then
-      uart_out.rx <= repeat('0', 31) & to_std_logic(v.tx_len < 256);
+      uart_out.rx <= repeat('0', 31) & to_std_logic(r.tx_len < 255);
     else
       uart_out.rx <= (others => 'Z');
     end if;
