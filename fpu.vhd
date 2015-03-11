@@ -44,23 +44,23 @@ architecture behavioral of fpu is
 
 begin
 
-  fadd_1: entity work.fadd
-    port map (
-      x => x,
-      y => y,
-      q => q_add);
+  --fadd_1: entity work.fadd
+  --  port map (
+  --    x => x,
+  --    y => y,
+  --    q => q_add);
 
-  fadd_2: entity work.fadd
-    port map (
-      x => x,
-      y => yn,
-      q => q_sub);
+  --fadd_2: entity work.fadd
+  --  port map (
+  --    x => x,
+  --    y => yn,
+  --    q => q_sub);
 
-  fmul_1: entity work.fmul
-    port map (
-      x => x,
-      y => y,
-      q => q_mul);
+  --fmul_1: entity work.fmul
+  --  port map (
+  --    x => x,
+  --    y => y,
+  --    q => q_mul);
 
   comb : process(r, fpu_in, q_add, q_sub, q_mul)
 
