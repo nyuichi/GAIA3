@@ -338,71 +338,6 @@ architecture Behavioral of cpu is
   end procedure;
 
 
-  procedure memory_flag (
-    addr : in  std_logic_vector(31 downto 0);
-    re   : in  std_logic;
-    we   : in  std_logic;
-    val  : in  std_logic_vector(31 downto 0);
-    flag : out flag_type;
-    res  : out std_logic_vector(31 downto 0);
-    cai  : out std_logic) is
-  begin
-
-    flag := r.flag;
-
-    cai := '0';
-
-    case addr is
-      when x"80001100" =>
-        if re = '1' then
-          res := r.flag.int_handler;
-        end if;
-        if we = '1' then
-          flag.int_handler := val;
-        end if;
-      when x"80001104" =>
-        if re = '1' then
-          res := repeat('0', 31) & r.flag.int_en;
-        end if;
-        if we = '1' then
-          flag.int_en := val(0);
-        end if;
-      when x"80001108" =>
-        if re = '1' then
-          res := r.flag.int_pc;
-        end if;
-        if we = '1' then
-          flag.int_pc := val;
-        end if;
-      when x"8000110C" =>
-        if re = '1' then
-          res := r.flag.int_cause;
-        end if;
-        if we = '1' then
-          flag.int_cause := val;
-        end if;
-      when x"80001200" =>
-        if re = '1' then
-          res := repeat('0', 31) & r.flag.vmm_en;
-        end if;
-        if we = '1' then
-          flag.vmm_en := val(0);
-          cai := '1';
-        end if;
-      when x"80001204" =>
-        if re = '1' then
-          res := r.flag.vmm_pd;
-        end if;
-        if we = '1' then
-          flag.vmm_pd := val;
-          cai := '1';
-        end if;
-      when others =>
-    end case;
-
-  end procedure;
-
-
 begin
 
   comb : process(r, cpu_in)
@@ -474,7 +409,47 @@ begin
       v.m.reg_mem := r.e.mem_read;
     end if;
 
-    memory_flag(d_addr, d_re, d_we, d_val, v.flag, v.m.res, cai);
+    if d_re = '1' then
+      case d_addr is
+        when x"80001100" =>
+          v.m.res := r.flag.int_handler;
+        when x"80001104" =>
+          v.m.res := repeat('0', 31) & r.flag.int_en;
+        when x"80001108" =>
+          v.m.res := r.flag.int_pc;
+        when x"8000110C" =>
+          v.m.res := r.flag.int_cause;
+        when x"80001200" =>
+          v.m.res := repeat('0', 31) & r.flag.vmm_en;
+        when x"80001204" =>
+          v.m.res := r.flag.vmm_pd;
+        when others =>
+      end case;
+    end if;
+
+    if d_we = '1' then
+      case d_addr is
+        when x"80001100" =>
+          v.flag.int_handler := d_val;
+        when x"80001104" =>
+          v.flag.int_en := d_val(0);
+        when x"80001108" =>
+          v.flag.int_pc := d_val;
+        when x"8000110C" =>
+          v.flag.int_cause := d_val;
+        when x"80001200" =>
+          v.flag.vmm_en := d_val(0);
+        when x"80001204" =>
+          v.flag.vmm_pd := d_val;
+        when others =>
+      end case;
+    end if;
+
+    if (d_addr = x"80001200" or d_addr = x"80001204") and d_we = '1' then
+      cai := '1';
+    else
+      cai := '0';
+    end if;
 
     v.m.reg_dest  := r.e.reg_dest;
     v.m.reg_write := r.e.reg_write;
