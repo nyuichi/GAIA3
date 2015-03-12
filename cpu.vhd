@@ -258,7 +258,7 @@ architecture Behavioral of cpu is
 
     -- fpu pipeline WAR/WAR hazard
     case opcode is
-      when OP_ALU | OP_FPU | OP_LDL | OP_LDH | OP_LD | OP_LDB | OP_JL | OP_JR =>
+      when OP_ALU | OP_LDL | OP_LDH | OP_LD | OP_LDB | OP_JL | OP_JR =>
         if r.d.fpu_write = '1' and r.d.reg_dest /= "00000" and r.d.reg_dest = reg_x then
           stall := '1';
         end if;
