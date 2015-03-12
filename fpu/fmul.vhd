@@ -27,8 +27,8 @@ architecture behav of fmul is
   signal sign_o : std_logic := '0';
   signal sign : std_logic_vector (2 downto 0) := (others => '0');
   signal exp : std_logic_vector (7 downto 0) := (others => '0');
-  signal mantissa : std_logic_vector (22 downto 0) := (others => '0');
-  signal m_out : std_logic_vector (22 downto 0);
+  signal mantissa : std_logic_vector (25 downto 0) := (others => '0');
+  signal m_out : std_logic_vector (22 downto 0) := (others => '0');
 
   signal sign_o2, sign_o3 : std_logic := '0';
 
@@ -56,12 +56,10 @@ begin  -- architecture behav
         ('1' & i_a (22 downto 11)) * ('1' & i_b (22 downto 11));
   HL <= ('1' & i_a (22 downto 11)) * (i_b (10 downto 0));
   LH <= (i_a (10 downto 0)) * ('1' & i_b (22 downto 11));
-  exp0 <= (others => '0') when i_a (30 downto 0) = "0000000000000000000000000000000"
+  exp01 <= (others => '0') when i_a (30 downto 0) = "0000000000000000000000000000000"
           or i_b (30 downto 0) = "0000000000000000000000000000000" else
           "000000000" + i_a (30 downto 23) + i_b (30 downto 23) + 129;
   sign_o <= i_a (31) xor i_b (31);
-
-  -- stage 2
 
   process (CLK) is
   begin
@@ -74,6 +72,8 @@ begin  -- architecture behav
       sign_o2 <= sign_o;
     end if;
   end process;
+
+  -- stage 2
 
   mantissa <= (others => '0') when i_HH = "00000000000000000000000000" else
               "00000000000000000000000000" + i_HH + i_HL (23 downto 11) + i_LH (23 downto 11) + 2;
@@ -90,7 +90,7 @@ begin  -- architecture behav
     i_exp + 1  when '1',
     i_exp + 1  when others;
 
-  set_loop: process (CLK) is
+  process (CLK) is
   begin  -- process set_loop
     if rising_edge (CLK) and stall = '0' then
       i_m <= mantissa;
@@ -98,7 +98,7 @@ begin  -- architecture behav
       i_exp1 <= exp1;
       sign_o3 <= sign_o2;
     end if;
-  end process set_loop;
+  end process;
 
   -- stage 3
 
