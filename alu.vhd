@@ -27,32 +27,7 @@ architecture behavioral of alu is
 
   signal r, rin : reg_type := rzero;
 
-  component f2i is
-    port (
-      A : in  std_logic_vector (31 downto 0);
-      Q : out std_logic_vector (31 downto 0));
-  end component;
-
-  component i2f is
-    port (
-      A : in  std_logic_vector (31 downto 0);
-      Q : out std_logic_vector (31 downto 0));
-  end component;
-
-  signal a : std_logic_vector(31 downto 0) := (others => '0');
-  signal q_i2f, q_f2i : std_logic_vector(31 downto 0) := (others => '0');
-
 begin
-
-  i2f_1: entity work.i2f
-    port map (
-      A => A,
-      Q => Q_i2f);
-
-  f2i_1: entity work.f2i
-    port map (
-      A => A,
-      Q => Q_f2i);
 
   comb : process(r, alu_in)
 
@@ -85,10 +60,6 @@ begin
         v.res := data_a or data_b;
       when ALU_XOR =>
         v.res := data_a xor data_b;
-      when ALU_F2I =>
-        v.res := q_f2i;
-      when ALU_I2F =>
-        v.res := q_i2f;
       when ALU_CMPULT =>
         v.res := repeat('0', 31) & to_std_logic(data_a < data_b);
       when ALU_CMPULE =>
@@ -123,7 +94,6 @@ begin
 
     rin <= v;
 
-    a <= data_a;
     alu_out.res <= r.res;
 
   end process;
