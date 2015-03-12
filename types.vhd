@@ -42,7 +42,7 @@ package types is
     optag  : std_logic_vector(4 downto 0);
     data_a : std_logic_vector(31 downto 0);
     data_b : std_logic_vector(31 downto 0);
-    data_l : std_logic_vector(31 downto 0);
+    data_l : std_logic_vector(7 downto 0);
   end record;
 
   constant cpu_out_zero : cpu_out_type := (
@@ -75,13 +75,15 @@ package types is
   -- alu
 
   type alu_in_type is record
+    stall  : std_logic;
     optag  : std_logic_vector(4 downto 0);
     data_a : std_logic_vector(31 downto 0);
     data_b : std_logic_vector(31 downto 0);
-    data_l : std_logic_vector(31 downto 0);
+    data_l : std_logic_vector(7 downto 0);
   end record;
 
   constant alu_in_zero : alu_in_type := (
+    stall  => '0',
     optag  => (others => '0'),
     data_a => (others => '0'),
     data_b => (others => '0'),
@@ -106,12 +108,14 @@ package types is
   -- fpu
 
   type fpu_in_type is record
+    stall  : std_logic;
     optag  : std_logic_vector(4 downto 0);
     data_a : std_logic_vector(31 downto 0);
     data_b : std_logic_vector(31 downto 0);
   end record;
 
   constant fpu_in_zero : fpu_in_type := (
+    stall  => '0',
     optag  => (others => '0'),
     data_a => (others => '0'),
     data_b => (others => '0'));

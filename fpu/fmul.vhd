@@ -5,6 +5,7 @@ use IEEE.std_logic_unsigned.all;
 entity fmul is
   port (
     CLK : in  std_logic;
+    stall : in std_logic;
     A   : in  std_logic_vector (31 downto 0);
     B   : in  std_logic_vector (31 downto 0);
     C   : out std_logic_vector (31 downto 0));
@@ -64,7 +65,7 @@ begin  -- architecture behav
 
   process (CLK) is
   begin
-    if rising_edge (CLK)  then
+    if rising_edge (CLK) and stall = '0' then
       i_HH <= HH;
       i_HL <= HL;
       i_LH <= LH;
@@ -91,7 +92,7 @@ begin  -- architecture behav
 
   set_loop: process (CLK) is
   begin  -- process set_loop
-    if rising_edge (CLK) then
+    if rising_edge (CLK) and stall = '0' then
       i_m <= mantissa;
       i_exp0 <= exp0;
       i_exp1 <= exp1;

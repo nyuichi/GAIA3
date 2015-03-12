@@ -27,35 +27,43 @@ architecture Behavioral of cpu is
   end record;
 
   type decode_reg_type is record
-    opcode    : std_logic_vector(3 downto 0);
-    reg_dest  : std_logic_vector(4 downto 0);
-    reg_a     : std_logic_vector(4 downto 0);
-    reg_b     : std_logic_vector(4 downto 0);
-    data_x    : std_logic_vector(31 downto 0);
-    data_a    : std_logic_vector(31 downto 0);
-    data_b    : std_logic_vector(31 downto 0);
-    data_l    : std_logic_vector(31 downto 0);
-    data_d    : std_logic_vector(31 downto 0);
-    tag       : std_logic_vector(4 downto 0);
-    nextpc    : std_logic_vector(31 downto 0);
-    reg_write : std_logic;
-    res_unit  : integer range 0 to 2;
-    mem_write : std_logic;
-    mem_read  : std_logic;
-    mem_byte  : std_logic;
-    pc_addr   : std_logic_vector(31 downto 0);
-    pc_src    : std_logic;
+    opcode     : std_logic_vector(3 downto 0);
+    reg_dest   : std_logic_vector(4 downto 0);
+    reg_a      : std_logic_vector(4 downto 0);
+    reg_b      : std_logic_vector(4 downto 0);
+    data_x     : std_logic_vector(31 downto 0);
+    data_a     : std_logic_vector(31 downto 0);
+    data_b     : std_logic_vector(31 downto 0);
+    data_l     : std_logic_vector(7 downto 0);
+    data_d     : std_logic_vector(31 downto 0);
+    tag        : std_logic_vector(4 downto 0);
+    nextpc     : std_logic_vector(31 downto 0);
+    alu_write  : std_logic;
+    fpu_write  : std_logic;
+    misc_write : std_logic;
+    mem_write  : std_logic;
+    mem_read   : std_logic;
+    mem_byte   : std_logic;
+    pc_addr    : std_logic_vector(31 downto 0);
+    pc_src     : std_logic;
   end record;
 
   type execute_reg_type is record
-    res       : std_logic_vector(31 downto 0);
-    mem_addr  : std_logic_vector(31 downto 0);
-    reg_dest  : std_logic_vector(4 downto 0);
-    reg_write : std_logic;
-    res_unit  : integer range 0 to 2;
-    mem_write : std_logic;
-    mem_read  : std_logic;
-    mem_byte  : std_logic;
+    alu_dest   : std_logic_vector(4 downto 0);
+    alu_write  : std_logic;
+    fpu_dest   : std_logic_vector(4 downto 0);
+    fpu_write  : std_logic;
+    fpu_dest1  : std_logic_vector(4 downto 0);
+    fpu_write1 : std_logic;
+    fpu_dest2  : std_logic_vector(4 downto 0);
+    fpu_write2 : std_logic;
+    misc_res   : std_logic_vector(31 downto 0);
+    misc_dest  : std_logic_vector(4 downto 0);
+    misc_write : std_logic;
+    mem_addr   : std_logic_vector(31 downto 0);
+    mem_write  : std_logic;
+    mem_read   : std_logic;
+    mem_byte   : std_logic;
   end record;
 
   type memory_reg_type is record
@@ -91,35 +99,43 @@ architecture Behavioral of cpu is
     );
 
   constant dzero : decode_reg_type := (
-    opcode    => "0000",
-    reg_dest  => "00000",
-    reg_a     => "00000",
-    reg_b     => "00000",
-    data_x    => (others => '0'),
-    data_a    => (others => '0'),
-    data_b    => (others => '0'),
-    data_l    => (others => '0'),
-    data_d    => (others => '0'),
-    tag       => "00000",
-    nextpc    => (others => '0'),
-    reg_write => '0',
-    res_unit  => 0,
-    mem_write => '0',
-    mem_read  => '0',
-    mem_byte  => '0',
-    pc_addr   => (others => '0'),
-    pc_src    => '0'
+    opcode     => "0000",
+    reg_dest   => "00000",
+    reg_a      => "00000",
+    reg_b      => "00000",
+    data_x     => (others => '0'),
+    data_a     => (others => '0'),
+    data_b     => (others => '0'),
+    data_l     => (others => '0'),
+    data_d     => (others => '0'),
+    tag        => "00000",
+    nextpc     => (others => '0'),
+    alu_write  => '0',
+    fpu_write  => '0',
+    misc_write => '0',
+    mem_write  => '0',
+    mem_read   => '0',
+    mem_byte   => '0',
+    pc_addr    => (others => '0'),
+    pc_src     => '0'
     );
 
   constant ezero : execute_reg_type := (
-    res       => (others => '0'),
-    mem_addr  => (others => '0'),
-    reg_dest  => "00000",
-    reg_write => '0',
-    res_unit  => 0,
-    mem_write => '0',
-    mem_read  => '0',
-    mem_byte  => '0'
+    alu_dest   => (others => '0'),
+    alu_write  => '0',
+    fpu_dest   => (others => '0'),
+    fpu_write  => '0',
+    fpu_dest1  => (others => '0'),
+    fpu_write1 => '0',
+    fpu_dest2  => (others => '0'),
+    fpu_write2 => '0',
+    misc_res   => (others => '0'),
+    misc_dest  => "00000",
+    misc_write => '0',
+    mem_addr   => (others => '0'),
+    mem_write  => '0',
+    mem_read   => '0',
+    mem_byte   => '0'
     );
 
   constant mzero : memory_reg_type := (
@@ -156,17 +172,12 @@ architecture Behavioral of cpu is
     reg_data : in  std_logic_vector(31 downto 0);
     res      : out std_logic_vector(31 downto 0)) is
   begin
-    if r.e.reg_write = '1' and r.e.reg_dest /= "00000" and r.e.reg_dest = reg_src then
-      case r.e.res_unit is
-        when 0 =>
-          res := r.e.res;
-        when 1 =>
-          res := cpu_in.alu_res;
-        when 2 =>
-          res := cpu_in.fpu_res;
-        when others =>
-          assert false severity failure;
-      end case;
+    if r.e.misc_write = '1' and r.e.misc_dest /= "00000" and r.e.misc_dest = reg_src then
+      res := r.e.misc_res;
+    elsif r.e.alu_write = '1' and r.e.alu_dest /= "00000" and r.e.alu_dest = reg_src then
+      res := cpu_in.alu_res;
+    elsif r.e.fpu_write = '1' and r.e.fpu_dest /= "00000" and r.e.fpu_dest = reg_src then
+      res := cpu_in.fpu_res;
     elsif r.m.reg_write = '1' and r.m.reg_dest /= "00000" and r.m.reg_dest = reg_src then
       if r.m.reg_mem = '1' then
         res := cpu_in.d_data;
@@ -215,20 +226,90 @@ architecture Behavioral of cpu is
         end if;
     end case;
 
+    -- fpu pipeline RAW hazard
+    case opcode is
+      when OP_ST | OP_STB =>
+        if r.d.fpu_write = '1' and r.d.reg_dest /= "00000" and r.d.reg_dest = reg_x then
+          stall := '1';
+        end if;
+        if r.e.fpu_write1 = '1' and r.e.fpu_dest1 /= "00000" and r.e.fpu_dest1 = reg_x then
+          stall := '1';
+        end if;
+        if r.d.fpu_write = '1' and r.d.reg_dest /= "00000" and r.d.reg_dest = reg_a then
+          stall := '1';
+        end if;
+        if r.e.fpu_write1 = '1' and r.e.fpu_dest1 /= "00000" and r.e.fpu_dest1 = reg_a then
+          stall := '1';
+        end if;
+      when others =>
+        if r.d.fpu_write = '1' and r.d.reg_dest /= "00000" and r.d.reg_dest = reg_a then
+          stall := '1';
+        end if;
+        if r.e.fpu_write1 = '1' and r.e.fpu_dest1 /= "00000" and r.e.fpu_dest1 = reg_a then
+          stall := '1';
+        end if;
+        if r.d.fpu_write = '1' and r.d.reg_dest /= "00000" and r.d.reg_dest = reg_b then
+          stall := '1';
+        end if;
+        if r.e.fpu_write1 = '1' and r.e.fpu_dest1 /= "00000" and r.e.fpu_dest1 = reg_b then
+          stall := '1';
+        end if;
+    end case;
+
+    -- fpu pipeline WAR/WAR hazard
+    case opcode is
+      when OP_ALU | OP_FPU | OP_LDL | OP_LDH | OP_LD | OP_LDB | OP_JL | OP_JR =>
+        if r.d.fpu_write = '1' and r.d.reg_dest /= "00000" and r.d.reg_dest = reg_x then
+          stall := '1';
+        end if;
+        if r.e.fpu_write1 = '1' and r.e.fpu_dest1 /= "00000" and r.e.fpu_dest1 = reg_x then
+          stall := '1';
+        end if;
+      when others =>
+    end case;
+
     -- branch hazard
     case opcode is
       when OP_BNE | OP_BEQ =>
-        if r.d.reg_write = '1' and r.d.reg_dest /= "00000" and (r.d.reg_dest = reg_x or r.d.reg_dest = reg_a) then
+        if r.d.alu_write = '1' and r.d.reg_dest /= "00000" and (r.d.reg_dest = reg_x or r.d.reg_dest = reg_a) then
           stall := '1';
         end if;
-        if r.e.mem_read = '1' and r.e.reg_dest /= "00000" and (r.e.reg_dest = reg_x or r.e.reg_dest = reg_a) then
+        if r.d.fpu_write = '1' and r.d.reg_dest /= "00000" and (r.d.reg_dest = reg_x or r.d.reg_dest = reg_a) then
+          stall := '1';
+        end if;
+        if r.d.misc_write = '1' and r.d.reg_dest /= "00000" and (r.d.reg_dest = reg_x or r.d.reg_dest = reg_a) then
+          stall := '1';
+        end if;
+
+        if r.e.fpu_write1 = '1' and r.e.fpu_dest1 /= "00000" and (r.e.fpu_dest1 = reg_x or r.e.fpu_dest1 = reg_a) then
+          stall := '1';
+        end if;
+        if r.e.fpu_write2 = '1' and r.e.fpu_dest2 /= "00000" and (r.e.fpu_dest2 = reg_x or r.e.fpu_dest2 = reg_a) then
+          stall := '1';
+        end if;
+
+        if r.e.mem_read = '1' and r.e.misc_dest /= "00000" and (r.e.misc_dest = reg_x or r.e.misc_dest = reg_a) then
           stall := '1';
         end if;
       when OP_JR =>
-        if r.d.reg_write = '1' and r.d.reg_dest /= "00000" and r.d.reg_dest = reg_a then
+        if r.d.alu_write = '1' and r.d.reg_dest /= "00000" and r.d.reg_dest = reg_a then
           stall := '1';
         end if;
-        if r.e.mem_read = '1' and r.e.reg_dest /= "00000" and r.e.reg_dest = reg_a then
+        if r.d.fpu_write = '1' and r.d.reg_dest /= "00000" and r.d.reg_dest = reg_a then
+          stall := '1';
+        end if;
+        if r.d.misc_write = '1' and r.d.reg_dest /= "00000" and r.d.reg_dest = reg_a then
+          stall := '1';
+        end if;
+
+        if r.e.fpu_write1 = '1' and r.e.fpu_dest1 /= "00000" and r.e.fpu_dest1 = reg_a then
+          stall := '1';
+        end if;
+        if r.e.fpu_write2 = '1' and r.e.fpu_dest2 /= "00000" and r.e.fpu_dest2 = reg_a then
+          stall := '1';
+        end if;
+
+        if r.e.mem_read = '1' and r.e.misc_dest /= "00000" and r.e.misc_dest = reg_a then
           stall := '1';
         end if;
       when OP_SYSENTER | OP_SYSEXIT =>
@@ -269,32 +350,22 @@ architecture Behavioral of cpu is
     reg_a  := inst(22 downto 18);
 
     -- forwarding, but results may be wrong...
-    if r.e.reg_write = '1' and r.e.reg_dest /= "00000" and r.e.reg_dest = reg_x then
-      case r.e.res_unit is
-        when 0 =>
-          data_x := r.e.res;
-        when 1 =>
-          data_x := cpu_in.alu_res;
-        when 2 =>
-          data_x := cpu_in.fpu_res;
-        when others =>
-          assert false severity failure;
-      end case;
+    if r.e.misc_write = '1' and r.e.misc_dest /= "00000" and r.e.misc_dest = reg_x then
+      data_x := r.e.misc_res;
+    elsif r.e.alu_write = '1' and r.e.alu_dest /= "00000" and r.e.alu_dest = reg_x then
+      data_x := cpu_in.alu_res;
+    elsif r.e.fpu_write = '1' and r.e.fpu_dest /= "00000" and r.e.fpu_dest = reg_x then
+      data_x := cpu_in.fpu_res;
     else
       data_x := regfile(conv_integer(reg_x));
     end if;
 
-    if r.e.reg_write = '1' and r.e.reg_dest /= "00000" and r.e.reg_dest = reg_a then
-      case r.e.res_unit is
-        when 0 =>
-          data_a := r.e.res;
-        when 1 =>
-          data_a := cpu_in.alu_res;
-        when 2 =>
-          data_a := cpu_in.fpu_res;
-        when others =>
-          assert false severity failure;
-      end case;
+    if r.e.misc_write = '1' and r.e.misc_dest /= "00000" and r.e.misc_dest = reg_a then
+      data_a := r.e.misc_res;
+    elsif r.e.alu_write = '1' and r.e.alu_dest /= "00000" and r.e.alu_dest = reg_a then
+      data_a := cpu_in.alu_res;
+    elsif r.e.fpu_write = '1' and r.e.fpu_dest /= "00000" and r.e.fpu_dest = reg_a then
+      data_a := cpu_in.fpu_res;
     else
       data_a := regfile(conv_integer(reg_a));
     end if;
@@ -387,21 +458,26 @@ begin
     -- MEMORY
 
     d_addr := r.e.mem_addr;
-    d_val  := r.e.res;
+    d_val  := r.e.misc_res;
     d_we   := r.e.mem_write;
     d_re   := r.e.mem_read;
     d_b    := r.e.mem_byte;
 
-    case r.e.res_unit is
-      when 0 =>
-        v.m.res := r.e.res;
-      when 1 =>
-        v.m.res := cpu_in.alu_res;
-      when 2 =>
-        v.m.res := cpu_in.fpu_res;
-      when others =>
-        assert false severity failure;
-    end case;
+    if r.e.alu_write = '1' then
+      v.m.res       := cpu_in.alu_res;
+      v.m.reg_dest  := r.e.alu_dest;
+      v.m.reg_write := '1';
+    elsif r.e.fpu_write = '1' then
+      v.m.res       := cpu_in.fpu_res;
+      v.m.reg_dest  := r.e.fpu_dest;
+      v.m.reg_write := '1';
+    elsif r.e.misc_write = '1' then
+      v.m.res       := r.e.misc_res;
+      v.m.reg_dest  := r.e.misc_dest;
+      v.m.reg_write := '1';
+    else
+      v.m.reg_write := '0';
+    end if;
 
     if x"80001100" <= d_addr and d_addr < x"80002000" then
       v.m.reg_mem := '0';
@@ -451,9 +527,6 @@ begin
       cai := '0';
     end if;
 
-    v.m.reg_dest  := r.e.reg_dest;
-    v.m.reg_write := r.e.reg_write;
-
     if cpu_in.d_stall = '1' then
       v.m.reg_write := '0';
     end if;
@@ -470,38 +543,56 @@ begin
     if is_x(data_x) then data_x := (others => '0'); end if;
 --pragma synthesis_on
 
+    --// MISC
+
     case r.d.opcode is
       when OP_LDL =>
-        v.e.res := r.d.data_d;
+        v.e.misc_res := r.d.data_d;
       when OP_LDH =>
-        v.e.res := r.d.data_d(15 downto 0) & data_a(15 downto 0);
+        v.e.misc_res := r.d.data_d(15 downto 0) & data_a(15 downto 0);
       when OP_JL | OP_JR =>
-        v.e.res := r.d.nextpc;
+        v.e.misc_res := r.d.nextpc;
       when OP_ST | OP_STB =>
-        v.e.res := data_x;
+        v.e.misc_res := data_x;
       when others =>
-        v.e.res := (others => '-');
+        v.e.misc_res := (others => '-');
     end case;
+    v.e.misc_dest  := r.d.reg_dest;
+    v.e.misc_write := r.d.misc_write;
 
     if r.d.mem_byte = '1' then
       v.e.mem_addr := data_a + r.d.data_d;
     else
       v.e.mem_addr := data_a + (r.d.data_d(29 downto 0) & "00");
     end if;
+    v.e.mem_write  := r.d.mem_write;
+    v.e.mem_read   := r.d.mem_read;
+    v.e.mem_byte   := r.d.mem_byte;
 
-    v.e.reg_dest  := r.d.reg_dest;
-    v.e.res_unit  := r.d.res_unit;
-    v.e.reg_write := r.d.reg_write;
-    v.e.mem_write := r.d.mem_write;
-    v.e.mem_read  := r.d.mem_read;
-    v.e.mem_byte  := r.d.mem_byte;
+    --// ALU
+
+    v.e.alu_write := r.d.alu_write;
+    v.e.alu_dest  := r.d.reg_dest;
+
+    --// FPU
+
+    v.e.fpu_write2 := r.d.fpu_write;
+    v.e.fpu_dest2  := r.d.reg_dest;
+
+    v.e.fpu_write1 := r.e.fpu_write2;
+    v.e.fpu_dest1  := r.e.fpu_dest2;
+
+    v.e.fpu_write := r.e.fpu_write1;
+    v.e.fpu_dest  := r.e.fpu_dest1;
 
     if cpu_in.d_stall = '1' then
       v.e := r.e;
     elsif r.eoi = '1' then
-      v.e.reg_write := '0';
-      v.e.mem_write := '0';
-      v.e.mem_read  := '0';
+      v.e.alu_write  := '0';
+      v.e.fpu_write2  := '0';
+      v.e.misc_write := '0';
+      v.e.mem_write  := '0';
+      v.e.mem_read   := '0';
     end if;
 
     -- DECODE
@@ -522,25 +613,19 @@ begin
     v.d.reg_dest := inst(27 downto 23);
     v.d.reg_a    := inst(22 downto 18);
     v.d.reg_b    := inst(17 downto 13);
-    v.d.data_l   := repeat(inst(12), 24) & inst(12 downto 5);
+    v.d.data_l   := inst(12 downto 5);
     v.d.data_d   := repeat(inst(15), 16) & inst(15 downto 0);
     v.d.tag      := inst(4 downto 0);
     v.d.nextpc   := r.f.nextpc;
+    v.d.alu_write := to_std_logic(v.d.opcode = OP_ALU);
+    v.d.fpu_write := to_std_logic(v.d.opcode = OP_FPU);
     case v.d.opcode is
-      when OP_ALU | OP_FPU | OP_LDL | OP_LDH | OP_LD | OP_LDB | OP_JL | OP_JR =>
-        v.d.reg_write := '1';
-      when OP_ST | OP_STB | OP_SYSENTER | OP_SYSEXIT | OP_BNE | OP_BEQ =>
-        v.d.reg_write := '0';
+      when OP_LDL | OP_LDH | OP_LD | OP_LDB | OP_JL | OP_JR =>
+        v.d.misc_write := '1';
+      when OP_ALU | OP_FPU | OP_ST | OP_STB | OP_SYSENTER | OP_SYSEXIT | OP_BNE | OP_BEQ =>
+        v.d.misc_write := '0';
       when others =>
-        v.d.reg_write := '-';
-    end case;
-    case v.d.opcode is
-      when OP_ALU =>
-        v.d.res_unit := 1;
-      when OP_FPU =>
-        v.d.res_unit := 2;
-      when others =>
-        v.d.res_unit := 0;
+        v.d.misc_write := '-';
     end case;
     v.d.mem_write := to_std_logic(v.d.opcode = OP_ST or v.d.opcode = OP_STB);
     v.d.mem_read  := to_std_logic(v.d.opcode = OP_LD or v.d.opcode = OP_LDB);
@@ -554,7 +639,9 @@ begin
       v.d := r.d;
       v.eoi := '0';
     elsif stall = '1' or r.d.pc_src = '1' or r.eoi = '1' then
-      v.d.reg_write := '0';
+      v.d.alu_write := '0';
+      v.d.fpu_write := '0';
+      v.d.misc_write := '0';
       v.d.mem_write := '0';
       v.d.mem_read := '0';
       v.d.pc_src := '0';

@@ -33,60 +33,60 @@ begin
 
     variable v : reg_type;
 
-    variable data_a  : std_logic_vector(31 downto 0);
-    variable data_b : std_logic_vector(31 downto 0);
+    variable a : std_logic_vector(31 downto 0);
+    variable b : std_logic_vector(31 downto 0);
 
   begin
 
     v := r;
 
-    data_a := alu_in.data_a;
-    data_b := std_logic_vector(signed(alu_in.data_b) + signed(alu_in.data_l(7 downto 0)));
+    a := alu_in.data_a;
+    b := std_logic_vector(signed(alu_in.data_b) + signed(alu_in.data_l));
 
     case alu_in.optag is
       when ALU_ADD =>
-        v.res := data_a + data_b;
+        v.res := a + b;
       when ALU_SUB =>
-        v.res := data_a - data_b;
+        v.res := a - b;
       when ALU_SHL =>
-        v.res := std_logic_vector(shift_left(unsigned(data_a), conv_integer(data_b(4 downto 0))));
+        v.res := std_logic_vector(shift_left(unsigned(a), conv_integer(b(4 downto 0))));
       when ALU_SHR =>
-        v.res := std_logic_vector(shift_right(unsigned(data_a), conv_integer(data_b(4 downto 0))));
+        v.res := std_logic_vector(shift_right(unsigned(a), conv_integer(b(4 downto 0))));
       when ALU_SAR =>
-        v.res := std_logic_vector(shift_right(signed(data_a), conv_integer(data_b(4 downto 0))));
+        v.res := std_logic_vector(shift_right(signed(a), conv_integer(b(4 downto 0))));
       when ALU_AND =>
-        v.res := data_a and data_b;
+        v.res := a and b;
       when ALU_OR =>
-        v.res := data_a or data_b;
+        v.res := a or b;
       when ALU_XOR =>
-        v.res := data_a xor data_b;
+        v.res := a xor b;
       when ALU_CMPULT =>
-        v.res := repeat('0', 31) & to_std_logic(data_a < data_b);
+        v.res := repeat('0', 31) & to_std_logic(a < b);
       when ALU_CMPULE =>
-        v.res := repeat('0', 31) & to_std_logic(data_a <= data_b);
+        v.res := repeat('0', 31) & to_std_logic(a <= b);
       when ALU_CMPNE =>
-        v.res := repeat('0', 31) & to_std_logic(data_a /= data_b);
+        v.res := repeat('0', 31) & to_std_logic(a /= b);
       when ALU_CMPEQ =>
-        v.res := repeat('0', 31) & to_std_logic(data_a = data_b);
+        v.res := repeat('0', 31) & to_std_logic(a = b);
       when ALU_CMPLT =>
-        v.res := repeat('0', 31) & to_std_logic(signed(data_a) < signed(data_b));
+        v.res := repeat('0', 31) & to_std_logic(signed(a) < signed(b));
       when ALU_CMPLE =>
-        v.res := repeat('0', 31) & to_std_logic(signed(data_a) <= signed(data_b));
+        v.res := repeat('0', 31) & to_std_logic(signed(a) <= signed(b));
       when ALU_FCMPNE =>
-        v.res := repeat('0', 31) & to_std_logic(data_a /= data_b);
+        v.res := repeat('0', 31) & to_std_logic(a /= b);
       when ALU_FCMPEQ =>
-        v.res := repeat('0', 31) & to_std_logic(data_a = data_b);
+        v.res := repeat('0', 31) & to_std_logic(a = b);
       when ALU_FCMPLT =>
-        if data_a(31) = '1' or data_b(31) = '1' then
-          v.res := repeat('0', 31) & to_std_logic(data_a >= data_b);
+        if a(31) = '1' or b(31) = '1' then
+          v.res := repeat('0', 31) & to_std_logic(a >= b);
         else
-          v.res := repeat('0', 31) & to_std_logic(data_a < data_b);
+          v.res := repeat('0', 31) & to_std_logic(a < b);
         end if;
       when ALU_FCMPLE =>
-        if data_a(31) = '1' or data_b(31) = '1' then
-          v.res := repeat('0', 31) & to_std_logic(data_a > data_b);
+        if a(31) = '1' or b(31) = '1' then
+          v.res := repeat('0', 31) & to_std_logic(a > b);
         else
-          v.res := repeat('0', 31) & to_std_logic(data_a <= data_b);
+          v.res := repeat('0', 31) & to_std_logic(a <= b);
         end if;
       when others =>
         v.res := (others => '0');

@@ -7,6 +7,7 @@ use IEEE.std_logic_unsigned.all;
 entity fsub is
   port (
     CLK : in  std_logic;
+    stall : in std_logic;
     A   : in  std_logic_vector (31 downto 0);
     B   : in  std_logic_vector (31 downto 0);
     C   : out std_logic_vector (31 downto 0));
@@ -117,7 +118,7 @@ begin  -- architecture behav
 
   process (CLK) is
   begin  -- process set_loop
-    if rising_edge (CLK) then
+    if rising_edge (CLK) and stall = '0' then
       i_m_g <= m_g;
       i_m_l <= m_l;
       i_sign <= sign_in;
@@ -157,7 +158,7 @@ begin  -- architecture behav
 
   process (CLK) is
   begin
-    if rising_edge (CLK) then
+    if rising_edge (CLK) and stall = '0' then
       i_sign2 <= sign_out;
       i_exp2 <= exp_out;
       i_mantissa <= mantissa;

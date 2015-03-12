@@ -19,17 +19,20 @@ end entity;
 architecture behavioral of fpu is
 
   type reg_type is record
-    res : std_logic_vector(31 downto 0);
+    res  : std_logic_vector(31 downto 0);
+    tag1 : std_logic_vector(4 downto 0);
+    tag2 : std_logic_vector(4 downto 0);
   end record;
 
   constant rzero : reg_type := (
-    res => (others => '0'));
+    others => (others => '0'));
 
   signal r, rin : reg_type := rzero;
 
   component fadd is
     port (
       CLK : in  std_logic;
+      stall : in std_logic;
       A   : in  std_logic_vector (31 downto 0);
       B   : in  std_logic_vector (31 downto 0);
       C   : out std_logic_vector (31 downto 0));
@@ -38,6 +41,7 @@ architecture behavioral of fpu is
   component fsub is
     port (
       CLK : in  std_logic;
+      stall : in std_logic;
       A   : in  std_logic_vector (31 downto 0);
       B   : in  std_logic_vector (31 downto 0);
       C   : out std_logic_vector (31 downto 0));
@@ -46,6 +50,7 @@ architecture behavioral of fpu is
   component fmul is
     port (
       CLK : in  std_logic;
+      stall : in std_logic;
       A   : in  std_logic_vector (31 downto 0);
       B   : in  std_logic_vector (31 downto 0);
       C   : out std_logic_vector (31 downto 0));
@@ -59,6 +64,7 @@ begin
   fadd_1: entity work.fadd
     port map (
       CLK => CLK,
+      stall => fpu_in.stall,
       A   => A,
       B   => B,
       C   => q_add);
@@ -66,6 +72,7 @@ begin
   fsub_1: entity work.fsub
     port map (
       CLK => CLK,
+      stall => fpu_in.stall,
       A   => A,
       B   => B,
       C   => q_sub);
@@ -73,22 +80,22 @@ begin
   fmul_1: entity work.fmul
     port map (
       CLK => CLK,
+      stall => fpu_in.stall,
       A   => A,
       B   => B,
       C   => q_mul);
 
 
   comb : process(r, fpu_in, q_add, q_sub, q_mul)
-
     variable v : reg_type;
-
-    variable res : std_logic_vector(31 downto 0);
-
   begin
 
     v := r;
 
-    case fpu_in.optag is
+    v.tag1 := fpu_in.optag;
+    v.tag2 := r.tag1;
+
+    case r.tag2 is
       when FPU_FADD =>
         v.res := q_add;
       when FPU_FSUB =>
