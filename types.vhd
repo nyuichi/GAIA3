@@ -461,14 +461,16 @@ package types is
   constant ALU_AND    : std_logic_vector(4 downto 0) := "00101";
   constant ALU_OR     : std_logic_vector(4 downto 0) := "00110";
   constant ALU_XOR    : std_logic_vector(4 downto 0) := "00111";
+  constant ALU_F2I    : std_logic_vector(4 downto 0) := "01000";
+  constant ALU_I2F    : std_logic_vector(4 downto 0) := "01001";
   constant ALU_CMPULT : std_logic_vector(4 downto 0) := "10110";
   constant ALU_CMPULE : std_logic_vector(4 downto 0) := "10111";
   constant ALU_CMPNE  : std_logic_vector(4 downto 0) := "11000";
   constant ALU_CMPEQ  : std_logic_vector(4 downto 0) := "11001";
   constant ALU_CMPLT  : std_logic_vector(4 downto 0) := "11010";
   constant ALU_CMPLE  : std_logic_vector(4 downto 0) := "11011";
-  constant ALU_F2I    : std_logic_vector(4 downto 0) := "11100";
-  constant ALU_I2F    : std_logic_vector(4 downto 0) := "11101";
+  constant ALU_FCMPNE : std_logic_vector(4 downto 0) := "11100";
+  constant ALU_FCMPEQ : std_logic_vector(4 downto 0) := "11101";
   constant ALU_FCMPLT : std_logic_vector(4 downto 0) := "11110";
   constant ALU_FCMPLE : std_logic_vector(4 downto 0) := "11111";
 

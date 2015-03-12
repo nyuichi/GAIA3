@@ -5,7 +5,6 @@ use IEEE.numeric_std.all;
 
 entity i2f is
   port (
-    clk : in std_logic;
     A   : in  std_logic_vector (31 downto 0);
     Q   : out std_logic_vector (31 downto 0));
 end entity i2f;
@@ -28,8 +27,6 @@ architecture behav of i2f is
   signal G : std_logic := '0';
   signal ulp : std_logic := '0';
   signal round : std_logic := '0';
-
-  signal q_res : std_logic_vector(31 downto 0) := (others => '0');
 begin  -- architecture behav
   with sign select
     raw_mantissa <=
@@ -70,7 +67,7 @@ begin  -- architecture behav
                    count => conv_integer(7-s))(22 downto 0)) when others;
 
   with isZero select
-    q_res <=
+    Q <=
     (sign & expr & mantissa) + round when false,
     x"00000000"                      when others;
 
@@ -78,12 +75,5 @@ begin  -- architecture behav
   isZero <= A = x"00000000";
   sign <= A (31);
   i <= A (30 downto 0);
-
-  process(clk)
-  begin
-    if rising_edge(clk) then
-      q <= q_res;
-    end if;
-  end process;
 
 end architecture behav;
