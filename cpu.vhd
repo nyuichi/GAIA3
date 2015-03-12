@@ -232,37 +232,37 @@ architecture Behavioral of cpu is
         if r.d.fpu_write = '1' and r.d.reg_dest /= "00000" and r.d.reg_dest = reg_x then
           stall := '1';
         end if;
-        if r.e.fpu_write1 = '1' and r.e.fpu_dest1 /= "00000" and r.e.fpu_dest1 = reg_x then
+        if r.e.fpu_write2 = '1' and r.e.fpu_dest2 /= "00000" and r.e.fpu_dest2 = reg_x then
           stall := '1';
         end if;
         if r.d.fpu_write = '1' and r.d.reg_dest /= "00000" and r.d.reg_dest = reg_a then
           stall := '1';
         end if;
-        if r.e.fpu_write1 = '1' and r.e.fpu_dest1 /= "00000" and r.e.fpu_dest1 = reg_a then
+        if r.e.fpu_write2 = '1' and r.e.fpu_dest2 /= "00000" and r.e.fpu_dest2 = reg_a then
           stall := '1';
         end if;
       when others =>
         if r.d.fpu_write = '1' and r.d.reg_dest /= "00000" and r.d.reg_dest = reg_a then
           stall := '1';
         end if;
-        if r.e.fpu_write1 = '1' and r.e.fpu_dest1 /= "00000" and r.e.fpu_dest1 = reg_a then
+        if r.e.fpu_write2 = '1' and r.e.fpu_dest2 /= "00000" and r.e.fpu_dest2 = reg_a then
           stall := '1';
         end if;
         if r.d.fpu_write = '1' and r.d.reg_dest /= "00000" and r.d.reg_dest = reg_b then
           stall := '1';
         end if;
-        if r.e.fpu_write1 = '1' and r.e.fpu_dest1 /= "00000" and r.e.fpu_dest1 = reg_b then
+        if r.e.fpu_write2 = '1' and r.e.fpu_dest2 /= "00000" and r.e.fpu_dest2 = reg_b then
           stall := '1';
         end if;
     end case;
 
-    -- fpu pipeline WAR/WAR hazard
+    -- fpu pipeline WAR/WAW hazard
     case opcode is
       when OP_ALU | OP_LDL | OP_LDH | OP_LD | OP_LDB | OP_JL | OP_JR =>
-        if r.d.fpu_write = '1' and r.d.reg_dest /= "00000" and r.d.reg_dest = reg_x then
-          stall := '1';
+        if r.e.fpu_write2 = '1' and r.e.fpu_dest2 /= "00000" then
+          stall := '1';                 -- avoid structual hazard at WB stage (double write)
         end if;
-        if r.e.fpu_write1 = '1' and r.e.fpu_dest1 /= "00000" and r.e.fpu_dest1 = reg_x then
+        if r.d.fpu_write = '1' and r.d.reg_dest /= "00000" and r.d.reg_dest = reg_x then
           stall := '1';
         end if;
       when others =>
@@ -462,6 +462,10 @@ begin
     d_we   := r.e.mem_write;
     d_re   := r.e.mem_read;
     d_b    := r.e.mem_byte;
+
+    assert not (r.e.alu_write = '1' and r.e.fpu_write = '1') severity failure;
+    assert not (r.e.fpu_write = '1' and r.e.misc_write = '1') severity failure;
+    assert not (r.e.misc_write = '1' and r.e.alu_write = '1') severity failure;
 
     if r.e.alu_write = '1' then
       v.m.res       := cpu_in.alu_res;
