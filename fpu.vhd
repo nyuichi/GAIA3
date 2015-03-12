@@ -25,7 +25,9 @@ architecture behavioral of fpu is
   end record;
 
   constant rzero : reg_type := (
-    others => (others => '0'));
+    res => (others => '0'),
+    tag1 => (others => '0'),
+    tag2 => (others => '0'));
 
   signal r, rin : reg_type := rzero;
 
@@ -56,8 +58,37 @@ architecture behavioral of fpu is
       C   : out std_logic_vector (31 downto 0));
   end component;
 
-  signal a, b : std_logic_vector(31 downto 0) := (others => '0');
-  signal q_add, q_sub, q_mul : std_logic_vector(31 downto 0) := (others => '0');
+  component f2i is
+    port (
+      CLK   : in  std_logic;
+      stall : in  std_logic;
+      A     : in  std_logic_vector (31 downto 0);
+      Q     : out std_logic_vector (31 downto 0));
+  end component;
+
+  component i2f is
+    port (
+      CLK   : in  std_logic;
+      stall : in  std_logic;
+      A     : in  std_logic_vector (31 downto 0);
+      Q     : out std_logic_vector (31 downto 0));
+  end component;
+
+  component floor is
+    port (
+      CLK   : in  std_logic;
+      stall : in  std_logic;
+      A     : in  std_logic_vector (31 downto 0);
+      Q     : out std_logic_vector (31 downto 0));
+  end component;
+
+  signal a : std_logic_vector(31 downto 0) := (others => '0');
+  signal b : std_logic_vector(31 downto 0) := (others => '0');
+  signal q_add : std_logic_vector(31 downto 0) := (others => '0');
+  signal q_sub : std_logic_vector(31 downto 0) := (others => '0');
+  signal q_mul : std_logic_vector(31 downto 0) := (others => '0');
+  signal q_i2f : std_logic_vector(31 downto 0) := (others => '0');
+  signal q_f2i : std_logic_vector(31 downto 0) := (others => '0');
 
 begin
 
@@ -85,8 +116,21 @@ begin
       B   => B,
       C   => q_mul);
 
+  f2i_1: entity work.f2i
+    port map (
+      CLK => CLK,
+      stall => fpu_in.stall,
+      A   => A,
+      Q   => q_f2i);
 
-  comb : process(r, fpu_in, q_add, q_sub, q_mul)
+  i2f_1: entity work.i2f
+    port map (
+      CLK => CLK,
+      stall => fpu_in.stall,
+      A   => A,
+      Q   => q_i2f);
+
+  comb : process(r, fpu_in, q_add, q_sub, q_mul, q_f2i, q_i2f)
     variable v : reg_type;
   begin
 
@@ -102,6 +146,10 @@ begin
         v.res := q_sub;
       when FPU_FMUL =>
         v.res := q_mul;
+      when FPU_F2I =>
+        v.res := q_f2i;
+      when FPU_I2F =>
+        v.res := q_i2f;
       when others =>
         v.res := (others => '0');
     end case;
