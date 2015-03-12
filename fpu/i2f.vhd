@@ -33,9 +33,16 @@ architecture behav of i2f is
   signal b, c, d : std_logic_vector(31 downto 0) := (others => '0');
 begin  -- architecture behav
 
-  isZero <= A = x"00000000";
-  sign <= A (31);
-  i <= A (30 downto 0);
+  process (clk) is
+  begin
+    if rising_edge (clk) and stall = '0' then
+      b <= a;
+    end if;
+  end process;
+
+  isZero <= b = x"00000000";
+  sign <= b (31);
+  i <= b (30 downto 0);
 
   with sign select
     raw_mantissa <=
@@ -76,16 +83,9 @@ begin  -- architecture behav
                    count => conv_integer(7-s))(22 downto 0)) when others;
 
   with isZero select
-    b <=
+    c <=
     (sign & expr & mantissa) + round when false,
     x"00000000"                      when others;
-
-  process (clk) is
-  begin
-    if rising_edge (clk) and stall = '0' then
-      c <= b;
-    end if;
-  end process;
 
   process (clk) is
   begin

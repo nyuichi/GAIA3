@@ -30,6 +30,17 @@ architecture rtl of floor is
   signal b, c, d : std_logic_vector(31 downto 0) := (others => '0');
 begin  -- architecture rtl
 
+  process(clk) is
+  begin
+    if rising_edge(clk) and stall = '0' then
+      b <= A;
+    end if;
+  end process;
+
+  sign <= B (31);
+  expr <= B (30 downto 23);
+  mantissa_in <= '0' &B (22 downto 0);
+
   with sign = '1' and (unsigned(mantissa_in) /= x"000000" & "000" or expr /= x"00") select
     ret0 <=
     ret1                          when true,
@@ -51,14 +62,13 @@ begin  -- architecture rtl
                              count => 150 - to_integer(unsigned(expr)));
 
   with 127 > unsigned(expr)select
-    b <=
+    c <=
     ret0                                     when true,
     std_logic_vector(unsigned(sign & expr & (mantissa_out (22 downto 0))) + unsigned(round_added)) when others;
 
   process(clk) is
   begin
     if rising_edge(clk) and stall = '0' then
-      c <= b;
       d <= c;
     end if;
   end process;

@@ -21,9 +21,16 @@ architecture behav of f2i is
 
 begin  -- architecture behav
 
-  sign <= A (31);
-  expr <= A (30 downto 23);
-  mantissa <= A (22 downto 0);
+  process (clk) is
+  begin
+    if rising_edge (clk) and stall = '0' then
+      b <= a;
+    end if;
+  end process;
+
+  sign <= B (31);
+  expr <= B (30 downto 23);
+  mantissa <= B (22 downto 0);
 
   with expr > 150 select
     ret <=
@@ -35,16 +42,9 @@ begin  -- architecture behav
                   count => conv_integer(150 - expr))) when others;
 
   with sign select
-    b <=
+    c <=
     ret  when '0',
     not ret + 1 when others;
-
-  process (clk) is
-  begin
-    if rising_edge (clk) and stall = '0' then
-      c <= b;
-    end if;
-  end process;
 
   process (clk) is
   begin
