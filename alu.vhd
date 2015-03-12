@@ -92,6 +92,10 @@ begin
         v.res := (others => '0');
     end case;
 
+    if alu_in.stall = '1' then
+      v := r;
+    end if;
+
     rin <= v;
 
     alu_out.res <= r.res;

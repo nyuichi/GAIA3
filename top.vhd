@@ -88,12 +88,14 @@ begin   -- architecture Behavioral
       cpu_in  => cpu_in,
       cpu_out => cpu_out);
 
+  alu_in.stall   <= dcache_out.stall;
   alu_in.optag   <= cpu_out.optag;
   alu_in.data_a  <= cpu_out.data_a;
   alu_in.data_b  <= cpu_out.data_b;
   alu_in.data_l  <= cpu_out.data_l;
   cpu_in.alu_res <= alu_out.res;
 
+  fpu_in.stall   <= dcache_out.stall;
   fpu_in.optag   <= cpu_out.optag;
   fpu_in.data_a  <= cpu_out.data_a;
   fpu_in.data_b  <= cpu_out.data_b;

@@ -106,6 +106,10 @@ begin
         v.res := (others => '0');
     end case;
 
+    if fpu_in.stall = '1' then
+      v := r;
+    end if;
+
     rin <= v;
 
     a <= fpu_in.data_a;
