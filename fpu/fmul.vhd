@@ -1,63 +1,118 @@
 library IEEE;
-use IEEE.std_logic_1164.ALL;
-use IEEE.std_logic_arith.ALL;
-use IEEE.std_logic_unsigned.ALL;
+use IEEE.std_logic_1164.all;
+use IEEE.std_logic_unsigned.all;
 
 entity fmul is
-
   port (
-    x, y : in  std_logic_vector(31 downto 0);
-    q    : out std_logic_vector(31 downto 0));
+    CLK : in  std_logic;
+    A   : in  std_logic_vector (31 downto 0);
+    B   : in  std_logic_vector (31 downto 0);
+    C   : out std_logic_vector (31 downto 0));
+end entity fmul;
 
-end entity;
+architecture behav of fmul is
+  signal e : std_logic_vector (15 downto 0) := (others => '0');
+  signal m : std_logic_vector (47 downto 0) := (others => '0');
+  signal re : std_logic := '0';
+  signal HH : std_logic_vector (25 downto 0) := (others => '0');
+  signal HL : std_logic_vector (23 downto 0) := (others => '0');
+  signal LH : std_logic_vector (23 downto 0) := (others => '0');
+  signal exp01 : std_logic_vector (8 downto 0) := (others => '0');
+  signal exp0 : std_logic_vector (7 downto 0) := (others => '0');
+  signal exp1 : std_logic_vector (7 downto 0) := (others => '0');
+  signal underflow_bit : std_logic := '0';
+  signal m2 : std_logic_vector (25 downto 0) := (others => '0');
+  signal state : std_logic_vector (1 downto 0) := (others => '0');
+  signal sign_o : std_logic := '0';
+  signal sign : std_logic_vector (2 downto 0) := (others => '0');
+  signal exp : std_logic_vector (7 downto 0) := (others => '0');
+  signal mantissa : std_logic_vector (22 downto 0) := (others => '0');
+  signal m_out : std_logic_vector (22 downto 0);
 
+  signal sign_o2, sign_o3 : std_logic := '0';
 
-architecture behavioral of fmul is
+  signal i_a : std_logic_vector (31 downto 0) := (others => '0');
+  signal i_b : std_logic_vector (31 downto 0) := (others => '0');
 
-  --stage1
-  signal input_x,input_y : std_logic_vector(31 downto 0) := (others => '0');
-  signal frc_x_h,frc_y_h : std_logic_vector(12 downto 0) := (others => '0');
-  signal frc_x_l,frc_y_l : std_logic_vector(10 downto 0) := (others => '0');
-  signal exp_x1,exp_y1 : std_logic_vector(8 downto 0);
-  signal exp_ans :std_logic_vector(7 downto 0);
-  signal exp_ans1,exp_ans2 : std_logic_vector(8 downto 0) := (others => '0');
-  signal sgn_ans : std_logic := '0';
-  signal frc_hh : std_logic_vector(25 downto 0);
-  signal frc_hl,frc_lh : std_logic_vector(23 downto 0);
-  signal frc_result : std_logic_vector(26 downto 0);
-  signal frc_ans : std_logic_vector(22 downto 0);
+  signal i_HH : std_logic_vector (25 downto 0) := (others => '0');
+  signal i_HL : std_logic_vector (23 downto 0) := (others => '0');
+  signal i_LH : std_logic_vector (23 downto 0) := (others => '0');
+  signal i_exp : std_logic_vector (7 downto 0) := (others => '0');
+  signal i_underflow_bit : std_logic := '0';
 
-begin                           -- fuml
+  signal i_m : std_logic_vector (25 downto 0) := (others => '0');
+  signal i_exp0 : std_logic_vector (7 downto 0) := (others => '0');
+  signal i_exp1 : std_logic_vector (7 downto 0) := (others => '0');
+begin  -- architecture behav
 
-  input_x <= x;
-  input_y <= y;
-  frc_x_h <= '1' & input_x(22 downto 11);
-  frc_x_l <= input_x(10 downto 0);
-  frc_y_h <= '1' & input_y(22 downto 11);
-  frc_y_l <= input_y(10 downto 0);
-  exp_x1  <= '0' & input_x(30 downto 23);
-  exp_y1  <= '0' & input_y(30 downto 23);
-  exp_ans1 <= exp_x1 + exp_y1 + "010000001";
+  -- stage 1
 
-  sgn_ans <= input_x(31) xor input_y(31);
+  i_a <= A;
+  i_b <= B;
 
+  HH <= (others => '0') when i_a (30 downto 0) = "0000000000000000000000000000000"
+        or i_b (30 downto 0) = "0000000000000000000000000000000" else
+        ('1' & i_a (22 downto 11)) * ('1' & i_b (22 downto 11));
+  HL <= ('1' & i_a (22 downto 11)) * (i_b (10 downto 0));
+  LH <= (i_a (10 downto 0)) * ('1' & i_b (22 downto 11));
+  exp0 <= (others => '0') when i_a (30 downto 0) = "0000000000000000000000000000000"
+          or i_b (30 downto 0) = "0000000000000000000000000000000" else
+          "000000000" + i_a (30 downto 23) + i_b (30 downto 23) + 129;
+  sign_o <= i_a (31) xor i_b (31);
 
-  frc_hh <= frc_x_h * frc_y_h;
-  frc_hl <= frc_x_h * frc_y_l;
-  frc_lh <= frc_x_l * frc_y_h;
+  -- stage 2
 
-  frc_result <= '0' & frc_hh + frc_hl(23 downto 11) + frc_lh(23 downto 11) + "10";
+  process (CLK) is
+  begin
+    if rising_edge (CLK)  then
+      i_HH <= HH;
+      i_HL <= HL;
+      i_LH <= LH;
+      i_exp <= exp01(7 downto 0);
+      i_underflow_bit <= exp01(8);
+      sign_o2 <= sign_o;
+    end if;
+  end process;
 
-  exp_ans2 <= exp_ans1 + '1';
+  mantissa <= (others => '0') when i_HH = "00000000000000000000000000" else
+              "00000000000000000000000000" + i_HH + i_HL (23 downto 11) + i_LH (23 downto 11) + 2;
 
-  exp_ans <= "00000000" when exp_ans1(8) = '0'
-             else exp_ans2(7 downto 0) when frc_result(25) = '1'
-             else exp_ans1(7 downto 0);
+  with i_underflow_bit select
+    exp0 <=
+    "00000000" when '0',
+    i_exp      when '1',
+    i_exp      when others;
 
-  frc_ans <= frc_result(24 downto 2) when frc_result(25) = '1'
-             else frc_result(23 downto 1);
+  with i_underflow_bit select
+    exp1 <=
+    "00000001" when '0',
+    i_exp + 1  when '1',
+    i_exp + 1  when others;
 
-  q <= "00000000000000000000000000000000" when exp_ans1(8) = '0'
-       else sgn_ans & exp_ans & frc_ans;
+  set_loop: process (CLK) is
+  begin  -- process set_loop
+    if rising_edge (CLK) then
+      i_m <= mantissa;
+      i_exp0 <= exp0;
+      i_exp1 <= exp1;
+      sign_o3 <= sign_o2;
+    end if;
+  end process set_loop;
 
-end architecture;
+  -- stage 3
+
+  with i_m (25) select
+    m_out <=
+    i_m (23 downto 1) when '0',
+    i_m (24 downto 2) when '1',
+    i_m (24 downto 2) when others;
+
+  with i_m (25) select
+    exp <=
+    i_exp1 when '1',
+    i_exp0 when '0',
+    i_exp0 when others;
+
+  C <= sign_o3 & exp & m_out;
+
+end architecture behav;

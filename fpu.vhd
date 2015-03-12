@@ -29,38 +29,54 @@ architecture behavioral of fpu is
 
   component fadd is
     port (
-      x, y : in  std_logic_vector(31 downto 0);
-      q    : out std_logic_vector(31 downto 0));
+      CLK : in  std_logic;
+      A   : in  std_logic_vector (31 downto 0);
+      B   : in  std_logic_vector (31 downto 0);
+      C   : out std_logic_vector (31 downto 0));
+  end component;
+
+  component fsub is
+    port (
+      CLK : in  std_logic;
+      A   : in  std_logic_vector (31 downto 0);
+      B   : in  std_logic_vector (31 downto 0);
+      C   : out std_logic_vector (31 downto 0));
   end component;
 
   component fmul is
     port (
-      x, y : in  std_logic_vector(31 downto 0);
-      q    : out std_logic_vector(31 downto 0));
+      CLK : in  std_logic;
+      A   : in  std_logic_vector (31 downto 0);
+      B   : in  std_logic_vector (31 downto 0);
+      C   : out std_logic_vector (31 downto 0));
   end component;
 
-  signal x, y, yn : std_logic_vector(31 downto 0) := (others => '0');
+  signal a, b : std_logic_vector(31 downto 0) := (others => '0');
   signal q_add, q_sub, q_mul : std_logic_vector(31 downto 0) := (others => '0');
 
 begin
 
-  --fadd_1: entity work.fadd
-  --  port map (
-  --    x => x,
-  --    y => y,
-  --    q => q_add);
+  fadd_1: entity work.fadd
+    port map (
+      CLK => CLK,
+      A   => A,
+      B   => B,
+      C   => q_add);
 
-  --fadd_2: entity work.fadd
-  --  port map (
-  --    x => x,
-  --    y => yn,
-  --    q => q_sub);
+  fsub_1: entity work.fsub
+    port map (
+      CLK => CLK,
+      A   => A,
+      B   => B,
+      C   => q_sub);
 
-  --fmul_1: entity work.fmul
-  --  port map (
-  --    x => x,
-  --    y => y,
-  --    q => q_mul);
+  fmul_1: entity work.fmul
+    port map (
+      CLK => CLK,
+      A   => A,
+      B   => B,
+      C   => q_mul);
+
 
   comb : process(r, fpu_in, q_add, q_sub, q_mul)
 
@@ -85,9 +101,8 @@ begin
 
     rin <= v;
 
-    x <= fpu_in.data_a;
-    y <= fpu_in.data_b;
-    yn <= (not fpu_in.data_b(31)) & fpu_in.data_b(30 downto 0);
+    a <= fpu_in.data_a;
+    b <= fpu_in.data_b;
     fpu_out.res <= r.res;
 
   end process;

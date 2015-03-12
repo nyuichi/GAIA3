@@ -4,15 +4,15 @@ use IEEE.numeric_std.all;
 use IEEE.std_logic_arith.all;
 use IEEE.std_logic_unsigned.all;
 
-entity fadd is
+entity fsub is
   port (
     CLK : in  std_logic;
     A   : in  std_logic_vector (31 downto 0);
     B   : in  std_logic_vector (31 downto 0);
     C   : out std_logic_vector (31 downto 0));
-end entity fadd;
+end entity fsub;
 
-architecture behav of fadd is
+architecture behav of fsub is
   component right_shift is
     port (
       D : in  std_logic_vector (23 downto 0);
@@ -69,7 +69,7 @@ begin  -- architecture behav
   -- stage 1
 
   i_A <= A;
-  i_B <= B;
+  i_B <= (not B(31)) & B(30 downto 0);
 
   m_g <=
     "1" & i_A (22 downto 0) & "000" when
