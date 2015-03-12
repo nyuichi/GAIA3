@@ -476,8 +476,13 @@ package types is
   constant ALU_FCMPLT : std_logic_vector(4 downto 0) := "11110";
   constant ALU_FCMPLE : std_logic_vector(4 downto 0) := "11111";
 
-  constant FPU_FADD : std_logic_vector(4 downto 0) := "00000";
-  constant FPU_FSUB : std_logic_vector(4 downto 0) := "00001";
-  constant FPU_FMUL : std_logic_vector(4 downto 0) := "00010";
+  constant FPU_FADD  : std_logic_vector(4 downto 0) := "00000";
+  constant FPU_FSUB  : std_logic_vector(4 downto 0) := "00001";
+  constant FPU_FMUL  : std_logic_vector(4 downto 0) := "00010";
+  constant FPU_FINV  : std_logic_vector(4 downto 0) := "00100";
+  constant FPU_FSQRT : std_logic_vector(4 downto 0) := "00101";
+  constant FPU_F2I   : std_logic_vector(4 downto 0) := "00110";
+  constant FPU_I2F   : std_logic_vector(4 downto 0) := "00111";
+  constant FPU_FLOOR : std_logic_vector(4 downto 0) := "01000";
 
 end package;
