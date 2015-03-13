@@ -591,7 +591,10 @@ begin
 
     if cpu_in.d_stall = '1' then
       v.e := r.e;
-    elsif r.eoi = '1' then
+    end if;
+
+    if cpu_in.d_stall = '0' and r.eoi = '1' then
+      --// flush operation if it came from *previous* ID
       v.e.alu_write  := '0';
       v.e.fpu_write2  := '0';
       v.e.misc_write := '0';
@@ -639,18 +642,7 @@ begin
     detect_branch(inst, v.regfile, v.flag.int_handler, v.flag.int_pc, v.d.pc_src, v.d.pc_addr);
     detect_interrupt(v.flag.int_en, v.eoi);
 
-    if cpu_in.d_stall = '1' then
-      v.d := r.d;
-      v.eoi := '0';
-    elsif stall = '1' or r.d.pc_src = '1' or r.eoi = '1' then
-      v.d.alu_write := '0';
-      v.d.fpu_write := '0';
-      v.d.misc_write := '0';
-      v.d.mem_write := '0';
-      v.d.mem_read := '0';
-      v.d.pc_src := '0';
-      v.eoi := '0';
-    else
+    if cpu_in.d_stall = '0' and r.eoi = '0' and stall = '0' and r.d.pc_src = '0' then
       if v.eoi = '1' then
         v.flag.int_cause := cpu_in.int_cause;
         v.flag.int_pc    := r.f.nextpc;
@@ -664,6 +656,42 @@ begin
       end if;
     end if;
 
+    if cpu_in.d_stall = '1' then
+      v.d := r.d;
+      v.eoi := '0';
+    end if;
+
+    if cpu_in.d_stall = '0' and stall = '1' then
+      v.d.alu_write := '0';
+      v.d.fpu_write := '0';
+      v.d.misc_write := '0';
+      v.d.mem_write := '0';
+      v.d.mem_read := '0';
+      v.d.pc_src := '0';
+      v.eoi := '0';
+    end if;
+
+    if cpu_in.d_stall = '0' and stall = '0' and r.d.pc_src = '1' then
+      v.d.alu_write := '0';
+      v.d.fpu_write := '0';
+      v.d.misc_write := '0';
+      v.d.mem_write := '0';
+      v.d.mem_read := '0';
+      v.d.pc_src := '0';
+      v.eoi := '0';
+    end if;
+
+    if r.eoi = '1' then
+      --// flush operations which came from ID and IF
+      v.d.alu_write := '0';
+      v.d.fpu_write := '0';
+      v.d.misc_write := '0';
+      v.d.mem_write := '0';
+      v.d.mem_read := '0';
+      v.d.pc_src := '0';
+      v.eoi := '0';
+    end if;
+
     --// see http://goo.gl/dhJQ69 for detail
     v.d.data_x := v.regfile(conv_integer(v.d.reg_dest));
     v.d.data_a := v.regfile(conv_integer(v.d.reg_a));
@@ -675,10 +703,10 @@ begin
 
     if r.eoi = '1' then
       i_addr := r.flag.int_handler;
-    elsif stall = '1' or cpu_in.d_stall = '1' then
-      i_addr := r.f.pc;
     elsif r.d.pc_src = '1' then
       i_addr := r.d.pc_addr;
+    elsif stall = '1' or cpu_in.d_stall = '1' then
+      i_addr := r.f.pc;
     elsif r.f.bubble = '1' then
       i_addr := r.f.pc;
     else
