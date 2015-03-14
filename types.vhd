@@ -40,6 +40,7 @@ package types is
     vmm_en : std_logic;
     vmm_pd : std_logic_vector(31 downto 0);
     optag  : std_logic_vector(4 downto 0);
+    signop : std_logic_vector(1 downto 0);
     data_a : std_logic_vector(31 downto 0);
     data_b : std_logic_vector(31 downto 0);
     data_l : std_logic_vector(7 downto 0);
@@ -59,6 +60,7 @@ package types is
     vmm_en => '0',
     vmm_pd => (others => '0'),
     optag  => (others => '0'),
+    signop => (others => '0'),
     data_a => (others => '0'),
     data_b => (others => '0'),
     data_l => (others => '0'));
@@ -110,6 +112,7 @@ package types is
   type fpu_in_type is record
     stall  : std_logic;
     optag  : std_logic_vector(4 downto 0);
+    signop : std_logic_vector(1 downto 0);
     data_a : std_logic_vector(31 downto 0);
     data_b : std_logic_vector(31 downto 0);
   end record;
@@ -117,6 +120,7 @@ package types is
   constant fpu_in_zero : fpu_in_type := (
     stall  => '0',
     optag  => (others => '0'),
+    signop => (others => '0'),
     data_a => (others => '0'),
     data_b => (others => '0'));
 

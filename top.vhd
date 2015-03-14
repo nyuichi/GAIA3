@@ -97,6 +97,7 @@ begin   -- architecture Behavioral
 
   fpu_in.stall   <= dcache_out.stall;
   fpu_in.optag   <= cpu_out.optag;
+  fpu_in.signop  <= cpu_out.signop;
   fpu_in.data_a  <= cpu_out.data_a;
   fpu_in.data_b  <= cpu_out.data_b;
   cpu_in.fpu_res <= fpu_out.res;

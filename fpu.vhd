@@ -19,15 +19,19 @@ end entity;
 architecture behavioral of fpu is
 
   type reg_type is record
-    res  : std_logic_vector(31 downto 0);
-    tag1 : std_logic_vector(4 downto 0);
-    tag2 : std_logic_vector(4 downto 0);
+    res     : std_logic_vector(31 downto 0);
+    tag1    : std_logic_vector(4 downto 0);
+    tag2    : std_logic_vector(4 downto 0);
+    signop1 : std_logic_vector(1 downto 0);
+    signop2 : std_logic_vector(1 downto 0);
   end record;
 
   constant rzero : reg_type := (
-    res => (others => '0'),
-    tag1 => (others => '0'),
-    tag2 => (others => '0'));
+    res     => (others => '0'),
+    tag1    => (others => '0'),
+    tag2    => (others => '0'),
+    signop1 => (others => '0'),
+    signop2 => (others => '0'));
 
   signal r, rin : reg_type := rzero;
 
@@ -147,6 +151,9 @@ begin
     v.tag1 := fpu_in.optag;
     v.tag2 := r.tag1;
 
+    v.signop1 := fpu_in.signop;
+    v.signop2 := r.signop1;
+
     case r.tag2 is
       when FPU_FADD =>
         v.res := q_add;
@@ -163,6 +170,18 @@ begin
       when others =>
         v.res := (others => '0');
     end case;
+
+    if r.signop2(1) = '1' then
+      v.res(31) := '0';
+    end if;
+
+    if r.signop2(0) = '1' then
+      v.res(31) := not v.res(31);
+    end if;
+
+    if v.res = x"80000000" then
+      v.res := x"00000000";
+    end if;
 
     if fpu_in.stall = '1' then
       v := r;

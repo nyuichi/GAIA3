@@ -37,6 +37,7 @@ architecture Behavioral of cpu is
     data_l     : std_logic_vector(7 downto 0);
     data_d     : std_logic_vector(31 downto 0);
     tag        : std_logic_vector(4 downto 0);
+    signop     : std_logic_vector(1 downto 0);
     nextpc     : std_logic_vector(31 downto 0);
     alu_write  : std_logic;
     fpu_write  : std_logic;
@@ -109,6 +110,7 @@ architecture Behavioral of cpu is
     data_l     => (others => '0'),
     data_d     => (others => '0'),
     tag        => "00000",
+    signop     => "00",
     nextpc     => (others => '0'),
     alu_write  => '0',
     fpu_write  => '0',
@@ -623,6 +625,7 @@ begin
     v.d.data_l   := inst(12 downto 5);
     v.d.data_d   := repeat(inst(15), 16) & inst(15 downto 0);
     v.d.tag      := inst(4 downto 0);
+    v.d.signop   := inst(6 downto 5);
     v.d.nextpc   := r.f.nextpc;
     v.d.alu_write := to_std_logic(v.d.opcode = OP_ALU);
     v.d.fpu_write := to_std_logic(v.d.opcode = OP_FPU);
@@ -735,6 +738,7 @@ begin
     cpu_out.vmm_en <= r.flag.vmm_en;
     cpu_out.vmm_pd <= r.flag.vmm_pd;
     cpu_out.optag  <= r.d.tag;
+    cpu_out.signop <= r.d.signop;
     cpu_out.data_a <= data_a;
     cpu_out.data_b <= data_b;
     cpu_out.data_l <= r.d.data_l;
