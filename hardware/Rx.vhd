@@ -1,6 +1,8 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_unsigned.all;
+use IEEE.numeric_std.all;
+use STD.textio.all;
 
 entity Rx is
   generic (
@@ -12,6 +14,40 @@ entity Rx is
     data : out std_logic_vector(7 downto 0);
     ready : out std_logic);
 end Rx;
+
+
+--pragma synthesis_off
+architecture Simulation of Rx is
+  constant input_filename : string := "/home/yuichi/workspace/gaia-software/a.out";
+  shared variable start : boolean := false;
+begin
+  process
+  begin
+    wait for 2 ms;
+    start := true;
+  end process;
+
+  process(clk)
+    variable c : character;
+    type ft is file of character;
+    file input_file : ft open READ_MODE is input_filename;
+    file stdout : ft open WRITE_MODE is "STD_OUTPUT";
+    variable go : boolean := true;
+  begin
+    if rising_edge(clk) and start then
+      if not endfile(input_file) and go then
+        read(input_file, c);
+        data <= std_logic_vector(to_unsigned(character'pos(c), 8));
+        ready <= '1';
+        go := false;
+      elsif not go and done = '1' then
+        ready <= '0';
+        go := true;
+      end if;
+    end if;
+  end process;
+end architecture;
+--pragma synthesis_on
 
 architecture Behavioral of Rx is
 

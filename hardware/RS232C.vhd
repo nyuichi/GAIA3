@@ -44,17 +44,37 @@ architecture Behavioral of rs232c is
       data   : in  std_logic_vector(7 downto 0));
   end component;
 
+  constant in_simulation : boolean := false
+--synthesis translate_off
+                                      or true
+--synthesis translate_on
+                                      ;
+
 begin
 
-  myRx: entity work.Rx
-    generic map (
-      wtime => wtime)
-    port map (
-      clk    => clk,
-      rx_pin => rx_pin,
-      done   => rx_done,
-      data   => rx_data,
-      ready  => rx_ready);
+  sim : if in_simulation generate
+    myRx: entity work.Rx(Simulation)
+      generic map (
+        wtime => wtime)
+      port map (
+        clk    => clk,
+        rx_pin => rx_pin,
+        done   => rx_done,
+        data   => rx_data,
+        ready  => rx_ready);
+  end generate;
+
+  syn : if not in_simulation generate
+    myRx: entity work.Rx
+      generic map (
+        wtime => wtime)
+      port map (
+        clk    => clk,
+        rx_pin => rx_pin,
+        done   => rx_done,
+        data   => rx_data,
+        ready  => rx_ready);
+  end generate;
 
   myTx: entity work.Tx
     generic map (
