@@ -716,8 +716,19 @@ begin
       i_addr := r.f.nextpc;
     end if;
 
-    v.f.pc := i_addr;
-    v.f.nextpc := i_addr + 4;
+    if r.eoi = '1' then
+      v.f.pc := r.flag.int_handler;
+    elsif r.d.pc_src = '1' then
+      v.f.pc := r.d.pc_addr;
+    elsif stall = '1' or cpu_in.d_stall = '1' then
+      v.f.pc := r.f.pc;
+    elsif r.f.bubble = '1' then
+      v.f.pc := r.f.pc;
+    else
+      v.f.pc := r.f.nextpc;
+    end if;
+
+    v.f.nextpc := v.f.pc + 4;
 
     v.f.bubble := cpu_in.i_stall;
 
