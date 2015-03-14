@@ -1039,13 +1039,8 @@ architecture rtl of fsqrt is
     1022 => "0000000000110000000011111111111100111111111010",
     1023 => "0000000000010000000000111111111110111111111110");
 
-  -- for stage 2
-
-  signal i_a       : std_logic_vector(31 downto 0);
-  signal i_raw_ret : std_logic_vector(45 downto 0);
-
   constant m_Nan : std_logic_vector (31 downto 0) := x"fff00000";
-  signal ret : std_logic_vector (31 downto 0) := (others => '0');
+
   signal sign : std_logic := '0';
   signal expr_t : std_logic_vector (8 downto 0) := (others => '0');
   signal expr : std_logic_vector (7 downto 0) := (others => '0');
@@ -1057,6 +1052,15 @@ architecture rtl of fsqrt is
   signal HH : std_logic_vector (25 downto 0) := (others => '0');
   signal HL : std_logic_vector (23 downto 0) := (others => '0');
   signal LH : std_logic_vector (23 downto 0) := (others => '0');
+
+  signal i_a : std_logic_vector(31 downto 0) := (others => '0');
+  signal i_raw_ret : std_logic_vector(45 downto 0) := (others => '0');
+  signal i_sign : std_logic := '0';
+  signal i_expr : std_logic_vector(7 downto 0) := (others => '0');
+  signal i_HH : std_logic_vector (25 downto 0) := (others => '0');
+  signal i_HL : std_logic_vector (23 downto 0) := (others => '0');
+  signal i_LH : std_logic_vector (23 downto 0) := (others => '0');
+
   signal mul0 : std_logic_vector (25 downto 0) := (others => '0');
   signal mul : std_logic_vector (22 downto 0) := (others => '0');
   signal x_expr : std_logic_vector (7 downto 0) := (others => '0');
@@ -1064,32 +1068,43 @@ architecture rtl of fsqrt is
   signal m_b : std_logic_vector (24 downto 0) := (others => '0');
   signal sum : std_logic_vector (25 downto 0) := (others => '0');
 
+  signal j_a : std_logic_vector(31 downto 0) := (others => '0');
+  signal j_sum : std_logic_vector(25 downto 0) := (others => '0');
+  signal j_m_b : std_logic_vector (24 downto 0) := (others => '0');
+  signal j_sign : std_logic := '0';
+  signal j_expr : std_logic_vector(7 downto 0) := (others => '0');
+
 begin
 
-  process (CLK) is
-  begin
-    if rising_edge (CLK) then
-      i_a <= A;
-      i_raw_ret <= ROM (conv_integer((not A (23)) & A(22 downto 14)));
-    end if;
-  end process;
+  raw_ret <= ROM (conv_integer((not A (23)) & A(22 downto 14)));
 
-  raw_ret <= i_raw_ret;
-
-  sign <= i_a (31);
-  expr_t <= "001111111" + i_a (30 downto 23);
+  sign <= A (31);
+  expr_t <= "001111111" + A (30 downto 23);
   expr <= expr_t(8 downto 1);
 
   h_a <= '1' & raw_ret (45 downto 34);
-  h_b <= '1' & i_a (22 downto 11);
+  h_b <= '1' & A (22 downto 11);
   l_a <= raw_ret (33 downto 23);
-  l_b <= i_a (10 downto 0);
+  l_b <= A (10 downto 0);
 
   HH <= h_a * h_b;
   HL <= h_a * l_b;
   LH <= l_a * h_b;
 
-  mul0 <= "00000000000000000000000000" + HH + LH (23 downto 11) + HL (23 downto 11) + "10";
+  process (CLK) is
+  begin
+    if rising_edge (CLK) then
+      i_a <= A;
+      i_raw_ret <= raw_ret;
+      i_sign <= sign;
+      i_expr <= expr;
+      i_HH <= HH;
+      i_HL <= HL;
+      i_LH <= LH;
+    end if;
+  end process;
+
+  mul0 <= "00000000000000000000000000" + i_HH + i_LH (23 downto 11) + i_HL (23 downto 11) + "10";
 
   with mul0 (25) select
     mul <=
@@ -1100,7 +1115,6 @@ begin
             x"80" when mul0 (25) = '1' or i_a (23) = '0' else
             x"7f";
 
-
   with x_expr select
     m_a <=
     "01" & mul (22 downto 0)      when x"7f",
@@ -1108,25 +1122,28 @@ begin
 
   with x_expr select
     m_b <=
-    "01" & raw_ret (22 downto 0) when x"81",
-    '1' & raw_ret (22 downto 0) & '0' when others;
-
+    "01" & i_raw_ret (22 downto 0) when x"81",
+    '1' & i_raw_ret (22 downto 0) & '0' when others;
 
   sum <= "00000000000000000000000000" + m_a + m_b;
 
-  ret <= x"3F800000" when i_a = x"3F800001" else
-         i_a when sign = '1' and i_a (30 downto 23) = x"00" else
-         m_Nan when sign = '1' else
-         x"00000000" when i_a (30 downto 23) = x"00" else
-         i_a when i_a (30 downto 23) = x"ff" else
-         sign & expr & sum (24 downto 2) when m_b (24) = '1' else
-         sign & expr & sum (23 downto 1);
-
   process(clk) is
   begin
-    if rising_edge(clk) and stall = '0' then
-      q <= ret;
+    if rising_edge(clk) then
+      j_a <= i_a;
+      j_sum <= sum;
+      j_m_b <= m_b;
+      j_sign <= i_sign;
+      j_expr <= i_expr;
     end if;
   end process;
+
+  Q <= x"3F800000" when j_a = x"3F800001" else
+       j_a when j_sign = '1' and j_a (30 downto 23) = x"00" else
+       m_Nan when j_sign = '1' else
+       x"00000000" when j_a (30 downto 23) = x"00" else
+       j_a when j_a (30 downto 23) = x"ff" else
+       j_sign & j_expr & j_sum (24 downto 2) when j_m_b (24) = '1' else
+       j_sign & j_expr & j_sum (23 downto 1);
 
 end architecture rtl;
