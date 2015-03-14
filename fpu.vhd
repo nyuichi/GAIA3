@@ -86,14 +86,32 @@ architecture behavioral of fpu is
       Q     : out std_logic_vector (31 downto 0));
   end component;
 
+  component finv is
+    port (
+      CLK   : in  std_logic;
+      stall : in  std_logic;
+      A     : in  std_logic_vector (31 downto 0);
+      Q     : out std_logic_vector (31 downto 0));
+  end component;
+
+  component fsqrt is
+    port (
+      CLK   : in  std_logic;
+      stall : in  std_logic;
+      A     : in  std_logic_vector (31 downto 0);
+      Q     : out std_logic_vector (31 downto 0));
+  end component;
+
   signal a : std_logic_vector(31 downto 0) := (others => '0');
   signal b : std_logic_vector(31 downto 0) := (others => '0');
-  signal q_add : std_logic_vector(31 downto 0) := (others => '0');
-  signal q_sub : std_logic_vector(31 downto 0) := (others => '0');
-  signal q_mul : std_logic_vector(31 downto 0) := (others => '0');
+  signal q_fadd : std_logic_vector(31 downto 0) := (others => '0');
+  signal q_fsub : std_logic_vector(31 downto 0) := (others => '0');
+  signal q_fmul : std_logic_vector(31 downto 0) := (others => '0');
   signal q_i2f : std_logic_vector(31 downto 0) := (others => '0');
   signal q_f2i : std_logic_vector(31 downto 0) := (others => '0');
   signal q_floor : std_logic_vector(31 downto 0) := (others => '0');
+  signal q_finv : std_logic_vector(31 downto 0) := (others => '0');
+  signal q_fsqrt : std_logic_vector(31 downto 0) := (others => '0');
 
 begin
 
@@ -103,7 +121,7 @@ begin
       stall => fpu_in.stall,
       A   => A,
       B   => B,
-      C   => q_add);
+      C   => q_fadd);
 
   fsub_1: entity work.fsub
     port map (
@@ -111,7 +129,7 @@ begin
       stall => fpu_in.stall,
       A   => A,
       B   => B,
-      C   => q_sub);
+      C   => q_fsub);
 
   fmul_1: entity work.fmul
     port map (
@@ -119,7 +137,7 @@ begin
       stall => fpu_in.stall,
       A   => A,
       B   => B,
-      C   => q_mul);
+      C   => q_fmul);
 
   f2i_1: entity work.f2i
     port map (
@@ -142,7 +160,21 @@ begin
       A   => A,
       Q   => q_floor);
 
-  comb : process(r, fpu_in, q_add, q_sub, q_mul, q_f2i, q_i2f, q_floor)
+  finv_1: entity work.finv
+    port map (
+      CLK => CLK,
+      stall => fpu_in.stall,
+      A   => A,
+      Q   => q_finv);
+
+  fsqrt_1: entity work.fsqrt
+    port map (
+      CLK => CLK,
+      stall => fpu_in.stall,
+      A   => A,
+      Q   => q_fsqrt);
+
+  comb : process(r, fpu_in, q_fadd, q_fsub, q_fmul, q_f2i, q_i2f, q_floor, q_fsqrt, q_finv)
     variable v : reg_type;
   begin
 
@@ -156,17 +188,21 @@ begin
 
     case r.tag2 is
       when FPU_FADD =>
-        v.res := q_add;
+        v.res := q_fadd;
       when FPU_FSUB =>
-        v.res := q_sub;
+        v.res := q_fsub;
       when FPU_FMUL =>
-        v.res := q_mul;
+        v.res := q_fmul;
       when FPU_F2I =>
         v.res := q_f2i;
       when FPU_I2F =>
         v.res := q_i2f;
       when FPU_FLOOR =>
         v.res := q_floor;
+      when FPU_FINV =>
+        v.res := q_finv;
+      when FPU_FSQRT =>
+        v.res := q_fsqrt;
       when others =>
         v.res := (others => '0');
     end case;
