@@ -23,8 +23,8 @@ architecture behav of i2f is
   signal expr : std_logic_vector (7 downto 0) := (others => '0');
   signal mantissa : std_logic_vector (22 downto 0) := (others => '0');
   signal i : std_logic_vector (30 downto 0) := (others => '0');
-  signal raw_mantissa : std_logic_vector (30 downto 0) := (others => '0');
-  signal s : std_logic_vector (4 downto 0) := (others => '0');
+  signal raw_mantissa0, raw_mantissa : std_logic_vector (30 downto 0) := (others => '0');
+  signal s0, s : std_logic_vector (4 downto 0) := (others => '0');
   signal R : std_logic := '0';
   signal G : std_logic := '0';
   signal ulp : std_logic := '0';
@@ -33,23 +33,26 @@ architecture behav of i2f is
   signal b, c, d : std_logic_vector(31 downto 0) := (others => '0');
 begin  -- architecture behav
 
+  i <= A (30 downto 0);
+
+  with A(31) select
+    raw_mantissa0 <=
+    (not i) + 1 when '1',
+    i when others;
+
+  ZLC:ZLC31 port map(raw_mantissa0,s0);
+
   process (clk) is
   begin
     if rising_edge (clk) and stall = '0' then
       b <= a;
+      raw_mantissa <= raw_mantissa0;
+      s <= s0;
     end if;
   end process;
 
   isZero <= b = x"00000000";
   sign <= b (31);
-  i <= b (30 downto 0);
-
-  with sign select
-    raw_mantissa <=
-    (not i) + 1 when '1',
-    i when others;
-
-  ZLC:ZLC31 port map(raw_mantissa,s);
 
   with s < 31 select
     expr <=
