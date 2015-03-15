@@ -606,7 +606,11 @@ begin
 
     -- DECODE
 
-    inst := cpu_in.i_data;
+    if r.f.retry = '1' then
+      inst := (others => '0');
+    else
+      inst := cpu_in.i_data;
+    end if;
 
 --pragma synthesis_off
     if is_x(inst) then

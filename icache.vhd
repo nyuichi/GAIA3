@@ -40,8 +40,6 @@ architecture Behavioral of icache is
     vmm_n : integer range 0 to 5;
     fetch_n : integer range -2 to 15;
 
-    bubble : std_logic;
-
     ram_req  : std_logic;
     ram_addr : std_logic_vector(31 downto 0);
 
@@ -62,7 +60,6 @@ architecture Behavioral of icache is
     off       => (others => '0'),
     vmm_n     => 0,
     fetch_n   => -2,
-    bubble    => '0',
     ram_req   => '0',
     ram_addr  => (others => '0'),
     bram_we   => '0',
@@ -245,8 +242,6 @@ begin
       hazard := '0';
     end if;
 
-    v.bubble := hazard;
-
     if icache_in.cai = '1' then
       v.valid := (others => '0');
     end if;
@@ -257,11 +252,7 @@ begin
 
     icache_out.stall <= hazard;
     if r.ack = '1' then
-      if r.bubble = '1' then
-        icache_out.rx <= (others => '0');
-      else
-        icache_out.rx <= icache_in.bram_do;
-      end if;
+      icache_out.rx <= icache_in.bram_do;
     else
       icache_out.rx <= (others => 'Z');
     end if;
