@@ -73,7 +73,7 @@ begin   -- architecture Behavioral
       clkfx_divide   => 6,
       clkfx_multiply => 7)
     port map (
-      rst      => rst,
+      rst      => not xrst,
       clkin    => iclk,
       clkfb    => dcm_clkfd,
       clk0     => dcm_clk1,
