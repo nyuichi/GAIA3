@@ -23,6 +23,8 @@ architecture Behavioral of cpu is
   type fetch_reg_type is record
     pc     : std_logic_vector(31 downto 0);
     nextpc : std_logic_vector(31 downto 0);
+    inst_src : std_logic;
+    inst   : std_logic_vector(31 downto 0);
   end record;
 
   type decode_reg_type is record
@@ -94,7 +96,9 @@ architecture Behavioral of cpu is
 
   constant fzero : fetch_reg_type := (
     pc     => (others => '0'),
-    nextpc => x"80000000"
+    nextpc => x"80000000",
+    inst_src => '0',
+    inst   => (others => '0')
     );
 
   constant dzero : decode_reg_type := (
@@ -607,7 +611,11 @@ begin
     if cpu_in.i_stall = '1' then
       inst := (others => '0');
     else
-      inst := cpu_in.i_data;
+      if r.f.inst_src = '1' then
+        inst := r.f.inst;
+      else
+        inst := cpu_in.i_data;
+      end if;
     end if;
 
 --pragma synthesis_off
@@ -706,8 +714,6 @@ begin
       i_addr := r.flag.int_handler;
     elsif r.d.pc_src = '1' then
       i_addr := r.d.pc_addr;
-    elsif stall = '1' or cpu_in.d_stall = '1' then
-      i_addr := r.f.pc;
     elsif cpu_in.i_stall = '1' then
       i_addr := r.f.pc;
     else
@@ -727,6 +733,17 @@ begin
     end if;
 
     v.f.nextpc := v.f.pc + 4;
+
+    if ((not r.eoi) and (not r.d.pc_src) and (stall or cpu_in.d_stall)) = '0' then
+      v.f.inst_src := '0';
+    else
+      if cpu_in.i_stall = '1' then
+        v.f.inst_src := '0';
+      else
+        v.f.inst_src := '1';
+        v.f.inst := inst;
+      end if;
+    end if;
 
     -- END
 
