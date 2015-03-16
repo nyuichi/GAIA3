@@ -35,6 +35,8 @@ architecture Behavioral of top is
 
   signal iclk, clk : std_logic := '0';
 
+  signal dcm_clk1, dcm_clkfd, dcm_clkfx : std_logic := '0';
+
   signal rst : std_logic;
 
   signal cpu_in     : cpu_in_type     := cpu_in_zero;
@@ -66,8 +68,30 @@ begin   -- architecture Behavioral
     i => MCLK1,
     o => iclk);
 
-  bg: BUFG port map (
-    i => iclk,
+  dcm : DCM_BASE
+    generic map (
+      clkfx_divide   => 6,
+      clkfx_multiply => 7)
+    port map (
+      rst      => rst,
+      clkin    => iclk,
+      clkfb    => dcm_clkfd,
+      clk0     => dcm_clk1,
+      clk90    => open,
+      clk180   => open,
+      clk270   => open,
+      clk2x    => open,
+      clk2x180 => open,
+      clkdv    => open,
+      clkfx    => dcm_clkfx,
+      clkfx180 => open);
+
+  b1: BUFG port map (
+    i => dcm_clk1,
+    o => dcm_clkfd);
+
+  bfx : BUFG port map (
+    i => dcm_clkfx,
     o => clk);
 
   rst <= (not XRST) when count > 100000 else '1';

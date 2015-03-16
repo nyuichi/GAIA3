@@ -17,7 +17,10 @@ end entity;
 
 architecture Behavioral of timer is
 
-  constant tick : std_logic_vector(19 downto 0) := x"A2BE8";
+  -- 0.01 ms * 66.66 MHz = 0xA2BE8
+  -- 0.01 ms * 77.77 MHz = 0xBDDE4
+  -- 0.01 ms * 88.88 MHz = 0xD8FE0
+  constant tick : std_logic_vector(19 downto 0) := x"BDDE4";
 
   type reg_type is record
     count  : std_logic_vector(19 downto 0);
