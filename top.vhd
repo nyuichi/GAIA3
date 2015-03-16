@@ -70,8 +70,8 @@ begin   -- architecture Behavioral
 
   dcm : DCM_BASE
     generic map (
-      clkfx_divide   => 6,
-      clkfx_multiply => 7)
+      clkfx_divide   => 3,
+      clkfx_multiply => 4)
     port map (
       rst      => not xrst,
       clkin    => iclk,
