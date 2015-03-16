@@ -23,7 +23,6 @@ architecture Behavioral of cpu is
   type fetch_reg_type is record
     pc     : std_logic_vector(31 downto 0);
     nextpc : std_logic_vector(31 downto 0);
-    retry  : std_logic;
   end record;
 
   type decode_reg_type is record
@@ -95,8 +94,7 @@ architecture Behavioral of cpu is
 
   constant fzero : fetch_reg_type := (
     pc     => (others => '0'),
-    nextpc => x"80000000",
-    retry  => '0'
+    nextpc => x"80000000"
     );
 
   constant dzero : decode_reg_type := (
@@ -606,7 +604,7 @@ begin
 
     -- DECODE
 
-    if r.f.retry = '1' then
+    if cpu_in.i_stall = '1' then
       inst := (others => '0');
     else
       inst := cpu_in.i_data;
@@ -710,7 +708,7 @@ begin
       i_addr := r.d.pc_addr;
     elsif stall = '1' or cpu_in.d_stall = '1' then
       i_addr := r.f.pc;
-    elsif r.f.retry = '1' then
+    elsif cpu_in.i_stall = '1' then
       i_addr := r.f.pc;
     else
       i_addr := r.f.nextpc;
@@ -722,15 +720,13 @@ begin
       v.f.pc := r.d.pc_addr;
     elsif stall = '1' or cpu_in.d_stall = '1' then
       v.f.pc := r.f.pc;
-    elsif r.f.retry = '1' then
+    elsif cpu_in.i_stall = '1' then
       v.f.pc := r.f.pc;
     else
       v.f.pc := r.f.nextpc;
     end if;
 
     v.f.nextpc := v.f.pc + 4;
-
-    v.f.retry := cpu_in.i_stall;
 
     -- END
 

@@ -40,6 +40,8 @@ architecture Behavioral of icache is
     vmm_n : integer range 0 to 5;
     fetch_n : integer range -2 to 15;
 
+    hazard : std_logic;
+
     ram_req  : std_logic;
     ram_addr : std_logic_vector(31 downto 0);
 
@@ -60,6 +62,7 @@ architecture Behavioral of icache is
     off       => (others => '0'),
     vmm_n     => 0,
     fetch_n   => -2,
+    hazard    => '0',
     ram_req   => '0',
     ram_addr  => (others => '0'),
     bram_we   => '0',
@@ -104,7 +107,6 @@ begin
     variable v : reg_type;
 
     variable miss : std_logic;
-    variable hazard : std_logic;
   begin
     v := r;
 
@@ -116,7 +118,7 @@ begin
       v.ack := '0';
     end if;
 
-    hazard := '0';
+    v.hazard := '0';
 
     v.ram_req := '0';
     v.bram_we := '0';
@@ -142,7 +144,7 @@ begin
           v.off    := icache_in.addr(11 downto 0);
 
           v.ram_req := '1';
-          hazard := '1';
+          v.hazard := '1';
 
           if icache_in.vmm_en = '0' then
             v.state := FETCH_REQ;
@@ -157,7 +159,7 @@ begin
 
       when VMM_REQ =>
         v.ram_req := '1';
-        hazard := '1';
+        v.hazard := '1';
 
         if icache_in.ram_grnt = '1' then
           v.ram_addr := icache_in.vmm_pd(31 downto 12) & r.pdi & "00";
@@ -167,7 +169,7 @@ begin
 
       when VMM =>
         v.ram_req := '1';
-        hazard := '1';
+        v.hazard := '1';
 
         assert icache_in.ram_grnt = '1' severity failure;
 
@@ -191,7 +193,7 @@ begin
 
       when FETCH_REQ =>
         v.ram_req := '1';
-        hazard := '1';
+        v.hazard := '1';
 
         if icache_in.ram_grnt = '1' then
           v.ram_addr := r.tag & r.index & "0000" & "00";
@@ -201,7 +203,7 @@ begin
 
       when FETCH =>
         v.ram_req := '1';
-        hazard := '1';
+        v.hazard := '1';
 
         assert icache_in.ram_grnt = '1' severity failure;
 
@@ -239,7 +241,7 @@ begin
     end case;
 
     if v.ack = '0' then
-      hazard := '0';
+      v.hazard := '0';
     end if;
 
     if icache_in.cai = '1' then
@@ -250,7 +252,7 @@ begin
 
     rin <= v;
 
-    icache_out.stall <= hazard;
+    icache_out.stall <= r.hazard;
     if r.ack = '1' then
       icache_out.rx <= icache_in.bram_do;
     else
