@@ -60,6 +60,8 @@ begin
         v.res := a or b;
       when ALU_XOR =>
         v.res := a xor b;
+      when ALU_ADDA =>
+        v.res := a + (b(29 downto 0) & "00");
       when ALU_CMPULT =>
         v.res := repeat('0', 31) & to_std_logic(a < b);
       when ALU_CMPULE =>
