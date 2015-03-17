@@ -20,7 +20,8 @@ architecture Behavioral of timer is
   -- 0.01 ms * 66.66 MHz = 0xA2BE8
   -- 0.01 ms * 77.77 MHz = 0xBDDE4
   -- 0.01 ms * 88.88 MHz = 0xD8FE0
-  constant tick : std_logic_vector(19 downto 0) := x"D8FE0";
+  -- 0.01 ms * 93.33 MHz = 0xE3DB4
+  constant tick : std_logic_vector(19 downto 0) := x"E3DB4";
 
   type reg_type is record
     count  : std_logic_vector(19 downto 0);

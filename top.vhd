@@ -68,31 +68,43 @@ begin   -- architecture Behavioral
     i => MCLK1,
     o => iclk);
 
-  dcm : DCM_BASE
-    generic map (
-      clkfx_divide   => 3,
-      clkfx_multiply => 4)
-    port map (
-      rst      => not xrst,
-      clkin    => iclk,
-      clkfb    => dcm_clkfd,
-      clk0     => dcm_clk1,
-      clk90    => open,
-      clk180   => open,
-      clk270   => open,
-      clk2x    => open,
-      clk2x180 => open,
-      clkdv    => open,
-      clkfx    => dcm_clkfx,
-      clkfx180 => open);
+  clk88: if true generate
 
-  b1: BUFG port map (
-    i => dcm_clk1,
-    o => dcm_clkfd);
+    dcm : DCM_BASE
+      generic map (
+        clkfx_divide   => 5,
+        clkfx_multiply => 7)
+      port map (
+        rst      => not xrst,
+        clkin    => iclk,
+        clkfb    => dcm_clkfd,
+        clk0     => dcm_clk1,
+        clk90    => open,
+        clk180   => open,
+        clk270   => open,
+        clk2x    => open,
+        clk2x180 => open,
+        clkdv    => open,
+        clkfx    => dcm_clkfx,
+        clkfx180 => open);
 
-  bfx : BUFG port map (
-    i => dcm_clkfx,
-    o => clk);
+    b1: BUFG port map (
+      i => dcm_clk1,
+      o => dcm_clkfd);
+
+    bfx : BUFG port map (
+      i => dcm_clkfx,
+      o => clk);
+
+  end generate;
+
+  clk66: if false generate
+
+    b1: BUFG port map (
+      i => iclk,
+      o => clk);
+
+  end generate;
 
   rst <= (not XRST) when count > 100000 else '1';
 
