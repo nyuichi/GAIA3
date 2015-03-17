@@ -42,7 +42,8 @@ architecture behav of fadd is
   signal isAddition : std_logic := '0';
 
   signal i_m_g : std_logic_vector (26 downto 0) := (others => '0');
-  signal i_m_l : std_logic_vector (26 downto 0) := (others => '0');
+  signal i_s : std_logic_vector(4 downto 0) := (others => '0');
+  signal i_m_l_0 : std_logic_vector (23 downto 0) := (others => '0');
   signal i_sign : std_logic := '0';
   signal i_exp : std_logic_vector (7 downto 0) := (others => '0');
   signal i_isAddition : std_logic := '0';
@@ -90,8 +91,6 @@ begin  -- architecture behav
     i_B (30 downto 23) /= x"00" else
     (others => '0');
 
-  shift : right_shift port map (m_l_0,s,m_l);
-
   diff_AB <= i_A (30 downto 23) - i_B (30 downto 23);
   diff_BA <= i_B (30 downto 23) - i_A (30 downto 23);
 
@@ -120,7 +119,8 @@ begin  -- architecture behav
   begin  -- process set_loop
     if rising_edge (CLK) and stall = '0' then
       i_m_g <= m_g;
-      i_m_l <= m_l;
+      i_m_l_0 <= m_l_0;
+      i_s <= s;
       i_sign <= sign_in;
       i_exp <= exp_in;
       i_isAddition <= isAddition;
@@ -129,10 +129,12 @@ begin  -- architecture behav
 
   -- stage 2
 
+  shift : right_shift port map (i_m_l_0,i_s,m_l);
+
   with i_isAddition select
     m_added <=
-    "0000000000000000000000000000" + i_m_g + i_m_l when '1',
-    "0000000000000000000000000000" + i_m_g - i_m_l when others;
+    "0000000000000000000000000000" + i_m_g + m_l when '1',
+    "0000000000000000000000000000" + i_m_g - m_l when others;
 
   i_ZLC : ZLC port map (m_added,m_leading_zero);
 
