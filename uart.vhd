@@ -92,7 +92,7 @@ begin
 
   -- WRITE
 
-  comb : process(r, uart_in, tx_busy, rx_ready, rx_dat)
+  comb : process(r, uart_in, tx_busy, rx_ready, rx_dat) is
     variable v : reg_type;
 
     variable v_din  : std_logic_vector(31 downto 0);
@@ -168,7 +168,7 @@ begin
     uart_out.int_go <= to_std_logic(v.rx_len /= 0);
   end process;
 
-  regs : process(clk, rst)
+  regs : process(clk, rst) is
   begin
     if rst = '1' then
       r <= rzero;

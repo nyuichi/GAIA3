@@ -22,6 +22,7 @@ architecture Behavioral of rs232c is
   -- 77 MHz / 230400 bps = 0x014E
   -- 88 MHz / 230400 bps = 0x017D
   -- 93 MHz / 230400 bps = 0x0193
+  -- 96 MHz / 230400 bps = 0x01A0
 
   constant wtime : std_logic_vector(15 downto 0) := x"0193";
 

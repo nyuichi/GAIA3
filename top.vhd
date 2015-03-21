@@ -72,8 +72,8 @@ begin   -- architecture Behavioral
 
     dcm : DCM_BASE
       generic map (
-        clkfx_divide   => 5,
-        clkfx_multiply => 7)
+        clkfx_divide   => 9,
+        clkfx_multiply => 13)
       port map (
         rst      => not xrst,
         clkin    => iclk,
@@ -108,7 +108,7 @@ begin   -- architecture Behavioral
 
   rst <= (not XRST) when count > 100000 else '1';
 
-  process(clk)
+  process(clk) is
   begin
     if rising_edge(clk) then
       if count <= 100000 then

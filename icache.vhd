@@ -103,7 +103,7 @@ architecture Behavioral of icache is
 
 begin
 
-  comb : process(r, icache_in)
+  comb : process(r, icache_in) is
     variable v : reg_type;
 
     variable miss : std_logic;
@@ -275,7 +275,7 @@ begin
     icache_out.ram_addr <= r.ram_addr;
   end process;
 
-  regs : process(clk, rst)
+  regs : process(clk, rst) is
   begin
     if rst = '1' then
       r <= rzero;

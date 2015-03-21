@@ -25,7 +25,7 @@ architecture Behavioral of sram is
 
 begin
 
-  process(clk)
+  process(clk) is
   begin
     if rising_edge(clk) then
       we1 <= sram_in.we;

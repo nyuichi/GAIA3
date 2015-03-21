@@ -23,7 +23,7 @@ architecture behavioral of rom is
 
 begin
 
-  process(clk)
+  process(clk) is
   begin
     if rising_edge(clk) then
       addr_reg1 <= rom_in.addr1;

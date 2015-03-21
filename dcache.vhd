@@ -128,7 +128,7 @@ architecture Behavioral of dcache is
 
 begin
 
-  comb : process(r, dcache_in)
+  comb : process(r, dcache_in) is
     variable v : reg_type;
 
     variable miss : std_logic;
@@ -387,7 +387,7 @@ begin
     dcache_out.ram_we   <= r.ram_we;
   end process;
 
-  regs : process(clk, rst)
+  regs : process(clk, rst) is
   begin
     if rst = '1' then
       r <= rzero;

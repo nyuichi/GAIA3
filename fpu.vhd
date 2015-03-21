@@ -174,7 +174,7 @@ begin
       A   => A,
       Q   => q_fsqrt);
 
-  comb : process(r, fpu_in, q_fadd, q_fsub, q_fmul, q_f2i, q_i2f, q_floor, q_fsqrt, q_finv)
+  comb : process(r, fpu_in, q_fadd, q_fsub, q_fmul, q_f2i, q_i2f, q_floor, q_fsqrt, q_finv) is
     variable v : reg_type;
   begin
 
@@ -231,7 +231,7 @@ begin
 
   end process;
 
-  regs : process(clk, rst)
+  regs : process(clk, rst) is
   begin
     if rst = '1' then
       r <= rzero;

@@ -27,7 +27,7 @@ begin
     start := true;
   end process;
 
-  process(clk)
+  process(clk) is
     variable c : character;
     type ft is file of character;
     file input_file : ft open READ_MODE is input_filename;
@@ -57,7 +57,7 @@ architecture Behavioral of Rx is
 
 begin
 
-  process(clk)
+  process(clk) is
   begin
     if rising_edge(clk) then
       if done = '1' then

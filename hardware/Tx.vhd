@@ -23,7 +23,7 @@ begin
 
   busy <= '1' when state /= -1 else '0';
 
-  process(clk)
+  process(clk) is
   begin
     if rising_edge(clk) then
       case state is

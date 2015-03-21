@@ -21,7 +21,8 @@ architecture Behavioral of timer is
   -- 0.01 ms * 77.77 MHz = 0xBDDE4
   -- 0.01 ms * 88.88 MHz = 0xD8FE0
   -- 0.01 ms * 93.33 MHz = 0xE3DB4
-  constant tick : std_logic_vector(19 downto 0) := x"E3DB4";
+  -- 0.01 ms * 96.29 MHz = 0xEB154
+  constant tick : std_logic_vector(19 downto 0) := x"EB154";
 
   type reg_type is record
     count  : std_logic_vector(19 downto 0);
@@ -37,7 +38,7 @@ architecture Behavioral of timer is
 
 begin
 
-  comb : process(r, timer_in)
+  comb : process(r, timer_in) is
     variable v : reg_type;
   begin
     v := r;
@@ -58,7 +59,7 @@ begin
     timer_out.int_go <= r.int_go;
   end process;
 
-  regs : process(clk, rst)
+  regs : process(clk, rst) is
   begin
     if rst = '1' then
       r <= rzero;

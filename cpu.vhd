@@ -415,7 +415,7 @@ architecture Behavioral of cpu is
 
 begin
 
-  comb : process(r, cpu_in)
+  comb : process(r, cpu_in) is
     variable v : reg_type;
 
     -- decode
@@ -768,7 +768,7 @@ begin
     cpu_out.data_l <= r.d.data_l;
   end process;
 
-  regs : process(clk, rst)
+  regs : process(clk, rst) is
   begin
     if rst = '1' then
       r <= rzero;

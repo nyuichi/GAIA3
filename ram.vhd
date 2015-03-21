@@ -35,7 +35,7 @@ begin
   sram_in.we   <= ram_in.we1   when state = M1 else ram_in.we2;
   sram_in.tx   <= ram_in.data1 when state = M1 else ram_in.data2;
 
-  process(state, ram_in)
+  process(state, ram_in) is
     variable v : state_type;
   begin
     v := state;
@@ -60,7 +60,7 @@ begin
     statein <= v;
   end process;
 
-  process(clk, rst)
+  process(clk, rst) is
   begin
     if rst = '1' then
       state <= M1;

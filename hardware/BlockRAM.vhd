@@ -28,7 +28,7 @@ architecture behavioral of blockram is
 
 begin
 
-  process(clk)
+  process(clk) is
   begin
     if rising_edge(clk) then
       if we = '1' then

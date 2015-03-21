@@ -29,7 +29,7 @@ architecture behavioral of alu is
 
 begin
 
-  comb : process(r, alu_in)
+  comb : process(r, alu_in) is
 
     variable v : reg_type;
 
@@ -104,7 +104,7 @@ begin
 
   end process;
 
-  regs : process(clk, rst)
+  regs : process(clk, rst) is
   begin
     if rst = '1' then
       r <= rzero;
