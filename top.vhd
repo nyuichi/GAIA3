@@ -33,6 +33,8 @@ end entity;
 
 architecture Behavioral of top is
 
+  constant use_default_clock : boolean := false;
+
   signal iclk, clk : std_logic := '0';
 
   signal dcm_clk1, dcm_clkfd, dcm_clkfx : std_logic := '0';
@@ -68,7 +70,15 @@ begin   -- architecture Behavioral
     i => MCLK1,
     o => iclk);
 
-  clk88: if true generate
+  clk66: if use_default_clock generate
+
+    b1: BUFG port map (
+      i => iclk,
+      o => clk);
+
+  end generate;
+
+  clk93: if not use_default_clock generate
 
     dcm : DCM_BASE
       generic map (
@@ -94,14 +104,6 @@ begin   -- architecture Behavioral
 
     bfx : BUFG port map (
       i => dcm_clkfx,
-      o => clk);
-
-  end generate;
-
-  clk66: if false generate
-
-    b1: BUFG port map (
-      i => iclk,
       o => clk);
 
   end generate;
